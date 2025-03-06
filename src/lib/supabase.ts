@@ -1,18 +1,15 @@
-
 import { createClient } from '@supabase/supabase-js';
 import { toast } from '../hooks/use-toast';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder-url.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-key';
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Missing Supabase environment variables');
+// Only log an error if we're not in development mode
+if ((!supabaseUrl || !supabaseAnonKey) && import.meta.env.DEV) {
+  console.warn('Missing Supabase environment variables. Using placeholder values for development.');
 }
 
-export const supabase = createClient(
-  supabaseUrl || '',
-  supabaseAnonKey || ''
-);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export async function signIn(email: string, password: string) {
   try {

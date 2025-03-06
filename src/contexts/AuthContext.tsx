@@ -24,7 +24,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children 
 }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false); // Changed to false initially
   const [isAdmin, setIsAdmin] = useState(false);
 
   const refreshUser = async () => {
@@ -56,22 +56,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   useEffect(() => {
-    refreshUser();
+    // Only try to refresh user if we're not in a development environment with missing credentials
+    if (import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      refreshUser();
 
-    // Set up auth state change listener
-    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        refreshUser();
-      } else {
-        setUser(null);
-        setIsAdmin(false);
-        setIsLoading(false);
-      }
-    });
+      // Set up auth state change listener
+      const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+        if (session?.user) {
+          refreshUser();
+        } else {
+          setUser(null);
+          setIsAdmin(false);
+          setIsLoading(false);
+        }
+      });
 
-    return () => {
-      data.subscription.unsubscribe();
-    };
+      return () => {
+        data.subscription.unsubscribe();
+      };
+    } else {
+      // If we don't have Supabase credentials, just set loading to false
+      setIsLoading(false);
+    }
   }, []);
 
   if (isLoading) {
