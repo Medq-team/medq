@@ -246,7 +246,7 @@ export default function AdminLecturePage() {
                       {question.options.map((option, index) => (
                         <div key={option.id} className="flex items-start gap-2">
                           <div className={`flex-shrink-0 h-5 w-5 rounded-full flex items-center justify-center text-xs 
-                            ${(question.correctAnswers?.includes(option.id)) 
+                            ${(question.correct_answers?.includes(option.id)) 
                               ? 'bg-green-100 text-green-800 border border-green-300' 
                               : 'bg-muted text-muted-foreground'}`}
                           >

@@ -9,6 +9,38 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      lectures: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          specialty_id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          specialty_id: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          specialty_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lectures_specialty_id_fkey"
+            columns: ["specialty_id"]
+            isOneToOne: false
+            referencedRelation: "specialties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -32,6 +64,47 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      questions: {
+        Row: {
+          correct_answers: string[] | null
+          created_at: string
+          explanation: string | null
+          id: string
+          lecture_id: string
+          options: Json | null
+          text: string
+          type: string
+        }
+        Insert: {
+          correct_answers?: string[] | null
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          lecture_id: string
+          options?: Json | null
+          text: string
+          type: string
+        }
+        Update: {
+          correct_answers?: string[] | null
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          lecture_id?: string
+          options?: Json | null
+          text?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questions_lecture_id_fkey"
+            columns: ["lecture_id"]
+            isOneToOne: false
+            referencedRelation: "lectures"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       specialties: {
         Row: {

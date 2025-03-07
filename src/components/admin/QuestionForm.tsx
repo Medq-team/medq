@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,6 +35,42 @@ export function QuestionForm({ lectureId, editQuestionId }: QuestionFormProps) {
     { id: '2', text: '' },
   ]);
   const [correctAnswers, setCorrectAnswers] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (editQuestionId) {
+      fetchQuestionData();
+    }
+  }, [editQuestionId]);
+
+  const fetchQuestionData = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('questions')
+        .select('*')
+        .eq('id', editQuestionId)
+        .single();
+
+      if (error) throw error;
+      
+      if (data) {
+        setQuestionType(data.type);
+        setQuestionText(data.text);
+        setExplanation(data.explanation || '');
+        
+        if (data.type === 'mcq' && data.options) {
+          setOptions(data.options);
+          setCorrectAnswers(data.correct_answers || []);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching question:', error);
+      toast({
+        title: "Error loading question",
+        description: "Failed to load question data. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const addOption = () => {
     if (options.length >= 5) return;
