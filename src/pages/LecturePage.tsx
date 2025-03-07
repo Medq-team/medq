@@ -4,14 +4,16 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { MCQQuestion } from '@/components/questions/MCQQuestion';
 import { OpenQuestion } from '@/components/questions/OpenQuestion';
-import { Lecture, Question } from '@/types';
+import { Lecture, Question, QuestionType } from '@/types';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ListOrdered } from 'lucide-react';
+import { ArrowLeft, ListOrdered, PlusCircle } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { QuestionForm } from '@/components/admin/QuestionForm';
 
 export default function LecturePage() {
   const { lectureId } = useParams<{ lectureId: string }>();
@@ -22,6 +24,7 @@ export default function LecturePage() {
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [isComplete, setIsComplete] = useState(false);
+  const [isAddQuestionOpen, setIsAddQuestionOpen] = useState(false);
 
   useEffect(() => {
     async function fetchLectureAndQuestions() {
@@ -69,7 +72,7 @@ export default function LecturePage() {
     }
 
     fetchLectureAndQuestions();
-  }, [lectureId, navigate]);
+  }, [lectureId, navigate, isAddQuestionOpen]);
 
   const handleAnswerSubmit = (questionId: string, answer: any) => {
     setAnswers({
@@ -108,14 +111,36 @@ export default function LecturePage() {
   return (
     <AppLayout>
       <div className="space-y-6 max-w-3xl mx-auto">
-        <Button 
-          variant="ghost" 
-          className="group flex items-center" 
-          onClick={handleBackToSpecialty}
-        >
-          <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
-          Back to Specialty
-        </Button>
+        <div className="flex justify-between items-center">
+          <Button 
+            variant="ghost" 
+            className="group flex items-center" 
+            onClick={handleBackToSpecialty}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
+            Back to Specialty
+          </Button>
+          
+          <Dialog open={isAddQuestionOpen} onOpenChange={setIsAddQuestionOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <PlusCircle className="h-4 w-4 mr-2" />
+                Add Question
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-3xl">
+              <DialogHeader>
+                <DialogTitle>Add New Question</DialogTitle>
+              </DialogHeader>
+              {lectureId && (
+                <QuestionForm 
+                  lectureId={lectureId} 
+                  onComplete={() => setIsAddQuestionOpen(false)}
+                />
+              )}
+            </DialogContent>
+          </Dialog>
+        </div>
 
         {isLoading ? (
           <div className="space-y-6">
@@ -185,16 +210,18 @@ export default function LecturePage() {
         ) : (
           <div className="text-center py-12">
             <h2 className="text-xl font-semibold">No questions available</h2>
-            <p className="text-muted-foreground mt-2">
-              This lecture doesn't have any questions yet.
+            <p className="text-muted-foreground mt-2 mb-6">
+              This lecture doesn't have any questions yet. Be the first to add one!
             </p>
-            <Button 
-              variant="outline" 
-              className="mt-4" 
-              onClick={handleBackToSpecialty}
-            >
-              Back to Specialty
-            </Button>
+            <div className="flex justify-center">
+              <Button 
+                onClick={() => setIsAddQuestionOpen(true)}
+                size="lg"
+              >
+                <PlusCircle className="h-5 w-5 mr-2" />
+                Add First Question
+              </Button>
+            </div>
           </div>
         )}
       </div>

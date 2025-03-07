@@ -13,9 +13,10 @@ import { McqOptionsSection } from './McqOptionsSection';
 interface QuestionFormProps {
   lectureId: string;
   editQuestionId?: string;
+  onComplete?: () => void;
 }
 
-export function QuestionForm({ lectureId, editQuestionId }: QuestionFormProps) {
+export function QuestionForm({ lectureId, editQuestionId, onComplete }: QuestionFormProps) {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [questionType, setQuestionType] = useState<QuestionType>('mcq');
@@ -109,7 +110,11 @@ export function QuestionForm({ lectureId, editQuestionId }: QuestionFormProps) {
         description: "The question has been saved to the database",
       });
       
-      navigate(`/admin/lecture/${lectureId}`);
+      if (onComplete) {
+        onComplete();
+      } else {
+        navigate(`/admin/lecture/${lectureId}`);
+      }
     } catch (error) {
       console.error('Error saving question:', error);
       toast({
@@ -122,11 +127,21 @@ export function QuestionForm({ lectureId, editQuestionId }: QuestionFormProps) {
     }
   };
 
+  const handleCancel = () => {
+    if (onComplete) {
+      onComplete();
+    } else {
+      navigate(`/admin/lecture/${lectureId}`);
+    }
+  };
+
   return (
-    <Card className="w-full max-w-3xl mx-auto">
-      <CardHeader>
-        <CardTitle>{editQuestionId ? 'Edit Question' : 'Create New Question'}</CardTitle>
-      </CardHeader>
+    <Card className={onComplete ? "w-full border-0 shadow-none" : "w-full max-w-3xl mx-auto"}>
+      {!onComplete && (
+        <CardHeader>
+          <CardTitle>{editQuestionId ? 'Edit Question' : 'Create New Question'}</CardTitle>
+        </CardHeader>
+      )}
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           <QuestionTypeSelect 
@@ -155,7 +170,7 @@ export function QuestionForm({ lectureId, editQuestionId }: QuestionFormProps) {
             <Button
               type="button"
               variant="outline"
-              onClick={() => navigate(`/admin/lecture/${lectureId}`)}
+              onClick={handleCancel}
             >
               Cancel
             </Button>
