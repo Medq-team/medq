@@ -13,16 +13,16 @@ export function EmptyQuestionsState({ onAddQuestion }: EmptyQuestionsStateProps)
         <HelpCircle className="h-6 w-6 text-muted-foreground" />
       </div>
       <h3 className="text-lg font-semibold">No questions yet</h3>
-      <p className="text-muted-foreground mt-2">
+      <p className="text-muted-foreground mt-2 mb-6">
         Add your first question to this lecture to help students learn.
       </p>
       <Button 
-        variant="outline" 
-        className="mt-4" 
         onClick={onAddQuestion}
+        size="lg"
+        className="mt-4"
       >
-        <PlusCircle className="h-4 w-4 mr-2" />
-        Add Question
+        <PlusCircle className="h-5 w-5 mr-2" />
+        Add Your First Question
       </Button>
     </div>
   );
