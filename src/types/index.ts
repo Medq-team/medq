@@ -1,4 +1,3 @@
-
 export type User = {
   id: string;
   email: string;
@@ -29,10 +28,12 @@ export type Option = {
 export type Question = {
   id: string;
   lectureId: string;
+  lecture_id: string;
   type: QuestionType;
   text: string;
   options?: Option[];
-  correctAnswers?: string[]; // Array of option IDs for MCQ
+  correct_answers?: string[]; // Array of option IDs for MCQ
+  correctAnswers?: string[]; // Keep for backward compatibility
   explanation?: string;
 };
 
