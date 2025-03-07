@@ -1,0 +1,107 @@
+
+import { Question } from '@/types';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Edit, Trash, HelpCircle, PenLine } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+
+interface QuestionItemProps {
+  question: Question;
+  onEdit: (questionId: string) => void;
+  onDelete: (questionId: string) => void;
+}
+
+export function QuestionItem({ question, onEdit, onDelete }: QuestionItemProps) {
+  return (
+    <Card key={question.id}>
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between">
+          <div>
+            <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-muted mb-2">
+              {question.type === 'mcq' ? (
+                <>
+                  <HelpCircle className="h-3 w-3 mr-1" />
+                  Multiple Choice
+                </>
+              ) : (
+                <>
+                  <PenLine className="h-3 w-3 mr-1" />
+                  Open Question
+                </>
+              )}
+            </div>
+            <CardTitle className="text-base">{question.text}</CardTitle>
+          </div>
+          <div className="flex space-x-2">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => onEdit(question.id)}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+            
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-destructive">
+                  <Trash className="h-4 w-4" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Question</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete this question? This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction 
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    onClick={() => onDelete(question.id)}
+                  >
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="text-sm">
+        {question.type === 'mcq' && question.options && (
+          <div className="space-y-1">
+            {question.options.map((option, index) => (
+              <div key={option.id} className="flex items-start gap-2">
+                <div className={`flex-shrink-0 h-5 w-5 rounded-full flex items-center justify-center text-xs 
+                  ${(question.correct_answers?.includes(option.id)) 
+                    ? 'bg-green-100 text-green-800 border border-green-300' 
+                    : 'bg-muted text-muted-foreground'}`}
+                >
+                  {String.fromCharCode(65 + index)}
+                </div>
+                <span>{option.text}</span>
+              </div>
+            ))}
+          </div>
+        )}
+        
+        {question.explanation && (
+          <div className="mt-3 pt-3 border-t text-muted-foreground">
+            <strong>Explanation:</strong> {question.explanation}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
