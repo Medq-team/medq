@@ -1,0 +1,37 @@
+
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, PlusCircle } from 'lucide-react';
+import { DialogTrigger } from '@/components/ui/dialog';
+import { Lecture } from '@/types';
+
+interface LectureHeaderProps {
+  lecture: Lecture | null;
+  onBackClick: () => void;
+  onAddQuestionClick: () => void;
+}
+
+export function LectureHeader({ 
+  lecture, 
+  onBackClick, 
+  onAddQuestionClick 
+}: LectureHeaderProps) {
+  return (
+    <div className="flex justify-between items-center">
+      <Button 
+        variant="ghost" 
+        className="group flex items-center" 
+        onClick={onBackClick}
+      >
+        <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
+        Back to Specialty
+      </Button>
+      
+      <DialogTrigger asChild>
+        <Button onClick={onAddQuestionClick}>
+          <PlusCircle className="h-4 w-4 mr-2" />
+          Add Question
+        </Button>
+      </DialogTrigger>
+    </div>
+  );
+}
