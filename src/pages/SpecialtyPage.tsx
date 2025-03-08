@@ -11,6 +11,8 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, PlusCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { QuestionForm } from '@/components/admin/QuestionForm';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 
 export default function SpecialtyPage() {
   const { specialtyId } = useParams<{ specialtyId: string }>();
@@ -20,63 +22,137 @@ export default function SpecialtyPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedLectureId, setSelectedLectureId] = useState<string | null>(null);
   const [isAddQuestionOpen, setIsAddQuestionOpen] = useState(false);
+  const [isAddLectureOpen, setIsAddLectureOpen] = useState(false);
+  const [newLecture, setNewLecture] = useState({
+    title: '',
+    description: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    async function fetchSpecialtyAndLectures() {
-      if (!specialtyId) return;
-      
-      setIsLoading(true);
-      
-      try {
-        // Fetch specialty
-        const { data: specialtyData, error: specialtyError } = await supabase
-          .from('specialties')
-          .select('*')
-          .eq('id', specialtyId)
-          .single();
-
-        if (specialtyError) {
-          throw specialtyError;
-        }
-
-        setSpecialty(specialtyData);
-
-        // Fetch lectures for this specialty
-        const { data: lecturesData, error: lecturesError } = await supabase
-          .from('lectures')
-          .select('*')
-          .eq('specialty_id', specialtyId)
-          .order('title');
-
-        if (lecturesError) {
-          throw lecturesError;
-        }
-
-        setLectures(lecturesData || []);
-        
-        // Set the first lecture as default if available
-        if (lecturesData && lecturesData.length > 0) {
-          setSelectedLectureId(lecturesData[0].id);
-        }
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load specialty information. Please try again.",
-          variant: "destructive",
-        });
-        navigate('/dashboard');
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
+    if (!specialtyId) return;
+    
     fetchSpecialtyAndLectures();
-  }, [specialtyId, navigate]);
+  }, [specialtyId]);
+
+  async function fetchSpecialtyAndLectures() {
+    if (!specialtyId) return;
+    
+    setIsLoading(true);
+    
+    try {
+      // Fetch specialty
+      const { data: specialtyData, error: specialtyError } = await supabase
+        .from('specialties')
+        .select('*')
+        .eq('id', specialtyId)
+        .single();
+
+      if (specialtyError) {
+        throw specialtyError;
+      }
+
+      setSpecialty(specialtyData);
+
+      // Fetch lectures for this specialty
+      const { data: lecturesData, error: lecturesError } = await supabase
+        .from('lectures')
+        .select('*')
+        .eq('specialty_id', specialtyId)
+        .order('title');
+
+      if (lecturesError) {
+        throw lecturesError;
+      }
+
+      setLectures(lecturesData || []);
+      
+      // Set the first lecture as default if available
+      if (lecturesData && lecturesData.length > 0) {
+        setSelectedLectureId(lecturesData[0].id);
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load specialty information. Please try again.",
+        variant: "destructive",
+      });
+      navigate('/dashboard');
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   const handleOpenAddQuestion = (lectureId: string) => {
     setSelectedLectureId(lectureId);
     setIsAddQuestionOpen(true);
+  };
+
+  const handleAddLecture = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!specialtyId) return;
+    
+    if (!newLecture.title.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Lecture title is required.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    try {
+      setIsSubmitting(true);
+      
+      const { data, error } = await supabase
+        .from('lectures')
+        .insert([
+          {
+            title: newLecture.title,
+            description: newLecture.description || null,
+            specialty_id: specialtyId
+          }
+        ])
+        .select();
+      
+      if (error) {
+        console.error('Error details:', error);
+        throw error;
+      }
+      
+      toast({
+        title: "Success",
+        description: "Lecture has been created successfully.",
+      });
+      
+      // Reset form and close dialog
+      setNewLecture({
+        title: '',
+        description: ''
+      });
+      setIsAddLectureOpen(false);
+      
+      // Refresh the lectures list
+      fetchSpecialtyAndLectures();
+      
+    } catch (error: any) {
+      console.error('Error creating lecture:', error);
+      let errorMessage = "An unexpected error occurred. Please try again.";
+      
+      if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      toast({
+        title: "Error creating lecture",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -92,43 +168,88 @@ export default function SpecialtyPage() {
             Back to Dashboard
           </Button>
           
-          {lectures.length > 0 && (
-            <Dialog open={isAddQuestionOpen} onOpenChange={setIsAddQuestionOpen}>
+          <div className="flex space-x-2">
+            {lectures.length > 0 && (
+              <Dialog open={isAddQuestionOpen} onOpenChange={setIsAddQuestionOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline">
+                    <PlusCircle className="h-4 w-4 mr-2" />
+                    Add Question
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-3xl">
+                  <DialogHeader>
+                    <DialogTitle>Add New Question</DialogTitle>
+                  </DialogHeader>
+                  {selectedLectureId && (
+                    <div className="mb-4">
+                      <label className="text-sm font-medium">Select Lecture:</label>
+                      <select 
+                        className="w-full p-2 mt-1 border rounded-md bg-background"
+                        value={selectedLectureId}
+                        onChange={(e) => setSelectedLectureId(e.target.value)}
+                      >
+                        {lectures.map((lecture) => (
+                          <option key={lecture.id} value={lecture.id}>
+                            {lecture.title}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                  {selectedLectureId && (
+                    <QuestionForm 
+                      lectureId={selectedLectureId} 
+                      onComplete={() => setIsAddQuestionOpen(false)}
+                    />
+                  )}
+                </DialogContent>
+              </Dialog>
+            )}
+            
+            <Dialog open={isAddLectureOpen} onOpenChange={setIsAddLectureOpen}>
               <DialogTrigger asChild>
                 <Button>
                   <PlusCircle className="h-4 w-4 mr-2" />
-                  Add Question
+                  Add Lecture
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-3xl">
+              <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Add New Question</DialogTitle>
+                  <DialogTitle>Add New Lecture</DialogTitle>
                 </DialogHeader>
-                {selectedLectureId && (
-                  <div className="mb-4">
-                    <label className="text-sm font-medium">Select Lecture:</label>
-                    <select 
-                      className="w-full p-2 mt-1 border rounded-md bg-background"
-                      value={selectedLectureId}
-                      onChange={(e) => setSelectedLectureId(e.target.value)}
-                    >
-                      {lectures.map((lecture) => (
-                        <option key={lecture.id} value={lecture.id}>
-                          {lecture.title}
-                        </option>
-                      ))}
-                    </select>
+                
+                <form onSubmit={handleAddLecture} className="space-y-4 mt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="title">Title</Label>
+                    <Input 
+                      id="title"
+                      value={newLecture.title}
+                      onChange={(e) => setNewLecture({...newLecture, title: e.target.value})}
+                      placeholder="Lecture title"
+                      required
+                    />
                   </div>
-                )}
-                {selectedLectureId && (
-                  <QuestionForm 
-                    lectureId={selectedLectureId} 
-                    onComplete={() => setIsAddQuestionOpen(false)}
-                  />
-                )}
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="description">Description</Label>
+                    <Input 
+                      id="description"
+                      value={newLecture.description}
+                      onChange={(e) => setNewLecture({...newLecture, description: e.target.value})}
+                      placeholder="Brief description"
+                    />
+                  </div>
+                  
+                  <div className="flex justify-end">
+                    <Button type="submit" disabled={isSubmitting}>
+                      {isSubmitting ? "Creating..." : "Create Lecture"}
+                    </Button>
+                  </div>
+                </form>
               </DialogContent>
             </Dialog>
-          )}
+          </div>
         </div>
 
         {isLoading ? (
