@@ -8,7 +8,9 @@ import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, PlusCircle } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { QuestionForm } from '@/components/admin/QuestionForm';
 
 export default function SpecialtyPage() {
   const { specialtyId } = useParams<{ specialtyId: string }>();
@@ -16,6 +18,8 @@ export default function SpecialtyPage() {
   const [specialty, setSpecialty] = useState<Specialty | null>(null);
   const [lectures, setLectures] = useState<Lecture[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedLectureId, setSelectedLectureId] = useState<string | null>(null);
+  const [isAddQuestionOpen, setIsAddQuestionOpen] = useState(false);
 
   useEffect(() => {
     async function fetchSpecialtyAndLectures() {
@@ -49,6 +53,11 @@ export default function SpecialtyPage() {
         }
 
         setLectures(lecturesData || []);
+        
+        // Set the first lecture as default if available
+        if (lecturesData && lecturesData.length > 0) {
+          setSelectedLectureId(lecturesData[0].id);
+        }
       } catch (error) {
         console.error('Error fetching data:', error);
         toast({
@@ -65,17 +74,62 @@ export default function SpecialtyPage() {
     fetchSpecialtyAndLectures();
   }, [specialtyId, navigate]);
 
+  const handleOpenAddQuestion = (lectureId: string) => {
+    setSelectedLectureId(lectureId);
+    setIsAddQuestionOpen(true);
+  };
+
   return (
     <AppLayout>
       <div className="space-y-6">
-        <Button 
-          variant="ghost" 
-          className="group flex items-center mb-6" 
-          onClick={() => navigate('/dashboard')}
-        >
-          <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
-          Back to Dashboard
-        </Button>
+        <div className="flex justify-between items-center">
+          <Button 
+            variant="ghost" 
+            className="group flex items-center" 
+            onClick={() => navigate('/dashboard')}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
+            Back to Dashboard
+          </Button>
+          
+          {lectures.length > 0 && (
+            <Dialog open={isAddQuestionOpen} onOpenChange={setIsAddQuestionOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Add Question
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-3xl">
+                <DialogHeader>
+                  <DialogTitle>Add New Question</DialogTitle>
+                </DialogHeader>
+                {selectedLectureId && (
+                  <div className="mb-4">
+                    <label className="text-sm font-medium">Select Lecture:</label>
+                    <select 
+                      className="w-full p-2 mt-1 border rounded-md bg-background"
+                      value={selectedLectureId}
+                      onChange={(e) => setSelectedLectureId(e.target.value)}
+                    >
+                      {lectures.map((lecture) => (
+                        <option key={lecture.id} value={lecture.id}>
+                          {lecture.title}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+                {selectedLectureId && (
+                  <QuestionForm 
+                    lectureId={selectedLectureId} 
+                    onComplete={() => setIsAddQuestionOpen(false)}
+                  />
+                )}
+              </DialogContent>
+            </Dialog>
+          )}
+        </div>
 
         {isLoading ? (
           <div className="space-y-6">
