@@ -9,6 +9,7 @@ import { supabase } from '@/lib/supabase';
 import { QuestionTypeSelect } from './QuestionTypeSelect';
 import { QuestionFields } from './QuestionFields';
 import { McqOptionsSection } from './McqOptionsSection';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface QuestionFormProps {
   lectureId: string;
@@ -18,6 +19,7 @@ interface QuestionFormProps {
 
 export function QuestionForm({ lectureId, editQuestionId, onComplete }: QuestionFormProps) {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [questionType, setQuestionType] = useState<QuestionType>('mcq');
   const [questionText, setQuestionText] = useState('');
@@ -67,6 +69,16 @@ export function QuestionForm({ lectureId, editQuestionId, onComplete }: Question
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Check if user is authenticated
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "You must be logged in to create or edit questions.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (questionType === 'mcq' && correctAnswers.length === 0) {
       toast({
         title: "Validation Error",
@@ -102,6 +114,7 @@ export function QuestionForm({ lectureId, editQuestionId, onComplete }: Question
       }
       
       if (result.error) {
+        console.error('Error details:', result.error);
         throw result.error;
       }
       
@@ -115,11 +128,22 @@ export function QuestionForm({ lectureId, editQuestionId, onComplete }: Question
       } else {
         navigate(`/admin/lecture/${lectureId}`);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving question:', error);
+      let errorMessage = "An unexpected error occurred. Please try again.";
+      
+      // Handle specific error cases
+      if (error.code === 'PGRST116') {
+        errorMessage = "You don't have permission to perform this action. Make sure you're logged in.";
+      } else if (error.code === '42501') {
+        errorMessage = "Permission denied. You might not have the right access level.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: "Error saving question",
-        description: "An unexpected error occurred. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
