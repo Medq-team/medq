@@ -68,6 +68,7 @@ export type Database = {
       questions: {
         Row: {
           correct_answers: string[] | null
+          course_reminder: string | null
           created_at: string
           explanation: string | null
           id: string
@@ -78,6 +79,7 @@ export type Database = {
         }
         Insert: {
           correct_answers?: string[] | null
+          course_reminder?: string | null
           created_at?: string
           explanation?: string | null
           id?: string
@@ -88,6 +90,7 @@ export type Database = {
         }
         Update: {
           correct_answers?: string[] | null
+          course_reminder?: string | null
           created_at?: string
           explanation?: string | null
           id?: string

@@ -4,7 +4,7 @@ import { Question, Option } from '@/types';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { CheckCircle, XCircle, HelpCircle } from 'lucide-react';
+import { CheckCircle, XCircle, HelpCircle, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -25,7 +25,8 @@ export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
     setSubmitted(true);
     
     // Check if answer is correct
-    const correct = question.correctAnswers?.includes(selectedOptionId) || false;
+    const correct = (question.correctAnswers?.includes(selectedOptionId) || 
+                     question.correct_answers?.includes(selectedOptionId)) || false;
     setIsCorrect(correct);
     
     onSubmit(selectedOptionId);
@@ -34,7 +35,8 @@ export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
   const getOptionColor = (optionId: string) => {
     if (!submitted) return '';
     
-    const isOptionCorrect = question.correctAnswers?.includes(optionId) || false;
+    const isOptionCorrect = (question.correctAnswers?.includes(optionId) || 
+                            question.correct_answers?.includes(optionId)) || false;
     
     if (selectedOptionId === optionId) {
       return isOptionCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200';
@@ -46,7 +48,8 @@ export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
   const getOptionIcon = (optionId: string) => {
     if (!submitted) return null;
     
-    const isOptionCorrect = question.correctAnswers?.includes(optionId) || false;
+    const isOptionCorrect = (question.correctAnswers?.includes(optionId) ||
+                            question.correct_answers?.includes(optionId)) || false;
     
     if (selectedOptionId === optionId) {
       return isOptionCorrect ? 
@@ -123,6 +126,14 @@ export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
               <p>{question.course_reminder}</p>
             </div>
           )}
+          
+          {/* Fallback to explanation field for backward compatibility */}
+          {!question.course_reminder && question.explanation && (
+            <div className="p-4 rounded-lg bg-blue-50 text-blue-800">
+              <h4 className="font-medium mb-1">Rappel du cours:</h4>
+              <p>{question.explanation}</p>
+            </div>
+          )}
         </motion.div>
       )}
 
@@ -150,7 +161,10 @@ export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
                 </div>
               )}
             </div>
-            <Button onClick={onNext}>Next Question</Button>
+            <Button onClick={onNext} className="group">
+              Next Question
+              <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </Button>
           </div>
         )}
       </div>

@@ -36,7 +36,7 @@ export type Question = {
   options?: Option[];
   correct_answers?: string[]; // Array of option IDs for MCQ
   correctAnswers?: string[]; // Keep for backward compatibility
-  explanation?: string;
+  explanation?: string; // Keep for backward compatibility
   course_reminder?: string; // Field for "Rappel du cours"
 };
 
