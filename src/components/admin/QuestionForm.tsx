@@ -1,15 +1,13 @@
-import { useState, useEffect } from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { QuestionType } from '@/types';
-import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/lib/supabase';
+import { useQuestionForm } from '@/hooks/use-question-form';
+import { QuestionFormSubmit } from './QuestionFormSubmit';
 import { QuestionTypeSelect } from './QuestionTypeSelect';
 import { QuestionFields } from './QuestionFields';
 import { McqOptionsSection } from './McqOptionsSection';
 import { AutoParseInput } from './AutoParseInput';
 import { FormActionButtons } from './FormActionButtons';
-import { useAuth } from '@/contexts/AuthContext';
 
 interface QuestionFormProps {
   lectureId: string;
@@ -19,163 +17,27 @@ interface QuestionFormProps {
 
 export function QuestionForm({ lectureId, editQuestionId, onComplete }: QuestionFormProps) {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
-  const [questionType, setQuestionType] = useState<QuestionType>('mcq');
-  const [questionText, setQuestionText] = useState('');
-  const [courseReminder, setCourseReminder] = useState('');
-  const [options, setOptions] = useState<{ id: string; text: string; explanation?: string }[]>([
-    { id: '1', text: '' },
-    { id: '2', text: '' },
-  ]);
-  const [correctAnswers, setCorrectAnswers] = useState<string[]>([]);
-
-  useEffect(() => {
-    if (editQuestionId) {
-      fetchQuestionData();
-    }
-  }, [editQuestionId]);
-
-  const fetchQuestionData = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('questions')
-        .select('*')
-        .eq('id', editQuestionId)
-        .single();
-
-      if (error) throw error;
-      
-      if (data) {
-        setQuestionType(data.type);
-        setQuestionText(data.text);
-        setCourseReminder(data.course_reminder || data.explanation || '');
-        
-        if (data.type === 'mcq' && data.options) {
-          setOptions(data.options);
-          setCorrectAnswers(data.correct_answers || []);
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching question:', error);
-      toast({
-        title: "Error loading question",
-        description: "Failed to load question data. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Check if user is authenticated
-    if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "You must be logged in to create or edit questions.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (questionType === 'mcq' && correctAnswers.length === 0) {
-      toast({
-        title: "Validation Error",
-        description: "Please select at least one correct answer",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setIsLoading(true);
-    
-    try {
-      const questionData = {
-        lecture_id: lectureId,
-        type: questionType,
-        text: questionText,
-        options: questionType === 'mcq' ? options : [],
-        correct_answers: questionType === 'mcq' ? correctAnswers : [],
-        course_reminder: courseReminder,
-        explanation: null, // Set old field to null when migrating to new field
-      };
-      
-      let result;
-      
-      if (editQuestionId) {
-        result = await supabase
-          .from('questions')
-          .update(questionData)
-          .eq('id', editQuestionId);
-      } else {
-        result = await supabase
-          .from('questions')
-          .insert(questionData);
-      }
-      
-      if (result.error) {
-        console.error('Error details:', result.error);
-        throw result.error;
-      }
-      
-      toast({
-        title: `Question ${editQuestionId ? 'updated' : 'created'} successfully`,
-        description: "The question has been saved to the database",
-      });
-      
-      if (onComplete) {
-        onComplete();
-      } else {
-        navigate(`/admin/lecture/${lectureId}`);
-      }
-    } catch (error: any) {
-      console.error('Error saving question:', error);
-      let errorMessage = "An unexpected error occurred. Please try again.";
-      
-      // Handle specific error cases
-      if (error.code === 'PGRST116') {
-        errorMessage = "You don't have permission to perform this action. Make sure you're logged in.";
-      } else if (error.code === '42501') {
-        errorMessage = "Permission denied. You might not have the right access level.";
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-      
-      toast({
-        title: "Error saving question",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const {
+    isLoading,
+    setIsLoading,
+    questionType,
+    setQuestionType,
+    questionText,
+    setQuestionText,
+    courseReminder,
+    setCourseReminder,
+    options,
+    setOptions,
+    correctAnswers,
+    setCorrectAnswers,
+    handleParsedContent
+  } = useQuestionForm({ lectureId, editQuestionId, onComplete });
 
   const handleCancel = () => {
     if (onComplete) {
       onComplete();
     } else {
       navigate(`/admin/lecture/${lectureId}`);
-    }
-  };
-
-  const handleParsedContent = (
-    parsedQuestionText: string, 
-    parsedOptions: { id: string; text: string; explanation?: string }[]
-  ) => {
-    setQuestionText(parsedQuestionText);
-    if (parsedOptions.length >= 2) {
-      if (options.length === parsedOptions.length) {
-        const updatedOptions = options.map((option, index) => ({
-          ...option,
-          text: parsedOptions[index].text,
-          explanation: parsedOptions[index].explanation || option.explanation
-        }));
-        setOptions(updatedOptions);
-      } else {
-        setOptions(parsedOptions);
-      }
     }
   };
 
@@ -187,7 +49,17 @@ export function QuestionForm({ lectureId, editQuestionId, onComplete }: Question
         </CardHeader>
       )}
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <QuestionFormSubmit
+          lectureId={lectureId}
+          editQuestionId={editQuestionId}
+          onComplete={onComplete}
+          questionType={questionType}
+          questionText={questionText}
+          courseReminder={courseReminder}
+          options={options}
+          correctAnswers={correctAnswers}
+          setIsLoading={setIsLoading}
+        >
           <QuestionTypeSelect 
             questionType={questionType} 
             setQuestionType={setQuestionType} 
@@ -219,7 +91,7 @@ export function QuestionForm({ lectureId, editQuestionId, onComplete }: Question
             onCancel={handleCancel} 
             isEdit={!!editQuestionId} 
           />
-        </form>
+        </QuestionFormSubmit>
       </CardContent>
     </Card>
   );
