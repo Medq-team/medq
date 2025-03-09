@@ -9,6 +9,7 @@ import { supabase } from '@/lib/supabase';
 import { QuestionTypeSelect } from './QuestionTypeSelect';
 import { QuestionFields } from './QuestionFields';
 import { McqOptionsSection } from './McqOptionsSection';
+import { AutoParseInput } from './AutoParseInput';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface QuestionFormProps {
@@ -159,6 +160,13 @@ export function QuestionForm({ lectureId, editQuestionId, onComplete }: Question
     }
   };
 
+  const handleParsedContent = (parsedQuestionText: string, parsedOptions: { id: string; text: string }[]) => {
+    setQuestionText(parsedQuestionText);
+    if (parsedOptions.length >= 2) {
+      setOptions(parsedOptions);
+    }
+  };
+
   return (
     <Card className={onComplete ? "w-full border-0 shadow-none" : "w-full max-w-3xl mx-auto"}>
       {!onComplete && (
@@ -172,6 +180,10 @@ export function QuestionForm({ lectureId, editQuestionId, onComplete }: Question
             questionType={questionType} 
             setQuestionType={setQuestionType} 
           />
+          
+          {questionType === 'mcq' && !editQuestionId && (
+            <AutoParseInput onParsedContent={handleParsedContent} />
+          )}
           
           <QuestionFields 
             questionText={questionText}
