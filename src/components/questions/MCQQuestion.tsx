@@ -57,6 +57,10 @@ export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
     return isOptionCorrect ? <CheckCircle className="h-5 w-5 text-green-500" /> : null;
   };
 
+  const getSelectedOption = () => {
+    return question.options?.find(option => option.id === selectedOptionId);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -100,14 +104,25 @@ export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
         ))}
       </RadioGroup>
 
-      {submitted && question.explanation && (
+      {submitted && (
         <motion.div 
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
-          className="mt-4 p-4 rounded-lg bg-blue-50 text-blue-800"
+          className="space-y-4"
         >
-          <h4 className="font-medium mb-1">Explanation:</h4>
-          <p>{question.explanation}</p>
+          {getSelectedOption()?.explanation && (
+            <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
+              <h4 className="font-medium mb-1">Option Explanation:</h4>
+              <p>{getSelectedOption()?.explanation}</p>
+            </div>
+          )}
+          
+          {question.course_reminder && (
+            <div className="p-4 rounded-lg bg-blue-50 text-blue-800">
+              <h4 className="font-medium mb-1">Rappel du cours:</h4>
+              <p>{question.course_reminder}</p>
+            </div>
+          )}
         </motion.div>
       )}
 

@@ -5,7 +5,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
 
 interface AutoParseInputProps {
-  onParsedContent: (questionText: string, options: { id: string; text: string; explanation?: string }[]) => void;
+  onParsedContent: (
+    questionText: string, 
+    options: { id: string; text: string; explanation?: string }[]
+  ) => void;
 }
 
 export function AutoParseInput({ onParsedContent }: AutoParseInputProps) {
@@ -22,6 +25,7 @@ export function AutoParseInput({ onParsedContent }: AutoParseInputProps) {
     }
 
     try {
+      // Extract the question text (everything before the first option)
       // Common patterns for answer choices
       const optionPatterns = [
         /([A-E]\)|\([A-E]\)|[A-E]\.)\s*(.*?)(?=(?:[A-E]\)|\([A-E]\)|[A-E]\.)|$)/gs,
@@ -56,18 +60,29 @@ export function AutoParseInput({ onParsedContent }: AutoParseInputProps) {
         ? rawText.substring(0, firstMatchPos).trim() 
         : "Could not extract question text";
 
-      // Process matches into options
-      const options = matches.map((match, index) => ({
-        id: String(index + 1),
-        text: match[2].trim()
-      }));
+      // Process matches into options with explanations
+      const options = matches.map((match, index) => {
+        const optionLetter = match[1].replace(/\)|\.|\(|\s/g, '');
+        const optionText = match[2].trim();
+        
+        // Look for explanation after the option text
+        // This regex looks for patterns like "Justification :" followed by text
+        const explanationRegex = new RegExp(`${optionLetter}[^]*?Justification[^:]*:[^\\n]*(.*?)(?=(?:[A-E][^]*?Justification)|$)`, 's');
+        const explanationMatch = rawText.match(explanationRegex);
+        
+        return {
+          id: String(index + 1),
+          text: optionText.split("\n")[0].trim(), // Get only the first line of option text
+          explanation: explanationMatch ? explanationMatch[1].trim() : undefined
+        };
+      });
 
       // Send parsed content to parent component
       onParsedContent(questionText, options);
 
       toast({
         title: "Parsing successful",
-        description: `Extracted ${options.length} answer choices`,
+        description: `Extracted ${options.length} answer choices with explanations`,
       });
     } catch (error) {
       console.error("Parsing error:", error);
@@ -83,7 +98,7 @@ export function AutoParseInput({ onParsedContent }: AutoParseInputProps) {
     <div className="space-y-3 p-4 border rounded-md bg-slate-50">
       <h3 className="text-sm font-medium">Auto-Parse Question</h3>
       <Textarea
-        placeholder="Paste your full question with answer choices (e.g., 'What is X?&#10;A) Option 1&#10;B) Option 2&#10;C) Option 3')"
+        placeholder="Paste your full question with answer choices and explanations..."
         value={rawText}
         onChange={(e) => setRawText(e.target.value)}
         className="min-h-32 font-mono text-sm"

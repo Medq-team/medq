@@ -49,14 +49,25 @@ export function OpenQuestion({ question, onSubmit, onNext }: OpenQuestionProps) 
         />
       </div>
 
-      {submitted && question.explanation && (
+      {submitted && (
         <motion.div 
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
-          className="mt-4 p-4 rounded-lg bg-purple-50 text-purple-800"
+          className="space-y-4"
         >
-          <h4 className="font-medium mb-1">Reference Answer:</h4>
-          <p>{question.explanation}</p>
+          {question.explanation && (
+            <div className="p-4 rounded-lg bg-purple-50 text-purple-800">
+              <h4 className="font-medium mb-1">Reference Answer:</h4>
+              <p>{question.explanation}</p>
+            </div>
+          )}
+          
+          {question.course_reminder && (
+            <div className="p-4 rounded-lg bg-purple-50 text-purple-800">
+              <h4 className="font-medium mb-1">Additional Information:</h4>
+              <p>{question.course_reminder}</p>
+            </div>
+          )}
         </motion.div>
       )}
 

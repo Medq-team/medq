@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -161,10 +160,22 @@ export function QuestionForm({ lectureId, editQuestionId, onComplete }: Question
     }
   };
 
-  const handleParsedContent = (parsedQuestionText: string, parsedOptions: { id: string; text: string }[]) => {
+  const handleParsedContent = (
+    parsedQuestionText: string, 
+    parsedOptions: { id: string; text: string; explanation?: string }[]
+  ) => {
     setQuestionText(parsedQuestionText);
     if (parsedOptions.length >= 2) {
-      setOptions(parsedOptions);
+      if (options.length === parsedOptions.length) {
+        const updatedOptions = options.map((option, index) => ({
+          ...option,
+          text: parsedOptions[index].text,
+          explanation: parsedOptions[index].explanation || option.explanation
+        }));
+        setOptions(updatedOptions);
+      } else {
+        setOptions(parsedOptions);
+      }
     }
   };
 
