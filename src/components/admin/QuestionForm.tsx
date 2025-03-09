@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { QuestionType } from '@/types';
 import { toast } from '@/hooks/use-toast';
@@ -10,6 +9,7 @@ import { QuestionTypeSelect } from './QuestionTypeSelect';
 import { QuestionFields } from './QuestionFields';
 import { McqOptionsSection } from './McqOptionsSection';
 import { AutoParseInput } from './AutoParseInput';
+import { FormActionButtons } from './FormActionButtons';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface QuestionFormProps {
@@ -24,8 +24,8 @@ export function QuestionForm({ lectureId, editQuestionId, onComplete }: Question
   const [isLoading, setIsLoading] = useState(false);
   const [questionType, setQuestionType] = useState<QuestionType>('mcq');
   const [questionText, setQuestionText] = useState('');
-  const [explanation, setExplanation] = useState('');
-  const [options, setOptions] = useState<{ id: string; text: string }[]>([
+  const [courseReminder, setCourseReminder] = useState('');
+  const [options, setOptions] = useState<{ id: string; text: string; explanation?: string }[]>([
     { id: '1', text: '' },
     { id: '2', text: '' },
   ]);
@@ -50,7 +50,7 @@ export function QuestionForm({ lectureId, editQuestionId, onComplete }: Question
       if (data) {
         setQuestionType(data.type);
         setQuestionText(data.text);
-        setExplanation(data.explanation || '');
+        setCourseReminder(data.course_reminder || data.explanation || '');
         
         if (data.type === 'mcq' && data.options) {
           setOptions(data.options);
@@ -98,7 +98,8 @@ export function QuestionForm({ lectureId, editQuestionId, onComplete }: Question
         text: questionText,
         options: questionType === 'mcq' ? options : [],
         correct_answers: questionType === 'mcq' ? correctAnswers : [],
-        explanation,
+        course_reminder: courseReminder,
+        explanation: null, // Set old field to null when migrating to new field
       };
       
       let result;
@@ -188,8 +189,8 @@ export function QuestionForm({ lectureId, editQuestionId, onComplete }: Question
           <QuestionFields 
             questionText={questionText}
             setQuestionText={setQuestionText}
-            explanation={explanation}
-            setExplanation={setExplanation}
+            courseReminder={courseReminder}
+            setCourseReminder={setCourseReminder}
             questionType={questionType}
           />
           
@@ -202,18 +203,11 @@ export function QuestionForm({ lectureId, editQuestionId, onComplete }: Question
             />
           )}
           
-          <div className="flex justify-end space-x-3 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleCancel}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Saving..." : (editQuestionId ? "Update Question" : "Create Question")}
-            </Button>
-          </div>
+          <FormActionButtons 
+            isLoading={isLoading} 
+            onCancel={handleCancel} 
+            isEdit={!!editQuestionId} 
+          />
         </form>
       </CardContent>
     </Card>

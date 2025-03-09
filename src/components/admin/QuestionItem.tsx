@@ -2,7 +2,8 @@
 import { Question } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Edit, Trash, HelpCircle, PenLine } from 'lucide-react';
+import { Edit, Trash, HelpCircle, PenLine, ChevronDown, ChevronUp } from 'lucide-react';
+import { useState } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,6 +23,16 @@ interface QuestionItemProps {
 }
 
 export function QuestionItem({ question, onEdit, onDelete }: QuestionItemProps) {
+  const [expandedOption, setExpandedOption] = useState<string | null>(null);
+  
+  const toggleOption = (optionId: string) => {
+    if (expandedOption === optionId) {
+      setExpandedOption(null);
+    } else {
+      setExpandedOption(optionId);
+    }
+  };
+  
   return (
     <Card key={question.id}>
       <CardHeader className="pb-3">
@@ -80,25 +91,48 @@ export function QuestionItem({ question, onEdit, onDelete }: QuestionItemProps) 
       </CardHeader>
       <CardContent className="text-sm">
         {question.type === 'mcq' && question.options && (
-          <div className="space-y-1">
+          <div className="space-y-2">
             {question.options.map((option, index) => (
-              <div key={option.id} className="flex items-start gap-2">
-                <div className={`flex-shrink-0 h-5 w-5 rounded-full flex items-center justify-center text-xs 
-                  ${(question.correct_answers?.includes(option.id)) 
-                    ? 'bg-green-100 text-green-800 border border-green-300' 
-                    : 'bg-muted text-muted-foreground'}`}
-                >
-                  {String.fromCharCode(65 + index)}
+              <div key={option.id} className="border rounded-md p-2">
+                <div className="flex items-start gap-2">
+                  <div className={`flex-shrink-0 h-5 w-5 rounded-full flex items-center justify-center text-xs 
+                    ${(question.correct_answers?.includes(option.id)) 
+                      ? 'bg-green-100 text-green-800 border border-green-300' 
+                      : 'bg-muted text-muted-foreground'}`}
+                  >
+                    {String.fromCharCode(65 + index)}
+                  </div>
+                  <span className="flex-grow">{option.text}</span>
+                  
+                  {option.explanation && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-5 w-5 p-0"
+                      onClick={() => toggleOption(option.id)}
+                    >
+                      {expandedOption === option.id ? (
+                        <ChevronUp className="h-3 w-3" />
+                      ) : (
+                        <ChevronDown className="h-3 w-3" />
+                      )}
+                    </Button>
+                  )}
                 </div>
-                <span>{option.text}</span>
+                
+                {expandedOption === option.id && option.explanation && (
+                  <div className="mt-2 pt-2 pl-7 text-xs text-muted-foreground border-t">
+                    {option.explanation}
+                  </div>
+                )}
               </div>
             ))}
           </div>
         )}
         
-        {question.explanation && (
-          <div className="mt-3 pt-3 border-t text-muted-foreground">
-            <strong>Explanation:</strong> {question.explanation}
+        {(question.course_reminder || question.explanation) && (
+          <div className="mt-3 pt-3 border-t">
+            <strong>Rappel du cours:</strong> {question.course_reminder || question.explanation}
           </div>
         )}
       </CardContent>

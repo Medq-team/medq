@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
 
 interface AutoParseInputProps {
-  onParsedContent: (questionText: string, options: { id: string; text: string }[]) => void;
+  onParsedContent: (questionText: string, options: { id: string; text: string; explanation?: string }[]) => void;
 }
 
 export function AutoParseInput({ onParsedContent }: AutoParseInputProps) {

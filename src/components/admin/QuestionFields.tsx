@@ -6,16 +6,16 @@ import { QuestionType } from '@/types';
 interface QuestionFieldsProps {
   questionText: string;
   setQuestionText: (text: string) => void;
-  explanation: string;
-  setExplanation: (text: string) => void;
+  courseReminder: string;
+  setCourseReminder: (text: string) => void;
   questionType: QuestionType;
 }
 
 export function QuestionFields({ 
   questionText, 
   setQuestionText, 
-  explanation, 
-  setExplanation,
+  courseReminder, 
+  setCourseReminder,
   questionType
 }: QuestionFieldsProps) {
   return (
@@ -33,16 +33,16 @@ export function QuestionFields({
       </div>
       
       <div className="space-y-2">
-        <Label htmlFor="explanation">
-          {questionType === 'mcq' ? 'Explanation (shown after answering)' : 'Reference Answer'}
+        <Label htmlFor="course-reminder">
+          {questionType === 'mcq' ? 'Rappel du cours' : 'Reference Answer'}
         </Label>
         <Textarea
-          id="explanation"
+          id="course-reminder"
           placeholder={questionType === 'mcq' 
-            ? "Enter explanation for the correct answer..." 
+            ? "Enter educational reminder or background information..." 
             : "Enter reference answer for evaluation..."}
-          value={explanation}
-          onChange={(e) => setExplanation(e.target.value)}
+          value={courseReminder}
+          onChange={(e) => setCourseReminder(e.target.value)}
           className="min-h-32"
         />
       </div>

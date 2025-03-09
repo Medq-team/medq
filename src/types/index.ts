@@ -1,3 +1,4 @@
+
 export type User = {
   id: string;
   email: string;
@@ -23,6 +24,7 @@ export type QuestionType = 'mcq' | 'open';
 export type Option = {
   id: string;
   text: string;
+  explanation?: string;
 };
 
 export type Question = {
@@ -35,6 +37,7 @@ export type Question = {
   correct_answers?: string[]; // Array of option IDs for MCQ
   correctAnswers?: string[]; // Keep for backward compatibility
   explanation?: string;
+  course_reminder?: string; // New field for "Rappel du cours"
 };
 
 export type Answer = {
