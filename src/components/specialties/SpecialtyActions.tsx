@@ -2,7 +2,6 @@
 import { Button } from '@/components/ui/button';
 import { PlusCircle, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
 
 interface SpecialtyActionsProps {
   onAddLectureClick: () => void;
@@ -16,7 +15,6 @@ export function SpecialtyActions({
   hasLectures 
 }: SpecialtyActionsProps) {
   const navigate = useNavigate();
-  const { user, isAdmin } = useAuth();
 
   return (
     <div className="flex justify-between items-center">
@@ -30,19 +28,17 @@ export function SpecialtyActions({
       </Button>
       
       <div className="flex space-x-2">
-        {user && hasLectures && (
+        {hasLectures && (
           <Button variant="outline" onClick={onAddQuestionClick}>
             <PlusCircle className="h-4 w-4 mr-2" />
             Add Question
           </Button>
         )}
         
-        {isAdmin && (
-          <Button onClick={onAddLectureClick}>
-            <PlusCircle className="h-4 w-4 mr-2" />
-            Add Lecture
-          </Button>
-        )}
+        <Button onClick={onAddLectureClick}>
+          <PlusCircle className="h-4 w-4 mr-2" />
+          Add Lecture
+        </Button>
       </div>
     </div>
   );
