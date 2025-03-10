@@ -1,44 +1,87 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Question, Option } from '@/types';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { CheckCircle, XCircle, HelpCircle, ArrowRight } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { CheckCircle, XCircle, HelpCircle, ArrowRight, ChevronDown, ChevronUp } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 interface MCQQuestionProps {
   question: Question;
-  onSubmit: (selectedOptionId: string) => void;
+  onSubmit: (selectedOptionIds: string[]) => void;
   onNext: () => void;
 }
 
 export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
-  const [selectedOptionId, setSelectedOptionId] = useState<string>('');
+  const [selectedOptionIds, setSelectedOptionIds] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+  const [expandedExplanations, setExpandedExplanations] = useState<string[]>([]);
+
+  // Get correct answers array from question
+  const correctAnswers = question.correctAnswers || question.correct_answers || [];
+
+  // Handle checkbox change
+  const handleOptionSelect = (optionId: string) => {
+    if (submitted) return;
+    
+    setSelectedOptionIds(prev => 
+      prev.includes(optionId)
+        ? prev.filter(id => id !== optionId)
+        : [...prev, optionId]
+    );
+  };
+
+  // Toggle explanation visibility
+  const toggleExplanation = (optionId: string) => {
+    setExpandedExplanations(prev =>
+      prev.includes(optionId)
+        ? prev.filter(id => id !== optionId)
+        : [...prev, optionId]
+    );
+  };
 
   const handleSubmit = () => {
-    if (!selectedOptionId || submitted) return;
+    if (selectedOptionIds.length === 0 || submitted) return;
     
     setSubmitted(true);
     
-    // Check if answer is correct
-    const correct = (question.correctAnswers?.includes(selectedOptionId) || 
-                     question.correct_answers?.includes(selectedOptionId)) || false;
-    setIsCorrect(correct);
+    // Check if answer is completely correct (all correct options selected and no incorrect ones)
+    const allCorrectSelected = correctAnswers.every(id => selectedOptionIds.includes(id));
+    const noIncorrectSelected = selectedOptionIds.every(id => correctAnswers.includes(id));
+    setIsCorrect(allCorrectSelected && noIncorrectSelected);
     
-    onSubmit(selectedOptionId);
+    // Auto-expand explanations for incorrect answers and correct answers that weren't selected
+    const autoExpandIds: string[] = [];
+    
+    // Add incorrect selections to auto-expand
+    selectedOptionIds.forEach(id => {
+      if (!correctAnswers.includes(id)) {
+        autoExpandIds.push(id);
+      }
+    });
+    
+    // Add correct answers that weren't selected to auto-expand
+    correctAnswers.forEach(id => {
+      if (!selectedOptionIds.includes(id)) {
+        autoExpandIds.push(id);
+      }
+    });
+    
+    setExpandedExplanations(autoExpandIds);
+    
+    onSubmit(selectedOptionIds);
   };
 
   const getOptionColor = (optionId: string) => {
     if (!submitted) return '';
     
-    const isOptionCorrect = (question.correctAnswers?.includes(optionId) || 
-                            question.correct_answers?.includes(optionId)) || false;
+    const isOptionCorrect = correctAnswers.includes(optionId);
+    const isSelected = selectedOptionIds.includes(optionId);
     
-    if (selectedOptionId === optionId) {
+    if (isSelected) {
       return isOptionCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200';
     }
     
@@ -48,20 +91,16 @@ export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
   const getOptionIcon = (optionId: string) => {
     if (!submitted) return null;
     
-    const isOptionCorrect = (question.correctAnswers?.includes(optionId) ||
-                            question.correct_answers?.includes(optionId)) || false;
+    const isOptionCorrect = correctAnswers.includes(optionId);
+    const isSelected = selectedOptionIds.includes(optionId);
     
-    if (selectedOptionId === optionId) {
+    if (isSelected) {
       return isOptionCorrect ? 
         <CheckCircle className="h-5 w-5 text-green-500" /> : 
         <XCircle className="h-5 w-5 text-red-500" />;
     }
     
     return isOptionCorrect ? <CheckCircle className="h-5 w-5 text-green-500" /> : null;
-  };
-
-  const getSelectedOption = () => {
-    return question.options?.find(option => option.id === selectedOptionId);
   };
 
   return (
@@ -78,48 +117,79 @@ export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
           Multiple Choice
         </div>
         <h3 className="text-xl font-semibold">{question.text}</h3>
+        <p className="text-sm text-muted-foreground">
+          {submitted ? "Review your answers below:" : "Select all correct answers:"}
+        </p>
       </div>
 
-      <RadioGroup 
-        value={selectedOptionId} 
-        onValueChange={setSelectedOptionId}
-        className="space-y-3"
-        disabled={submitted}
-      >
-        {question.options?.map((option: Option) => (
-          <div
-            key={option.id}
-            className={cn(
-              "flex items-center space-x-3 rounded-lg border p-4 transition-colors",
-              getOptionColor(option.id),
-              submitted ? "" : "hover:bg-muted/50 cursor-pointer"
-            )}
-          >
-            <RadioGroupItem value={option.id} id={option.id} disabled={submitted} />
-            <Label 
-              htmlFor={option.id} 
-              className="flex-grow cursor-pointer font-normal"
+      <div className="space-y-3">
+        {question.options?.map((option: Option, index) => (
+          <div key={option.id} className="space-y-2">
+            <div
+              className={cn(
+                "flex items-center rounded-lg border p-4 transition-colors",
+                getOptionColor(option.id),
+                !submitted && "hover:bg-muted/50 cursor-pointer",
+              )}
+              onClick={() => handleOptionSelect(option.id)}
             >
-              {option.text}
-            </Label>
-            {getOptionIcon(option.id)}
+              <div className="mr-3">
+                <Checkbox
+                  id={option.id}
+                  checked={selectedOptionIds.includes(option.id)}
+                  onCheckedChange={() => handleOptionSelect(option.id)}
+                  disabled={submitted}
+                  className="pointer-events-none"
+                />
+              </div>
+              <Label 
+                htmlFor={option.id} 
+                className="flex-grow cursor-pointer font-normal"
+              >
+                {option.text}
+              </Label>
+              {getOptionIcon(option.id)}
+              
+              {submitted && option.explanation && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleExplanation(option.id);
+                  }}
+                  className="ml-2 h-6 w-6 p-0 rounded-full"
+                >
+                  {expandedExplanations.includes(option.id) ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
+                  )}
+                </Button>
+              )}
+            </div>
+            
+            {submitted && expandedExplanations.includes(option.id) && option.explanation && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="ml-8 p-3 rounded-md bg-slate-50 text-sm"
+              >
+                <strong>Explanation:</strong> {option.explanation}
+              </motion.div>
+            )}
           </div>
         ))}
-      </RadioGroup>
+      </div>
 
       {submitted && (
         <motion.div 
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
           className="space-y-4"
-        >
-          {getSelectedOption()?.explanation && (
-            <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-              <h4 className="font-medium mb-1">Option Explanation:</h4>
-              <p>{getSelectedOption()?.explanation}</p>
-            </div>
-          )}
-          
+        >          
           {question.course_reminder && (
             <div className="p-4 rounded-lg bg-blue-50 text-blue-800">
               <h4 className="font-medium mb-1">Rappel du cours:</h4>
@@ -141,7 +211,7 @@ export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
         {!submitted ? (
           <Button 
             onClick={handleSubmit} 
-            disabled={!selectedOptionId}
+            disabled={selectedOptionIds.length === 0}
             className="ml-auto"
           >
             Submit Answer

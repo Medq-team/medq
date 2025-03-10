@@ -66,7 +66,7 @@ export function McqOptionsSection({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <Label>Answer Options (select correct answers)</Label>
+        <Label>Answer Options (select all correct answers)</Label>
         <Button 
           type="button" 
           variant="outline" 
