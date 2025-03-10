@@ -85,7 +85,7 @@ export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
       return isOptionCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200';
     }
     
-    return isOptionCorrect ? 'bg-green-50 border-green-200' : '';
+    return isOptionCorrect ? 'bg-blue-50 border-blue-200' : '';
   };
   
   const getOptionIcon = (optionId: string) => {
@@ -100,7 +100,7 @@ export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
         <XCircle className="h-5 w-5 text-red-500" />;
     }
     
-    return isOptionCorrect ? <CheckCircle className="h-5 w-5 text-green-500" /> : null;
+    return isOptionCorrect ? <CheckCircle className="h-5 w-5 text-blue-500" /> : null;
   };
 
   return (
@@ -146,6 +146,7 @@ export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
                 htmlFor={option.id} 
                 className="flex-grow cursor-pointer font-normal"
               >
+                <span className="font-medium mr-2">{String.fromCharCode(65 + index)}.</span>
                 {option.text}
               </Label>
               {getOptionIcon(option.id)}
