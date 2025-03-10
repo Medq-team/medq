@@ -1,8 +1,9 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useTheme } from "@/components/ui/use-theme"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
+import { useTheme } from "@/components/ui/use-theme";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,9 +12,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   DropdownMenuGroup,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import { LogOut, Moon, Sun, Settings, User } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { signOut } from '@/lib/supabase';
 
 export function AppHeader() {
   return (
@@ -67,7 +69,6 @@ const ThemeToggle = () => {
   );
 }
 
-// Update the user dropdown menu to include a link to the profile page
 const UserDropdown = () => {
   const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
@@ -121,6 +122,3 @@ const UserDropdown = () => {
     </DropdownMenu>
   );
 };
-
-import { signOut } from '@/lib/supabase';
-import { useEffect } from 'react';
