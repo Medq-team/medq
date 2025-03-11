@@ -9,13 +9,21 @@ import { AddSpecialtyDialog } from '@/components/specialties/AddSpecialtyDialog'
 import { SpecialtiesList } from '@/components/specialties/SpecialtiesList';
 
 export default function DashboardPage() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     fetchSpecialties();
-  }, []);
+    
+    // For debugging
+    console.log('DashboardPage - Current auth state:', {
+      userId: user?.id,
+      userEmail: user?.email,
+      userRole: user?.role,
+      isAdmin
+    });
+  }, [user, isAdmin]);
 
   async function fetchSpecialties() {
     try {
@@ -49,7 +57,7 @@ export default function DashboardPage() {
           <div>
             <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
             <p className="text-muted-foreground">
-              Welcome {user?.email}. Select a specialty to get started.
+              Welcome {user?.email}. {isAdmin ? '(Admin)' : '(Student)'} Select a specialty to get started.
             </p>
           </div>
           

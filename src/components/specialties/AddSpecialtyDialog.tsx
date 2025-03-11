@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -22,7 +22,17 @@ export function AddSpecialtyDialog({ onSpecialtyAdded, userId }: AddSpecialtyDia
     imageUrl: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
+  
+  useEffect(() => {
+    // For debugging
+    console.log('AddSpecialtyDialog - Current auth state:', { 
+      isAdmin, 
+      userId, 
+      userEmail: user?.email,
+      userRole: user?.role
+    });
+  }, [isAdmin, userId, user]);
 
   const handleAddSpecialty = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,7 +121,12 @@ export function AddSpecialtyDialog({ onSpecialtyAdded, userId }: AddSpecialtyDia
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button disabled={!isAdmin}>
+        <Button className="relative" disabled={!isAdmin}>
+          {!isAdmin && (
+            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-md">
+              <span className="text-xs text-white">Admin only</span>
+            </div>
+          )}
           <PlusCircle className="h-4 w-4 mr-2" />
           Add Specialty
         </Button>

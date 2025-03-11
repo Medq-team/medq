@@ -24,7 +24,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children 
 }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(false); // Changed to false initially
+  const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
   const refreshUser = async () => {
@@ -39,6 +39,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       }
       
       const role = await getUserRole();
+      console.log('User role from database:', role);
+      
       setUser({
         id: authUser.id,
         email: authUser.email || '',
@@ -46,6 +48,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       });
       
       setIsAdmin(role === 'admin');
+      console.log('Is admin set to:', role === 'admin');
     } catch (error) {
       console.error('Error refreshing user:', error);
       setUser(null);
