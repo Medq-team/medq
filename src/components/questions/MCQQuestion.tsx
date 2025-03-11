@@ -9,7 +9,6 @@ import { MCQActions } from './mcq/MCQActions';
 import { QuestionEditDialog } from './QuestionEditDialog';
 import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
 
 interface MCQQuestionProps {
   question: Question;
@@ -18,7 +17,6 @@ interface MCQQuestionProps {
 }
 
 export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
-  const { isAdmin } = useAuth();
   const [selectedOptionIds, setSelectedOptionIds] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
@@ -99,17 +97,15 @@ export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
           isSubmitted={submitted}
         />
         
-        {isAdmin && (
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => setIsEditDialogOpen(true)}
-            className="flex items-center gap-1"
-          >
-            <Pencil className="h-3.5 w-3.5" />
-            Edit
-          </Button>
-        )}
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => setIsEditDialogOpen(true)}
+          className="flex items-center gap-1"
+        >
+          <Pencil className="h-3.5 w-3.5" />
+          Edit
+        </Button>
       </div>
 
       <div className="space-y-3">

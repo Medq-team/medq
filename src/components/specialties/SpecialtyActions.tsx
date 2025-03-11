@@ -16,7 +16,7 @@ export function SpecialtyActions({
   hasLectures 
 }: SpecialtyActionsProps) {
   const navigate = useNavigate();
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
 
   return (
     <div className="flex justify-between items-center">
@@ -30,7 +30,7 @@ export function SpecialtyActions({
       </Button>
       
       <div className="flex space-x-2">
-        {hasLectures && (
+        {user && hasLectures && (
           <Button variant="outline" onClick={onAddQuestionClick}>
             <PlusCircle className="h-4 w-4 mr-2" />
             Add Question

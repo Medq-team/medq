@@ -15,7 +15,10 @@ export function useSpecialty(specialtyId: string | undefined) {
   const [isAddLectureOpen, setIsAddLectureOpen] = useState(false);
 
   const fetchSpecialtyAndLectures = async () => {
-    if (!specialtyId) return;
+    if (!specialtyId) {
+      setIsLoading(false);
+      return;
+    }
     
     setIsLoading(true);
     
@@ -28,10 +31,15 @@ export function useSpecialty(specialtyId: string | undefined) {
         .single();
 
       if (specialtyError) {
-        throw specialtyError;
+        // Only throw error if it's not a case of "No rows found"
+        if (specialtyError.code !== 'PGRST116') {
+          throw specialtyError;
+        }
+        // If no specialty found, still set loading to false but don't navigate away
+        setSpecialty(null);
+      } else {
+        setSpecialty(specialtyData);
       }
-
-      setSpecialty(specialtyData);
 
       // Fetch lectures for this specialty
       const { data: lecturesData, error: lecturesError } = await supabase
@@ -59,7 +67,10 @@ export function useSpecialty(specialtyId: string | undefined) {
         description: "Failed to load specialty information. Please try again.",
         variant: "destructive",
       });
-      navigate('/dashboard');
+      // Only navigate away on serious errors
+      if (navigate && window.location.pathname.includes('/specialty/')) {
+        navigate('/dashboard');
+      }
     } finally {
       setIsLoading(false);
     }
