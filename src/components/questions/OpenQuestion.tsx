@@ -1,10 +1,11 @@
 
 import { useState } from 'react';
 import { Question } from '@/types';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { PenLine, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { OpenQuestionHeader } from './open/OpenQuestionHeader';
+import { OpenQuestionInput } from './open/OpenQuestionInput';
+import { OpenQuestionExplanation } from './open/OpenQuestionExplanation';
+import { OpenQuestionActions } from './open/OpenQuestionActions';
 
 interface OpenQuestionProps {
   question: Question;
@@ -31,61 +32,27 @@ export function OpenQuestion({ question, onSubmit, onNext }: OpenQuestionProps) 
       transition={{ duration: 0.4 }}
       className="space-y-6"
     >
-      <div className="space-y-2">
-        <div className="inline-flex items-center px-3 py-1 rounded-full bg-purple-50 text-purple-700 text-sm font-medium">
-          <PenLine className="h-4 w-4 mr-1" />
-          Open Question
-        </div>
-        <h3 className="text-xl font-semibold">{question.text}</h3>
-      </div>
+      <OpenQuestionHeader questionText={question.text} />
 
-      <div className="space-y-2">
-        <Textarea
-          placeholder="Type your answer here..."
-          className="min-h-32 transition-all"
-          value={answer}
-          onChange={(e) => setAnswer(e.target.value)}
-          disabled={submitted}
-        />
-      </div>
+      <OpenQuestionInput 
+        answer={answer}
+        setAnswer={setAnswer}
+        isSubmitted={submitted}
+      />
 
       {submitted && (
-        <motion.div 
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          className="space-y-4"
-        >
-          {question.explanation && (
-            <div className="p-4 rounded-lg bg-purple-50 text-purple-800">
-              <h4 className="font-medium mb-1">Reference Answer:</h4>
-              <p>{question.explanation}</p>
-            </div>
-          )}
-          
-          {question.course_reminder && (
-            <div className="p-4 rounded-lg bg-purple-50 text-purple-800">
-              <h4 className="font-medium mb-1">Additional Information:</h4>
-              <p>{question.course_reminder}</p>
-            </div>
-          )}
-        </motion.div>
+        <OpenQuestionExplanation
+          explanation={question.explanation}
+          courseReminder={question.course_reminder}
+        />
       )}
 
-      <div className="flex justify-end space-x-3 pt-4">
-        {!submitted ? (
-          <Button 
-            onClick={handleSubmit} 
-            disabled={!answer.trim()}
-          >
-            Submit Answer
-          </Button>
-        ) : (
-          <Button onClick={onNext} className="group">
-            Next Question
-            <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </Button>
-        )}
-      </div>
+      <OpenQuestionActions 
+        isSubmitted={submitted}
+        canSubmit={!!answer.trim()}
+        onSubmit={handleSubmit}
+        onNext={onNext}
+      />
     </motion.div>
   );
 }
