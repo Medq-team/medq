@@ -38,7 +38,7 @@ export function MCQOptionItem({
       return isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200';
     }
     
-    return isCorrect ? 'bg-blue-50 border-blue-200' : '';
+    return isCorrect ? 'bg-amber-50 border-amber-200' : '';
   };
   
   const getOptionIcon = () => {
@@ -50,7 +50,7 @@ export function MCQOptionItem({
         <XCircle className="h-5 w-5 text-red-500" />;
     }
     
-    return isCorrect ? <CheckCircle className="h-5 w-5 text-blue-500" /> : null;
+    return isCorrect ? <CheckCircle className="h-5 w-5 text-amber-700" /> : null;
   };
 
   const isExplanationExpanded = expandedExplanations.includes(option.id);

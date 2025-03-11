@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface AddSpecialtyDialogProps {
   onSpecialtyAdded: () => void;
@@ -21,6 +22,7 @@ export function AddSpecialtyDialog({ onSpecialtyAdded, userId }: AddSpecialtyDia
     imageUrl: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isAdmin } = useAuth();
 
   const handleAddSpecialty = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,6 +31,15 @@ export function AddSpecialtyDialog({ onSpecialtyAdded, userId }: AddSpecialtyDia
       toast({
         title: "Authentication required",
         description: "You must be logged in to create specialties.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!isAdmin) {
+      toast({
+        title: "Permission denied",
+        description: "Only administrators can create specialties.",
         variant: "destructive",
       });
       return;
@@ -52,7 +63,8 @@ export function AddSpecialtyDialog({ onSpecialtyAdded, userId }: AddSpecialtyDia
           {
             name: newSpecialty.name,
             description: newSpecialty.description || null,
-            imageurl: newSpecialty.imageUrl || null
+            imageurl: newSpecialty.imageUrl || null,
+            created_by: userId
           }
         ])
         .select();
@@ -99,7 +111,7 @@ export function AddSpecialtyDialog({ onSpecialtyAdded, userId }: AddSpecialtyDia
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button>
+        <Button disabled={!isAdmin}>
           <PlusCircle className="h-4 w-4 mr-2" />
           Add Specialty
         </Button>

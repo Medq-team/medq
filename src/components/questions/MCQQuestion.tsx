@@ -6,6 +6,10 @@ import { MCQHeader } from './mcq/MCQHeader';
 import { MCQOptionItem } from './mcq/MCQOptionItem';
 import { MCQExplanation } from './mcq/MCQExplanation';
 import { MCQActions } from './mcq/MCQActions';
+import { QuestionEditDialog } from './QuestionEditDialog';
+import { Button } from '@/components/ui/button';
+import { Pencil } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface MCQQuestionProps {
   question: Question;
@@ -14,10 +18,12 @@ interface MCQQuestionProps {
 }
 
 export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
+  const { isAdmin } = useAuth();
   const [selectedOptionIds, setSelectedOptionIds] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [expandedExplanations, setExpandedExplanations] = useState<string[]>([]);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   // Get correct answers array from question
   const correctAnswers = question.correctAnswers || question.correct_answers || [];
@@ -74,6 +80,11 @@ export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
     onSubmit(selectedOptionIds);
   };
 
+  const handleQuestionUpdated = () => {
+    // Reload the page to refresh the question data
+    window.location.reload();
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -82,10 +93,24 @@ export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
       transition={{ duration: 0.4 }}
       className="space-y-6"
     >
-      <MCQHeader 
-        questionText={question.text}
-        isSubmitted={submitted}
-      />
+      <div className="flex justify-between items-start">
+        <MCQHeader 
+          questionText={question.text}
+          isSubmitted={submitted}
+        />
+        
+        {isAdmin && (
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setIsEditDialogOpen(true)}
+            className="flex items-center gap-1"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+            Edit
+          </Button>
+        )}
+      </div>
 
       <div className="space-y-3">
         {question.options?.map((option, index) => (
@@ -117,6 +142,13 @@ export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
         isCorrect={isCorrect}
         onSubmit={handleSubmit}
         onNext={onNext}
+      />
+      
+      <QuestionEditDialog
+        question={question}
+        isOpen={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        onQuestionUpdated={handleQuestionUpdated}
       />
     </motion.div>
   );

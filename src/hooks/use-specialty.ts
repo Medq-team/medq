@@ -41,14 +41,16 @@ export function useSpecialty(specialtyId: string | undefined) {
         .order('title');
 
       if (lecturesError) {
-        throw lecturesError;
-      }
-
-      setLectures(lecturesData || []);
-      
-      // Set the first lecture as default if available
-      if (lecturesData && lecturesData.length > 0) {
-        setSelectedLectureId(lecturesData[0].id);
+        // Don't throw an error for empty lectures, just set empty array
+        console.warn('Error fetching lectures:', lecturesError);
+        setLectures([]);
+      } else {
+        setLectures(lecturesData || []);
+        
+        // Set the first lecture as default if available
+        if (lecturesData && lecturesData.length > 0) {
+          setSelectedLectureId(lecturesData[0].id);
+        }
       }
     } catch (error) {
       console.error('Error fetching data:', error);
