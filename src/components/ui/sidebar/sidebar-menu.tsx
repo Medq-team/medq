@@ -1,4 +1,16 @@
 
+/**
+ * @file Sidebar menu components
+ * 
+ * Contains components for creating navigation menus within the sidebar:
+ * - SidebarMenu: Container for menu items
+ * - SidebarMenuItem: Individual item in the menu
+ * - SidebarMenuButton: Interactive button for menu items
+ * - SidebarMenuAction: Action button for menu items
+ * - SidebarMenuBadge: Badge/counter for menu items
+ * - SidebarMenuSkeleton: Loading placeholder for menu items
+ */
+
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { VariantProps, cva } from "class-variance-authority"
@@ -12,6 +24,11 @@ import {
 } from "@/components/ui/tooltip"
 import { useSidebar } from "./sidebar-context"
 
+/**
+ * Sidebar menu component
+ * 
+ * Container for a list of menu items in the sidebar.
+ */
 export const SidebarMenu = React.forwardRef<
   HTMLUListElement,
   React.ComponentProps<"ul">
@@ -25,6 +42,11 @@ export const SidebarMenu = React.forwardRef<
 ))
 SidebarMenu.displayName = "SidebarMenu"
 
+/**
+ * Sidebar menu item component
+ * 
+ * Container for an individual menu item in the sidebar.
+ */
 export const SidebarMenuItem = React.forwardRef<
   HTMLLIElement,
   React.ComponentProps<"li">
@@ -38,6 +60,9 @@ export const SidebarMenuItem = React.forwardRef<
 ))
 SidebarMenuItem.displayName = "SidebarMenuItem"
 
+/**
+ * Variants for the sidebar menu button component
+ */
 const sidebarMenuButtonVariants = cva(
   "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-none ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
   {
@@ -60,6 +85,11 @@ const sidebarMenuButtonVariants = cva(
   }
 )
 
+/**
+ * Sidebar menu button component
+ * 
+ * Interactive button for menu items, supports tooltips when collapsed.
+ */
 export const SidebarMenuButton = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<"button"> & {
@@ -119,6 +149,11 @@ export const SidebarMenuButton = React.forwardRef<
 )
 SidebarMenuButton.displayName = "SidebarMenuButton"
 
+/**
+ * Sidebar menu action component
+ * 
+ * Action button that appears inside menu items (e.g., delete, edit).
+ */
 export const SidebarMenuAction = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<"button"> & {
@@ -150,6 +185,11 @@ export const SidebarMenuAction = React.forwardRef<
 })
 SidebarMenuAction.displayName = "SidebarMenuAction"
 
+/**
+ * Sidebar menu badge component
+ * 
+ * Badge or counter that appears within menu items (e.g., notification count).
+ */
 export const SidebarMenuBadge = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div">
@@ -171,6 +211,11 @@ export const SidebarMenuBadge = React.forwardRef<
 ))
 SidebarMenuBadge.displayName = "SidebarMenuBadge"
 
+/**
+ * Sidebar menu skeleton component
+ * 
+ * Loading placeholder for menu items.
+ */
 export const SidebarMenuSkeleton = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div"> & {

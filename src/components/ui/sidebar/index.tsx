@@ -1,4 +1,12 @@
 
+/**
+ * @file Sidebar component index file
+ * 
+ * This file exports all sidebar components and provides the main entry point
+ * for the sidebar component library. It wraps the SidebarProvider with a
+ * TooltipProvider to ensure tooltips work correctly for collapsed sidebars.
+ */
+
 import * as React from "react"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
@@ -34,7 +42,10 @@ import {
   SidebarMenuSubButton
 } from "./sidebar-submenu"
 
-// Wrap SidebarProvider with TooltipProvider
+/**
+ * Enhanced SidebarProvider that wraps the original provider with TooltipProvider
+ * for better tooltip integration with sidebar components.
+ */
 const EnhancedSidebarProvider = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<typeof SidebarProvider>

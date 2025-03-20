@@ -1,22 +1,42 @@
+
+/**
+ * @file Sidebar context provider
+ * 
+ * This file contains the React context for the sidebar state management.
+ * It provides:
+ * - State tracking for sidebar expanded/collapsed state
+ * - Mobile detection and responsive behavior
+ * - Keyboard shortcut support (Ctrl/Cmd + B)
+ * - Cookie persistence for sidebar preferences
+ */
+
 import * as React from "react"
 import { useIsMobile } from "@/hooks/use-mobile"
 
 const SIDEBAR_COOKIE_NAME = "sidebar:state"
-const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
+const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7  // 7 days
 const SIDEBAR_KEYBOARD_SHORTCUT = "b"
 
+/**
+ * Context providing sidebar state and methods to control it
+ */
 export type SidebarContext = {
-  state: "expanded" | "collapsed"
-  open: boolean
-  setOpen: (open: boolean) => void
-  openMobile: boolean
-  setOpenMobile: (open: boolean) => void
-  isMobile: boolean
-  toggleSidebar: () => void
+  state: "expanded" | "collapsed"  // Current visual state of the sidebar
+  open: boolean                    // Whether sidebar is open (expanded) or closed (collapsed)
+  setOpen: (open: boolean) => void // Function to set the sidebar open state
+  openMobile: boolean              // Whether the mobile sidebar is open
+  setOpenMobile: (open: boolean) => void // Function to control mobile sidebar
+  isMobile: boolean                // Whether the current view is mobile
+  toggleSidebar: () => void        // Helper to toggle sidebar state
 }
 
 const SidebarContext = React.createContext<SidebarContext | null>(null)
 
+/**
+ * Hook to access the sidebar context
+ * @returns The sidebar context 
+ * @throws Error if used outside of a SidebarProvider
+ */
 export function useSidebar() {
   const context = React.useContext(SidebarContext)
   if (!context) {
@@ -28,13 +48,16 @@ export function useSidebar() {
 
 interface SidebarProviderProps {
   children: React.ReactNode
-  defaultOpen?: boolean
-  open?: boolean
-  onOpenChange?: (open: boolean) => void
+  defaultOpen?: boolean           // Default state of the sidebar (open/closed)
+  open?: boolean                  // Controlled open state
+  onOpenChange?: (open: boolean) => void // Callback for open state changes
   className?: string
   style?: React.CSSProperties
 }
 
+/**
+ * Provider component for sidebar state and functionality
+ */
 export const SidebarProvider = React.forwardRef<
   HTMLDivElement,
   SidebarProviderProps & React.ComponentProps<"div">

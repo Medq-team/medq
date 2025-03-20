@@ -1,16 +1,40 @@
 
+/**
+ * @file Main Sidebar component
+ * 
+ * This file implements the main Sidebar component which handles:
+ * - Different sidebar variants (sidebar, floating, inset)
+ * - Collapsibility modes (offcanvas, icon, none)
+ * - Responsive behavior (desktop/mobile)
+ * - Left/right positioning
+ */
+
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { useSidebar } from "./sidebar-context"
 import { SIDEBAR_WIDTH_MOBILE } from "./sidebar-constants"
 
+/**
+ * Sidebar component props
+ */
 interface SidebarProps extends React.ComponentProps<"div"> {
+  /** Side on which the sidebar appears */
   side?: "left" | "right"
+  /** Sidebar visual variant */
   variant?: "sidebar" | "floating" | "inset"
+  /** Collapse behavior of the sidebar */
   collapsible?: "offcanvas" | "icon" | "none"
 }
 
+/**
+ * Main sidebar component
+ * 
+ * Renders different UIs based on:
+ * - Mobile vs desktop (Sheet on mobile, fixed div on desktop)
+ * - Collapsible mode
+ * - Sidebar variant
+ */
 export const Sidebar = React.forwardRef<
   HTMLDivElement,
   SidebarProps
@@ -28,6 +52,7 @@ export const Sidebar = React.forwardRef<
   ) => {
     const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
 
+    // For non-collapsible sidebar
     if (collapsible === "none") {
       return (
         <div
@@ -43,6 +68,7 @@ export const Sidebar = React.forwardRef<
       )
     }
 
+    // For mobile sidebar (Sheet component)
     if (isMobile) {
       return (
         <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
@@ -63,6 +89,7 @@ export const Sidebar = React.forwardRef<
       )
     }
 
+    // For desktop sidebar
     return (
       <div
         ref={ref}

@@ -1,8 +1,22 @@
 
+/**
+ * @file Sidebar rail component
+ * 
+ * A draggable rail element that appears at the edge of the sidebar
+ * to allow users to toggle the sidebar's visibility.
+ */
+
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { useSidebar } from "./sidebar-context"
 
+/**
+ * Sidebar rail component
+ * 
+ * Renders a draggable rail at the edge of the sidebar that allows
+ * users to toggle the sidebar visibility by clicking. Uses appropriate
+ * cursor styles to indicate draggability.
+ */
 export const SidebarRail = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<"button">

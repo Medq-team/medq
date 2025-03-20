@@ -1,7 +1,21 @@
 
+/**
+ * @file Sidebar inset content area
+ * 
+ * Renders a main content area that adapts to the sidebar's state.
+ * This component is used to create layouts where the main content
+ * area adjusts based on the sidebar's visibility.
+ */
+
 import * as React from "react"
 import { cn } from "@/lib/utils"
 
+/**
+ * Sidebar inset component
+ * 
+ * Renders a main content area that adapts to the sidebar's state.
+ * Used to create responsive layouts with proper spacing around the content.
+ */
 export const SidebarInset = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"main">

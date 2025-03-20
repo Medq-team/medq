@@ -1,8 +1,24 @@
 
+/**
+ * @file Sidebar group components
+ * 
+ * Contains components for creating and structuring groups within the sidebar:
+ * - SidebarGroup: Container for a group of related items
+ * - SidebarGroupLabel: Label/heading for a group
+ * - SidebarGroupAction: Action button for the group (e.g., add, edit)
+ * - SidebarGroupContent: Content container for the group
+ */
+
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cn } from "@/lib/utils"
 
+/**
+ * Sidebar group component
+ * 
+ * Container for a group of related items within the sidebar.
+ * Usually contains a label, content, and optional action button.
+ */
 export const SidebarGroup = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div">
@@ -18,6 +34,12 @@ export const SidebarGroup = React.forwardRef<
 })
 SidebarGroup.displayName = "SidebarGroup"
 
+/**
+ * Sidebar group label component
+ * 
+ * Label/heading for a group of items within the sidebar.
+ * Supports asChild to allow custom elements as labels.
+ */
 export const SidebarGroupLabel = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div"> & { asChild?: boolean }
@@ -39,6 +61,12 @@ export const SidebarGroupLabel = React.forwardRef<
 })
 SidebarGroupLabel.displayName = "SidebarGroupLabel"
 
+/**
+ * Sidebar group action component
+ * 
+ * Action button for a sidebar group, positioned in the top-right corner.
+ * Commonly used for adding, editing, or managing group items.
+ */
 export const SidebarGroupAction = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<"button"> & { asChild?: boolean }
@@ -62,6 +90,11 @@ export const SidebarGroupAction = React.forwardRef<
 })
 SidebarGroupAction.displayName = "SidebarGroupAction"
 
+/**
+ * Sidebar group content component
+ * 
+ * Container for the content of a sidebar group.
+ */
 export const SidebarGroupContent = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div">
