@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Question } from '@/types';
 import { useQuestionEdit } from './edit/useQuestionEdit';
 import { QuestionEditContent } from './edit/QuestionEditContent';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface QuestionEditDialogProps {
   question: Question | null;
@@ -39,26 +40,28 @@ export function QuestionEditDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-3xl max-h-[90vh]">
         <DialogHeader>
           <DialogTitle>Edit Question</DialogTitle>
         </DialogHeader>
         
-        <QuestionEditContent
-          question={question}
-          questionText={questionText}
-          setQuestionText={setQuestionText}
-          courseReminder={courseReminder}
-          setCourseReminder={setCourseReminder}
-          options={options}
-          updateOptionText={updateOptionText}
-          updateOptionExplanation={updateOptionExplanation}
-          correctAnswers={correctAnswers}
-          toggleCorrectAnswer={toggleCorrectAnswer}
-          isLoading={isLoading}
-          onCancel={() => onOpenChange(false)}
-          onSubmit={handleSubmit}
-        />
+        <ScrollArea className="max-h-[calc(90vh-120px)] pr-4">
+          <QuestionEditContent
+            question={question}
+            questionText={questionText}
+            setQuestionText={setQuestionText}
+            courseReminder={courseReminder}
+            setCourseReminder={setCourseReminder}
+            options={options}
+            updateOptionText={updateOptionText}
+            updateOptionExplanation={updateOptionExplanation}
+            correctAnswers={correctAnswers}
+            toggleCorrectAnswer={toggleCorrectAnswer}
+            isLoading={isLoading}
+            onCancel={() => onOpenChange(false)}
+            onSubmit={handleSubmit}
+          />
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );

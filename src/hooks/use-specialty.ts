@@ -23,52 +23,63 @@ export function useSpecialty(specialtyId: string | undefined) {
     setIsLoading(true);
     
     try {
+      console.log('Fetching specialty with ID:', specialtyId);
+      
       // Fetch specialty
       const { data: specialtyData, error: specialtyError } = await supabase
         .from('specialties')
         .select('*')
         .eq('id', specialtyId)
-        .single();
+        .maybeSingle();
 
       if (specialtyError) {
-        // Only throw error if it's not a case of "No rows found"
-        if (specialtyError.code !== 'PGRST116') {
-          throw specialtyError;
-        }
-        // If no specialty found, still set loading to false but don't navigate away
+        console.error('Error fetching specialty:', specialtyError);
+        throw specialtyError;
+      }
+      
+      if (!specialtyData) {
+        console.warn('No specialty found with ID:', specialtyId);
         setSpecialty(null);
-      } else {
-        setSpecialty(specialtyData);
-      }
-
-      // Fetch lectures for this specialty
-      const { data: lecturesData, error: lecturesError } = await supabase
-        .from('lectures')
-        .select('*')
-        .eq('specialty_id', specialtyId)
-        .order('title');
-
-      if (lecturesError) {
-        // Don't throw an error for empty lectures, just set empty array
-        console.warn('Error fetching lectures:', lecturesError);
         setLectures([]);
+        toast({
+          title: "Specialty not found",
+          description: "The requested specialty could not be found.",
+          variant: "destructive",
+        });
       } else {
-        setLectures(lecturesData || []);
+        console.log('Successfully fetched specialty:', specialtyData);
+        setSpecialty(specialtyData);
         
-        // Set the first lecture as default if available
-        if (lecturesData && lecturesData.length > 0) {
-          setSelectedLectureId(lecturesData[0].id);
+        // Fetch lectures for this specialty
+        const { data: lecturesData, error: lecturesError } = await supabase
+          .from('lectures')
+          .select('*')
+          .eq('specialty_id', specialtyId)
+          .order('title');
+
+        if (lecturesError) {
+          console.error('Error fetching lectures:', lecturesError);
+          // Don't throw for lectures error, just set empty array
+          setLectures([]);
+        } else {
+          console.log('Successfully fetched lectures:', lecturesData?.length || 0);
+          setLectures(lecturesData || []);
+          
+          // Set the first lecture as default if available
+          if (lecturesData && lecturesData.length > 0) {
+            setSelectedLectureId(lecturesData[0].id);
+          }
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching data:', error);
       toast({
         title: "Error",
         description: "Failed to load specialty information. Please try again.",
         variant: "destructive",
       });
-      // Only navigate away on serious errors
-      if (navigate && window.location.pathname.includes('/specialty/')) {
+      // Only navigate away if we're on the specialty page
+      if (window.location.pathname.includes('/specialty/')) {
         navigate('/dashboard');
       }
     } finally {
@@ -77,8 +88,6 @@ export function useSpecialty(specialtyId: string | undefined) {
   };
 
   useEffect(() => {
-    if (!specialtyId) return;
-    
     fetchSpecialtyAndLectures();
   }, [specialtyId]);
 

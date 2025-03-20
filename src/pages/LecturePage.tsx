@@ -12,6 +12,7 @@ import { LectureLoadingState } from '@/components/lectures/LectureLoadingState';
 import { EmptyLectureState } from '@/components/lectures/EmptyLectureState';
 import { useLecture } from '@/hooks/use-lecture';
 import { AnimatePresence } from 'framer-motion';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export default function LecturePage() {
   const { lectureId } = useParams<{ lectureId: string }>();
@@ -41,16 +42,18 @@ export default function LecturePage() {
             onAddQuestionClick={() => setIsAddQuestionOpen(true)}
           />
           
-          <DialogContent className="max-w-3xl">
+          <DialogContent className="max-w-3xl max-h-[90vh]">
             <DialogHeader>
               <DialogTitle>Add New Question</DialogTitle>
             </DialogHeader>
-            {lectureId && (
-              <QuestionForm 
-                lectureId={lectureId} 
-                onComplete={() => setIsAddQuestionOpen(false)}
-              />
-            )}
+            <ScrollArea className="max-h-[calc(90vh-120px)] pr-4">
+              {lectureId && (
+                <QuestionForm 
+                  lectureId={lectureId} 
+                  onComplete={() => setIsAddQuestionOpen(false)}
+                />
+              )}
+            </ScrollArea>
           </DialogContent>
         </Dialog>
 

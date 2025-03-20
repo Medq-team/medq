@@ -13,6 +13,8 @@ import SpecialtyPage from "./pages/SpecialtyPage";
 import LecturePage from "./pages/LecturePage";
 import AdminPage from "./pages/AdminPage";
 import AdminLecturePage from "./pages/AdminLecturePage";
+import ProfilePage from "./pages/ProfilePage";
+import SettingsPage from "./pages/SettingsPage";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +33,8 @@ const App = () => (
             <Route path="/lecture/:lectureId" element={<LecturePage />} />
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/admin/lecture/:lectureId" element={<AdminLecturePage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/settings" element={<SettingsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

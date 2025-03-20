@@ -2,6 +2,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { QuestionForm } from '@/components/admin/QuestionForm';
 import { Lecture } from '@/types';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface AddQuestionDialogProps {
   isOpen: boolean;
@@ -20,32 +21,34 @@ export function AddQuestionDialog({
 }: AddQuestionDialogProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-3xl max-h-[90vh]">
         <DialogHeader>
           <DialogTitle>Add New Question</DialogTitle>
         </DialogHeader>
-        {selectedLectureId && (
-          <div className="mb-4">
-            <label className="text-sm font-medium">Select Lecture:</label>
-            <select 
-              className="w-full p-2 mt-1 border rounded-md bg-background"
-              value={selectedLectureId}
-              onChange={(e) => setSelectedLectureId(e.target.value)}
-            >
-              {lectures.map((lecture) => (
-                <option key={lecture.id} value={lecture.id}>
-                  {lecture.title}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-        {selectedLectureId && (
-          <QuestionForm 
-            lectureId={selectedLectureId} 
-            onComplete={() => onOpenChange(false)}
-          />
-        )}
+        <ScrollArea className="max-h-[calc(90vh-120px)] pr-4">
+          {selectedLectureId && (
+            <div className="mb-4">
+              <label className="text-sm font-medium">Select Lecture:</label>
+              <select 
+                className="w-full p-2 mt-1 border rounded-md bg-background"
+                value={selectedLectureId}
+                onChange={(e) => setSelectedLectureId(e.target.value)}
+              >
+                {lectures.map((lecture) => (
+                  <option key={lecture.id} value={lecture.id}>
+                    {lecture.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          {selectedLectureId && (
+            <QuestionForm 
+              lectureId={selectedLectureId} 
+              onComplete={() => onOpenChange(false)}
+            />
+          )}
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );
