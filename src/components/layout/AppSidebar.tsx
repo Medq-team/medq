@@ -39,14 +39,14 @@ export function AppSidebarProvider({ children }: AppSidebarProps) {
 export function AppSidebar() {
   const { user, isAdmin } = useAuth();
   const location = useLocation();
-  const { state, setState } = useSidebar();
+  const { state, setOpen } = useSidebar();
   const { theme, setTheme } = useTheme();
   
   // Set initial sidebar state based on route
   useEffect(() => {
     const isDashboard = location.pathname === '/dashboard';
-    setState(isDashboard ? 'expanded' : 'collapsed');
-  }, [location.pathname]);
+    setOpen(isDashboard);
+  }, [location.pathname, setOpen]);
   
   const menuItems = [
     { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
