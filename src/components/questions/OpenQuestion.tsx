@@ -9,6 +9,7 @@ import { OpenQuestionActions } from './open/OpenQuestionActions';
 import { QuestionEditDialog } from './QuestionEditDialog';
 import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
+import { useTranslation } from '@/contexts/TranslationContext';
 
 interface OpenQuestionProps {
   question: Question;
@@ -17,6 +18,7 @@ interface OpenQuestionProps {
 }
 
 export function OpenQuestion({ question, onSubmit, onNext }: OpenQuestionProps) {
+  const { t } = useTranslation();
   const [answer, setAnswer] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -55,7 +57,7 @@ export function OpenQuestion({ question, onSubmit, onNext }: OpenQuestionProps) 
           className="flex items-center gap-1"
         >
           <Pencil className="h-3.5 w-3.5" />
-          Edit
+          {t('Edit')}
         </Button>
       </div>
 

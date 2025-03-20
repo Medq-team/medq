@@ -6,8 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { EyeIcon, EyeOffIcon, Loader2 } from 'lucide-react';
+import { useTranslation } from '@/contexts/TranslationContext';
 
 export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -39,7 +41,7 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
         setSuccess(true);
       }
     } catch (err) {
-      setError('An unexpected error occurred');
+      setError(t('An unexpected error occurred'));
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -50,12 +52,12 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
     return (
       <Card className="w-full max-w-md mx-auto animate-fade-in shadow-lg">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold tracking-tight text-center">Registration Successful</CardTitle>
+          <CardTitle className="text-2xl font-bold tracking-tight text-center">{t('Registration Successful')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 text-center">
-          <p>Please check your email to verify your account.</p>
+          <p>{t('Please check your email to verify your account.')}</p>
           <Button onClick={onToggleForm} className="mt-4">
-            Back to Sign In
+            {t('Back to Sign In')}
           </Button>
         </CardContent>
       </Card>
@@ -65,15 +67,15 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
   return (
     <Card className="w-full max-w-md mx-auto animate-fade-in shadow-lg">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold tracking-tight">Create an account</CardTitle>
+        <CardTitle className="text-2xl font-bold tracking-tight">{t('Create an account')}</CardTitle>
         <CardDescription>
-          Enter your details below to create your account
+          {t('Enter your details below to create your account')}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleRegister} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t('Email')}</Label>
             <Input
               id="email"
               type="email"
@@ -86,7 +88,7 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{t('Password')}</Label>
             <div className="relative">
               <Input
                 id="password"
@@ -114,7 +116,7 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm Password</Label>
+            <Label htmlFor="confirmPassword">{t('Confirm Password')}</Label>
             <Input
               id="confirmPassword"
               type={showPassword ? "text" : "password"}
@@ -135,17 +137,17 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
-                Creating account...
+                {t('Creating account...')}
               </>
             ) : (
-              "Create account"
+              t('Create account')
             )}
           </Button>
         </form>
       </CardContent>
       <CardFooter className="flex justify-center">
         <Button variant="link" className="text-sm" onClick={onToggleForm}>
-          Already have an account? Sign in
+          {t('Already have an account?')} {t('Sign in')}
         </Button>
       </CardFooter>
     </Card>
