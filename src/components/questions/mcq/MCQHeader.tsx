@@ -9,7 +9,7 @@ interface MCQHeaderProps {
 export function MCQHeader({ questionText, isSubmitted }: MCQHeaderProps) {
   return (
     <div className="space-y-2">
-      <div className="inline-flex items-center px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-200 text-sm font-medium">
+      <div className="inline-flex items-center px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 text-sm font-medium">
         <HelpCircle className="h-4 w-4 mr-1" />
         Multiple Choice
       </div>
