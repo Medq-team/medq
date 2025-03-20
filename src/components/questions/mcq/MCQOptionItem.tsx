@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useTranslation } from '@/contexts/TranslationContext';
 
 interface MCQOptionItemProps {
   option: {
@@ -31,8 +30,6 @@ export function MCQOptionItem({
   expandedExplanations,
   toggleExplanation
 }: MCQOptionItemProps) {
-  const { t } = useTranslation();
-  
   // Get expanded state from parent component
   const isExpanded = expandedExplanations.includes(option.id);
   
@@ -89,12 +86,12 @@ export function MCQOptionItem({
                   {isExpanded ? (
                     <>
                       <ChevronUp className="h-4 w-4 mr-1" />
-                      {t('Hide explanation')}
+                      Hide explanation
                     </>
                   ) : (
                     <>
                       <ChevronDown className="h-4 w-4 mr-1" />
-                      {t('Show explanation')}
+                      Show explanation
                     </>
                   )}
                 </button>

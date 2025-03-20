@@ -2,13 +2,11 @@
 import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useTranslation } from '@/contexts/TranslationContext';
 import { LoginForm } from '@/components/auth/LoginForm';
 import { RegisterForm } from '@/components/auth/RegisterForm';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AuthPage() {
-  const { t } = useTranslation();
   const { user } = useAuth();
   const [isLoginView, setIsLoginView] = useState(true);
 
@@ -30,7 +28,7 @@ export default function AuthPage() {
         className="w-full max-w-md text-center mb-8"
       >
         <h1 className="text-3xl font-bold tracking-tight text-primary">MedEd Navigator</h1>
-        <p className="text-muted-foreground mt-2">{t('Your medical education, simplified')}</p>
+        <p className="text-muted-foreground mt-2">Your medical education, simplified</p>
       </motion.div>
       
       <AnimatePresence mode="wait">

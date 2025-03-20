@@ -1,7 +1,6 @@
 
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
-import { useTranslation } from '@/contexts/TranslationContext';
 
 interface OpenQuestionActionsProps {
   isSubmitted: boolean;
@@ -16,8 +15,6 @@ export function OpenQuestionActions({
   onSubmit, 
   onNext 
 }: OpenQuestionActionsProps) {
-  const { t } = useTranslation();
-  
   return (
     <div className="flex justify-end space-x-3 pt-4">
       {!isSubmitted ? (
@@ -25,11 +22,11 @@ export function OpenQuestionActions({
           onClick={onSubmit} 
           disabled={!canSubmit}
         >
-          {t('Submit Answer')}
+          Submit Answer
         </Button>
       ) : (
         <Button onClick={onNext} className="group">
-          {t('Next Question')}
+          Next Question
           <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
         </Button>
       )}

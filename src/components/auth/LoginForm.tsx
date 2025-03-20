@@ -7,10 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { EyeIcon, EyeOffIcon, Loader2 } from 'lucide-react';
-import { useTranslation } from '@/contexts/TranslationContext';
 
 export function LoginForm({ onToggleForm }: { onToggleForm: () => void }) {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -35,7 +33,7 @@ export function LoginForm({ onToggleForm }: { onToggleForm: () => void }) {
         navigate('/dashboard');
       }
     } catch (err) {
-      setError(t('An unexpected error occurred'));
+      setError('An unexpected error occurred');
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -45,15 +43,15 @@ export function LoginForm({ onToggleForm }: { onToggleForm: () => void }) {
   return (
     <Card className="w-full max-w-md mx-auto animate-fade-in shadow-lg">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold tracking-tight">{t('Sign in')}</CardTitle>
+        <CardTitle className="text-2xl font-bold tracking-tight">Sign in</CardTitle>
         <CardDescription>
-          {t('Enter your credentials to access your account')}
+          Enter your credentials to access your account
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleLogin} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">{t('Email')}</Label>
+            <Label htmlFor="email">Email</Label>
             <Input
               id="email"
               type="email"
@@ -67,14 +65,14 @@ export function LoginForm({ onToggleForm }: { onToggleForm: () => void }) {
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="password">{t('Password')}</Label>
+              <Label htmlFor="password">Password</Label>
               <Button 
                 variant="link" 
                 className="px-0 text-xs h-auto"
                 type="button"
                 onClick={() => {/* Password reset functionality */}}
               >
-                {t('Forgot password?')}
+                Forgot password?
               </Button>
             </div>
             <div className="relative">
@@ -112,17 +110,17 @@ export function LoginForm({ onToggleForm }: { onToggleForm: () => void }) {
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
-                {t('Signing in...')}
+                Signing in...
               </>
             ) : (
-              t('Sign in')
+              "Sign in"
             )}
           </Button>
         </form>
       </CardContent>
       <CardFooter className="flex justify-center">
         <Button variant="link" className="text-sm" onClick={onToggleForm}>
-          {t("Don't have an account?")} {t('Sign up')}
+          Don't have an account? Sign up
         </Button>
       </CardFooter>
     </Card>

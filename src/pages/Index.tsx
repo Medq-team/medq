@@ -2,11 +2,9 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useTranslation } from "@/contexts/TranslationContext";
 import { SignupHelper } from "@/components/auth/SignupHelper";
 
 const Index = () => {
-  const { t } = useTranslation();
   const { user, isLoading } = useAuth();
   const navigate = useNavigate();
 
@@ -21,7 +19,7 @@ const Index = () => {
     <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold mb-4 text-foreground">MedEd Navigator</h1>
-        <p className="text-muted-foreground">{t('Your medical education platform')}</p>
+        <p className="text-muted-foreground">Your medical education platform</p>
       </div>
       
       {isLoading ? (
@@ -36,12 +34,12 @@ const Index = () => {
             <>
               <SignupHelper />
               <p className="text-center text-sm text-muted-foreground mt-4">
-                {t('Already have an account?')}{" "}
+                Already have an account?{" "}
                 <a 
                   href="/auth" 
                   className="underline underline-offset-4 hover:text-primary"
                 >
-                  {t('Sign in')}
+                  Sign in
                 </a>
               </p>
             </>

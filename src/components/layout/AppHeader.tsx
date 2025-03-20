@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { signOut } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-import { useTranslation } from '@/contexts/TranslationContext';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +13,6 @@ import {
 import { LogOut, Settings, User } from 'lucide-react';
 
 export function AppHeader() {
-  const { t } = useTranslation();
   const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
 
@@ -42,7 +40,7 @@ export function AppHeader() {
                   onClick={() => navigate('/admin')}
                   className="font-medium text-primary/90 hover:text-primary"
                 >
-                  {t('Admin Panel')}
+                  Admin Panel
                 </Button>
               )}
               
@@ -57,22 +55,22 @@ export function AppHeader() {
                   <div className="flex flex-col space-y-1 p-2">
                     <p className="text-sm font-medium leading-none">{user.email}</p>
                     <p className="text-xs leading-none text-muted-foreground">
-                      {isAdmin ? t('Administrator') : t('Student')}
+                      {isAdmin ? 'Administrator' : 'Student'}
                     </p>
                   </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => navigate('/profile')}>
                     <User className="mr-2 h-4 w-4" />
-                    <span>{t('Profile')}</span>
+                    <span>Profile</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/settings')}>
                     <Settings className="mr-2 h-4 w-4" />
-                    <span>{t('Settings')}</span>
+                    <span>Settings</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut className="mr-2 h-4 w-4" />
-                    <span>{t('Log out')}</span>
+                    <span>Log out</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

@@ -1,6 +1,5 @@
 
 import { motion } from 'framer-motion';
-import { useTranslation } from '@/contexts/TranslationContext';
 
 interface MCQExplanationProps {
   courseReminder?: string;
@@ -8,8 +7,6 @@ interface MCQExplanationProps {
 }
 
 export function MCQExplanation({ courseReminder, explanation }: MCQExplanationProps) {
-  const { t } = useTranslation();
-  
   if (!courseReminder && !explanation) return null;
   
   return (
@@ -20,7 +17,7 @@ export function MCQExplanation({ courseReminder, explanation }: MCQExplanationPr
     >          
       {courseReminder && (
         <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-950/30 text-blue-800 dark:text-blue-300">
-          <h4 className="font-medium mb-1">{t('Rappel du cours:')}</h4>
+          <h4 className="font-medium mb-1">Rappel du cours:</h4>
           <p className="text-blue-700 dark:text-blue-300">{courseReminder}</p>
         </div>
       )}
@@ -28,7 +25,7 @@ export function MCQExplanation({ courseReminder, explanation }: MCQExplanationPr
       {/* Fallback to explanation field for backward compatibility */}
       {!courseReminder && explanation && (
         <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-950/30 text-blue-800 dark:text-blue-300">
-          <h4 className="font-medium mb-1">{t('Rappel du cours:')}</h4>
+          <h4 className="font-medium mb-1">Rappel du cours:</h4>
           <p className="text-blue-700 dark:text-blue-300">{explanation}</p>
         </div>
       )}
