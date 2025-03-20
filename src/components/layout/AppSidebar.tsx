@@ -15,9 +15,11 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   SidebarTrigger,
+  useSidebar
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { Home, Book, Settings, UserCircle, LogOut } from 'lucide-react';
+import { Home, Book, Settings, UserCircle, LogOut, LayoutDashboard, BookOpen, Users } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface AppSidebarProps {
   children: React.ReactNode;
@@ -36,15 +38,16 @@ export function AppSidebarProvider({ children }: AppSidebarProps) {
 export function AppSidebar() {
   const { user, isAdmin } = useAuth();
   const location = useLocation();
+  const { state } = useSidebar();
   
   const menuItems = [
-    { label: 'Dashboard', icon: Home, href: '/dashboard' },
+    { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
     { label: 'Profile', icon: UserCircle, href: '/profile' },
     { label: 'Settings', icon: Settings, href: '/settings' },
   ];
 
   if (isAdmin) {
-    menuItems.push({ label: 'Admin', icon: Book, href: '/admin' });
+    menuItems.push({ label: 'Admin', icon: Users, href: '/admin' });
   }
 
   const handleSignOut = async () => {
@@ -54,55 +57,59 @@ export function AppSidebar() {
   return (
     <Sidebar className="border-r" collapsible="icon">
       <SidebarHeader className="flex h-14 items-center px-4 border-b">
-        <Link to="/dashboard" className="flex items-center font-semibold">
-          MedQ
+        <Link to="/dashboard" className="flex items-center font-semibold text-primary">
+          MedEd Navigator
         </Link>
         <SidebarTrigger className="ml-auto" />
       </SidebarHeader>
       
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.href}>
+        <ScrollArea className="h-[calc(100vh-8rem)]">
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {menuItems.map((item) => (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={location.pathname === item.href}
+                      tooltip={item.label}
+                    >
+                      <Link to={item.href} className="transition-colors">
+                        <item.icon className="text-foreground" />
+                        <span>{item.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+                <SidebarMenuItem>
                   <SidebarMenuButton
                     asChild
-                    isActive={location.pathname === item.href}
-                    tooltip={item.label}
+                    tooltip="Sign Out"
+                    className="text-destructive"
                   >
-                    <Link to={item.href}>
-                      <item.icon />
-                      <span>{item.label}</span>
-                    </Link>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start px-2"
+                      onClick={handleSignOut}
+                    >
+                      <LogOut />
+                      <span>Sign out</span>
+                    </Button>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-              ))}
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  tooltip="Sign Out"
-                  className="text-destructive"
-                >
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start px-2"
-                    onClick={handleSignOut}
-                  >
-                    <LogOut />
-                    <span>Sign out</span>
-                  </Button>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </ScrollArea>
       </SidebarContent>
       
-      <SidebarFooter className="border-t py-4">
-        <p className="text-xs text-center text-muted-foreground">
-          {user?.email}
-        </p>
+      <SidebarFooter className="border-t py-2 px-2">
+        {user?.email && (
+          <div className={`text-xs text-muted-foreground ${state === 'collapsed' ? 'hidden' : 'block'} truncate px-2`}>
+            {user.email}
+          </div>
+        )}
       </SidebarFooter>
     </Sidebar>
   );

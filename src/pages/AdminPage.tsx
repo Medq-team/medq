@@ -1,16 +1,15 @@
+
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Specialty, Lecture } from '@/types';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
-import { BookOpen, PlusCircle, Users, FileText } from 'lucide-react';
-import { SpecialtyItem } from '@/components/admin/SpecialtyItem';
-import { LectureItem } from '@/components/admin/LectureItem';
+import { AdminStats } from '@/components/admin/AdminStats';
+import { SpecialtiesTab } from '@/components/admin/SpecialtiesTab';
+import { LecturesTab } from '@/components/admin/LecturesTab';
 
 export default function AdminPage() {
   const { isAdmin } = useAuth();
@@ -112,55 +111,7 @@ export default function AdminPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">
-                Total Specialties
-              </CardTitle>
-              <BookOpen className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{statsData.specialtiesCount}</div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">
-                Total Lectures
-              </CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{statsData.lecturesCount}</div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">
-                Total Questions
-              </CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{statsData.questionsCount}</div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">
-                Registered Users
-              </CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{statsData.usersCount}</div>
-            </CardContent>
-          </Card>
-        </div>
+        <AdminStats {...statsData} />
 
         <Tabs defaultValue="specialties" className="w-full">
           <TabsList className="mb-4">
@@ -168,82 +119,20 @@ export default function AdminPage() {
             <TabsTrigger value="lectures">Lectures</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="specialties" className="space-y-4 animate-fade-in">
-            <div className="flex justify-between">
-              <h3 className="text-lg font-semibold">Manage Specialties</h3>
-              <Button onClick={() => navigate('/admin/specialty/new')}>
-                <PlusCircle className="h-4 w-4 mr-2" />
-                Add Specialty
-              </Button>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {isLoading ? (
-                Array(4).fill(0).map((_, i) => (
-                  <Card key={i} className="animate-pulse">
-                    <CardHeader className="pb-2">
-                      <div className="h-5 w-3/4 bg-muted rounded mb-2"></div>
-                      <div className="h-3 w-full bg-muted rounded"></div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="h-9 w-24 bg-muted rounded"></div>
-                    </CardContent>
-                  </Card>
-                ))
-              ) : specialties.length === 0 ? (
-                <div className="col-span-2 flex flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
-                  <h3 className="text-lg font-semibold">No specialties available</h3>
-                  <p className="text-muted-foreground mt-2">
-                    Click "Add Specialty" to create your first specialty.
-                  </p>
-                </div>
-              ) : specialties.map((specialty) => (
-                <SpecialtyItem
-                  key={specialty.id}
-                  specialty={specialty}
-                  onDelete={handleDeleteSpecialty}
-                />
-              ))}
-            </div>
+          <TabsContent value="specialties">
+            <SpecialtiesTab 
+              specialties={specialties} 
+              isLoading={isLoading} 
+              onDeleteSpecialty={handleDeleteSpecialty} 
+            />
           </TabsContent>
           
-          <TabsContent value="lectures" className="space-y-4 animate-fade-in">
-            <div className="flex justify-between">
-              <h3 className="text-lg font-semibold">Manage Lectures</h3>
-              <Button onClick={() => navigate('/admin/lecture/new')}>
-                <PlusCircle className="h-4 w-4 mr-2" />
-                Add Lecture
-              </Button>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {isLoading ? (
-                Array(4).fill(0).map((_, i) => (
-                  <Card key={i} className="animate-pulse">
-                    <CardHeader className="pb-2">
-                      <div className="h-5 w-3/4 bg-muted rounded mb-2"></div>
-                      <div className="h-3 w-full bg-muted rounded"></div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="h-9 w-32 bg-muted rounded"></div>
-                    </CardContent>
-                  </Card>
-                ))
-              ) : lectures.length === 0 ? (
-                <div className="col-span-2 flex flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
-                  <h3 className="text-lg font-semibold">No lectures available</h3>
-                  <p className="text-muted-foreground mt-2">
-                    Click "Add Lecture" to create your first lecture.
-                  </p>
-                </div>
-              ) : lectures.map((lecture) => (
-                <LectureItem
-                  key={lecture.id}
-                  lecture={lecture}
-                  onDelete={handleDeleteLecture}
-                />
-              ))}
-            </div>
+          <TabsContent value="lectures">
+            <LecturesTab 
+              lectures={lectures} 
+              isLoading={isLoading} 
+              onDeleteLecture={handleDeleteLecture} 
+            />
           </TabsContent>
         </Tabs>
       </div>

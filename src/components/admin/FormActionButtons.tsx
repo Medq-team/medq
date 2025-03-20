@@ -1,5 +1,6 @@
 
 import { Button } from '@/components/ui/button';
+import { Save, X } from 'lucide-react';
 
 interface FormActionButtonsProps {
   isLoading: boolean;
@@ -14,10 +15,17 @@ export function FormActionButtons({ isLoading, onCancel, isEdit }: FormActionBut
         type="button"
         variant="outline"
         onClick={onCancel}
+        className="transition-all"
       >
+        <X className="h-4 w-4 mr-2" />
         Cancel
       </Button>
-      <Button type="submit" disabled={isLoading}>
+      <Button 
+        type="submit" 
+        disabled={isLoading}
+        className="transition-all"
+      >
+        <Save className="h-4 w-4 mr-2" />
         {isLoading ? "Saving..." : (isEdit ? "Update Question" : "Create Question")}
       </Button>
     </div>

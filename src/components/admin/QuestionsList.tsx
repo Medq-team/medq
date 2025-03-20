@@ -4,6 +4,7 @@ import { QuestionItem } from './QuestionItem';
 import { EmptyQuestionsState } from './EmptyQuestionsState';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface QuestionsListProps {
   questions: Question[];
@@ -24,7 +25,7 @@ export function QuestionsList({
   if (isLoading) {
     return (
       <div className="flex justify-center items-center p-8">
-        <div className="animate-pulse space-y-4">
+        <div className="animate-pulse space-y-4 w-full">
           <div className="h-12 bg-muted rounded-md w-3/4 mx-auto"></div>
           <div className="h-24 bg-muted rounded-md"></div>
           <div className="h-24 bg-muted rounded-md"></div>
@@ -42,22 +43,24 @@ export function QuestionsList({
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex justify-end mb-4">
-        <Button onClick={onAddQuestion} className="btn-hover">
+        <Button onClick={onAddQuestion} className="btn-hover transition-all">
           <PlusCircle className="h-4 w-4 mr-2" />
           Add Question
         </Button>
       </div>
       
-      <div className="grid grid-cols-1 gap-4">
-        {questions.map((question) => (
-          <QuestionItem 
-            key={question.id}
-            question={question}
-            onEdit={onEdit}
-            onDelete={onDelete}
-          />
-        ))}
-      </div>
+      <ScrollArea className="max-h-[calc(100vh-250px)]">
+        <div className="grid grid-cols-1 gap-4 pr-4">
+          {questions.map((question) => (
+            <QuestionItem 
+              key={question.id}
+              question={question}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
+          ))}
+        </div>
+      </ScrollArea>
     </div>
   );
 }

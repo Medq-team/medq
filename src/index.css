@@ -108,6 +108,28 @@
   .glass-panel {
     @apply bg-white/80 dark:bg-black/20 backdrop-blur-sm border border-white/20 shadow-sm;
   }
+  
+  /* Enhanced button styles */
+  .button-primary {
+    @apply bg-primary text-white px-4 py-2 rounded-md transition-all 
+    hover:bg-primary/90 active:scale-95 shadow-sm hover:shadow;
+  }
+  
+  .button-secondary {
+    @apply bg-secondary text-secondary-foreground px-4 py-2 rounded-md 
+    transition-all hover:bg-secondary/90 active:scale-95 shadow-sm hover:shadow;
+  }
+  
+  .button-danger {
+    @apply bg-destructive text-destructive-foreground px-4 py-2 rounded-md 
+    transition-all hover:bg-destructive/90 active:scale-95 shadow-sm hover:shadow;
+  }
+  
+  /* Card styles */
+  .card-interactive {
+    @apply transition-all duration-200 hover:shadow-md hover:-translate-y-0.5
+    active:translate-y-0 active:shadow-sm rounded-lg border p-4;
+  }
 }
 
 /* Page transitions */
@@ -229,3 +251,19 @@
 .staggered-item:nth-child(8) { animation: fade-in-up 0.3s ease-out 0.45s forwards; }
 .staggered-item:nth-child(9) { animation: fade-in-up 0.3s ease-out 0.5s forwards; }
 .staggered-item:nth-child(10) { animation: fade-in-up 0.3s ease-out 0.55s forwards; }
+
+/* Interactive elements */
+.hover-elevate {
+  @apply transition-all duration-200;
+}
+.hover-elevate:hover {
+  @apply -translate-y-1 shadow-md;
+}
+.hover-elevate:active {
+  @apply translate-y-0 shadow-sm;
+}
+
+/* Focus styles */
+.focus-ring {
+  @apply outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-background;
+}
