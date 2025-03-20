@@ -8,10 +8,12 @@
  * - Mobile detection and responsive behavior
  * - Keyboard shortcut support (Ctrl/Cmd + B)
  * - Cookie persistence for sidebar preferences
+ * - Route-based default state behavior
  */
 
 import * as React from "react"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { useLocation } from "react-router-dom"
 
 const SIDEBAR_COOKIE_NAME = "sidebar:state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7  // 7 days
@@ -46,6 +48,15 @@ export function useSidebar() {
   return context
 }
 
+/**
+ * Determines the default open state of the sidebar based on the current route
+ * 
+ * Dashboard opens expanded, all other routes start collapsed
+ */
+const getDefaultOpenState = (path: string): boolean => {
+  return path === '/dashboard';
+}
+
 interface SidebarProviderProps {
   children: React.ReactNode
   defaultOpen?: boolean           // Default state of the sidebar (open/closed)
@@ -64,7 +75,7 @@ export const SidebarProvider = React.forwardRef<
 >(
   (
     {
-      defaultOpen = true,
+      defaultOpen,
       open: openProp,
       onOpenChange: setOpenProp,
       className,
@@ -75,11 +86,17 @@ export const SidebarProvider = React.forwardRef<
     ref
   ) => {
     const isMobile = useIsMobile()
+    const location = useLocation()
     const [openMobile, setOpenMobile] = React.useState(false)
+
+    // Get the default open state based on the current route
+    const routeBasedDefaultOpen = React.useMemo(() => {
+      return defaultOpen !== undefined ? defaultOpen : getDefaultOpenState(location.pathname)
+    }, [location.pathname, defaultOpen])
 
     // This is the internal state of the sidebar.
     // We use openProp and setOpenProp for control from outside the component.
-    const [_open, _setOpen] = React.useState(defaultOpen)
+    const [_open, _setOpen] = React.useState(routeBasedDefaultOpen)
     const open = openProp ?? _open
     const setOpen = React.useCallback(
       (value: boolean | ((value: boolean) => boolean)) => {
@@ -118,6 +135,13 @@ export const SidebarProvider = React.forwardRef<
       window.addEventListener("keydown", handleKeyDown)
       return () => window.removeEventListener("keydown", handleKeyDown)
     }, [toggleSidebar])
+
+    // Update sidebar state when route changes
+    React.useEffect(() => {
+      if (openProp === undefined) {
+        _setOpen(getDefaultOpenState(location.pathname))
+      }
+    }, [location.pathname, openProp])
 
     // We add a state so that we can do data-state="expanded" or "collapsed".
     // This makes it easier to style the sidebar with Tailwind classes.

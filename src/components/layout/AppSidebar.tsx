@@ -18,8 +18,9 @@ import {
   useSidebar
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { Home, Book, Settings, UserCircle, LogOut, LayoutDashboard, BookOpen, Users } from 'lucide-react';
+import { Home, Book, Settings, UserCircle, LogOut, LayoutDashboard, Users, Moon, Sun } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface AppSidebarProps {
   children: React.ReactNode;
@@ -27,7 +28,7 @@ interface AppSidebarProps {
 
 export function AppSidebarProvider({ children }: AppSidebarProps) {
   return (
-    <SidebarProvider defaultOpen={true} className="w-full">
+    <SidebarProvider className="w-full">
       <div className="flex min-h-screen w-full">
         {children}
       </div>
@@ -39,6 +40,7 @@ export function AppSidebar() {
   const { user, isAdmin } = useAuth();
   const location = useLocation();
   const { state } = useSidebar();
+  const { theme, setTheme } = useTheme();
   
   const menuItems = [
     { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
@@ -54,9 +56,13 @@ export function AppSidebar() {
     await signOut();
   };
 
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
+
   return (
     <Sidebar className="border-r" collapsible="icon">
-      <SidebarHeader className="flex h-14 items-center px-4 border-b">
+      <SidebarHeader className="flex h-14 items-center px-4 border-b relative">
         <Link to="/dashboard" className="flex items-center font-semibold text-primary">
           MedEd Navigator
         </Link>
@@ -82,6 +88,24 @@ export function AppSidebar() {
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
+                
+                {/* Night Mode Toggle */}
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    tooltip={theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                  >
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start px-2"
+                      onClick={toggleTheme}
+                    >
+                      {theme === 'dark' ? <Sun /> : <Moon />}
+                      <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+                    </Button>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     asChild

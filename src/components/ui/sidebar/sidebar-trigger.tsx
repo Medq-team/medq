@@ -7,7 +7,7 @@
  */
 
 import * as React from "react"
-import { PanelLeft } from "lucide-react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { useSidebar } from "./sidebar-context"
@@ -16,13 +16,13 @@ import { useSidebar } from "./sidebar-context"
  * Sidebar trigger button
  * 
  * Renders a button that toggles the sidebar state when clicked.
- * Uses the PanelLeft icon by default.
+ * Uses direction-appropriate chevron icons based on sidebar state.
  */
 export const SidebarTrigger = React.forwardRef<
   React.ElementRef<typeof Button>,
   React.ComponentProps<typeof Button>
 >(({ className, onClick, ...props }, ref) => {
-  const { toggleSidebar } = useSidebar()
+  const { toggleSidebar, state } = useSidebar()
 
   return (
     <Button
@@ -30,15 +30,17 @@ export const SidebarTrigger = React.forwardRef<
       data-sidebar="trigger"
       variant="ghost"
       size="icon"
-      className={cn("h-7 w-7", className)}
+      className={cn("h-7 w-7 z-50 absolute right-1 top-3", className)}
       onClick={(event) => {
         onClick?.(event)
         toggleSidebar()
       }}
       {...props}
     >
-      <PanelLeft />
-      <span className="sr-only">Toggle Sidebar</span>
+      {state === "expanded" ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+      <span className="sr-only">
+        {state === "expanded" ? "Collapse Sidebar" : "Expand Sidebar"}
+      </span>
     </Button>
   )
 })
