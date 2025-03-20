@@ -24,6 +24,10 @@ export function QuestionEditDialog({
     setQuestionText,
     courseReminder,
     setCourseReminder,
+    questionNumber,
+    setQuestionNumber,
+    session,
+    setSession,
     options,
     correctAnswers,
     updateOptionText,
@@ -52,6 +56,10 @@ export function QuestionEditDialog({
             setQuestionText={setQuestionText}
             courseReminder={courseReminder}
             setCourseReminder={setCourseReminder}
+            questionNumber={questionNumber}
+            setQuestionNumber={setQuestionNumber}
+            session={session}
+            setSession={setSession}
             options={options}
             updateOptionText={updateOptionText}
             updateOptionExplanation={updateOptionExplanation}
