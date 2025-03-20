@@ -40,9 +40,9 @@ export function QuestionsList({
 
   // Render questions list
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       <div className="flex justify-end mb-4">
-        <Button onClick={onAddQuestion}>
+        <Button onClick={onAddQuestion} className="btn-hover">
           <PlusCircle className="h-4 w-4 mr-2" />
           Add Question
         </Button>

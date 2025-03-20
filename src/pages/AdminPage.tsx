@@ -1,15 +1,16 @@
-
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Specialty, Lecture } from '@/types';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { BookOpen, PlusCircle, Users, FileText } from 'lucide-react';
+import { SpecialtyItem } from '@/components/admin/SpecialtyItem';
+import { LectureItem } from '@/components/admin/LectureItem';
 
 export default function AdminPage() {
   const { isAdmin } = useAuth();
@@ -24,69 +25,77 @@ export default function AdminPage() {
     usersCount: 0
   });
 
+  const fetchAdminData = async () => {
+    setIsLoading(true);
+    
+    try {
+      // Fetch specialties
+      const { data: specialtiesData, error: specialtiesError } = await supabase
+        .from('specialties')
+        .select('*')
+        .order('name');
+
+      if (specialtiesError) throw specialtiesError;
+      setSpecialties(specialtiesData || []);
+
+      // Fetch lectures
+      const { data: lecturesData, error: lecturesError } = await supabase
+        .from('lectures')
+        .select('*')
+        .order('title');
+
+      if (lecturesError) throw lecturesError;
+      setLectures(lecturesData || []);
+
+      // Fetch counts for stats
+      const [specialtiesCount, lecturesCount, questionsCount, usersCount] = await Promise.all([
+        supabase.from('specialties').select('id', { count: 'exact', head: true }),
+        supabase.from('lectures').select('id', { count: 'exact', head: true }),
+        supabase.from('questions').select('id', { count: 'exact', head: true }),
+        supabase.from('profiles').select('id', { count: 'exact', head: true })
+      ]);
+
+      setStatsData({
+        specialtiesCount: specialtiesCount.count || 0,
+        lecturesCount: lecturesCount.count || 0,
+        questionsCount: questionsCount.count || 0,
+        usersCount: usersCount.count || 0
+      });
+    } catch (error) {
+      console.error('Error fetching admin data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load admin data. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!isAdmin) {
       navigate('/dashboard');
       return;
     }
 
-    async function fetchAdminData() {
-      setIsLoading(true);
-      
-      try {
-        // Fetch specialties
-        const { data: specialtiesData, error: specialtiesError } = await supabase
-          .from('specialties')
-          .select('*')
-          .order('name');
-
-        if (specialtiesError) throw specialtiesError;
-        setSpecialties(specialtiesData || []);
-
-        // Fetch lectures
-        const { data: lecturesData, error: lecturesError } = await supabase
-          .from('lectures')
-          .select('*')
-          .order('title');
-
-        if (lecturesError) throw lecturesError;
-        setLectures(lecturesData || []);
-
-        // Fetch counts for stats
-        const [specialtiesCount, lecturesCount, questionsCount, usersCount] = await Promise.all([
-          supabase.from('specialties').select('id', { count: 'exact', head: true }),
-          supabase.from('lectures').select('id', { count: 'exact', head: true }),
-          supabase.from('questions').select('id', { count: 'exact', head: true }),
-          supabase.from('profiles').select('id', { count: 'exact', head: true })
-        ]);
-
-        setStatsData({
-          specialtiesCount: specialtiesCount.count || 0,
-          lecturesCount: lecturesCount.count || 0,
-          questionsCount: questionsCount.count || 0,
-          usersCount: usersCount.count || 0
-        });
-      } catch (error) {
-        console.error('Error fetching admin data:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load admin data. Please try again.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
     fetchAdminData();
   }, [isAdmin, navigate]);
 
-  const goToSpecialty = (specialtyId: string) => {
-    navigate(`/admin/specialty/${specialtyId}`);
+  const handleDeleteSpecialty = (specialtyId: string) => {
+    setSpecialties(specialties.filter(s => s.id !== specialtyId));
+    setStatsData(prev => ({
+      ...prev,
+      specialtiesCount: prev.specialtiesCount - 1
+    }));
   };
 
-  const goToLecture = (lectureId: string) => {
-    navigate(`/admin/lecture/${lectureId}`);
+  const handleDeleteLecture = (lectureId: string) => {
+    setLectures(lectures.filter(l => l.id !== lectureId));
+    setStatsData(prev => ({
+      ...prev,
+      lecturesCount: prev.lecturesCount - 1
+    }));
   };
 
   if (!isAdmin) {
@@ -95,7 +104,7 @@ export default function AdminPage() {
 
   return (
     <AppLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 animate-fade-in">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Admin Dashboard</h2>
           <p className="text-muted-foreground">
@@ -159,7 +168,7 @@ export default function AdminPage() {
             <TabsTrigger value="lectures">Lectures</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="specialties" className="space-y-4">
+          <TabsContent value="specialties" className="space-y-4 animate-fade-in">
             <div className="flex justify-between">
               <h3 className="text-lg font-semibold">Manage Specialties</h3>
               <Button onClick={() => navigate('/admin/specialty/new')}>
@@ -169,29 +178,36 @@ export default function AdminPage() {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {specialties.map((specialty) => (
-                <Card key={specialty.id} className="cursor-pointer hover:shadow-md transition-shadow">
-                  <CardHeader className="pb-2" onClick={() => goToSpecialty(specialty.id)}>
-                    <CardTitle>{specialty.name}</CardTitle>
-                    <CardDescription className="line-clamp-2">
-                      {specialty.description || 'No description available'}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => goToSpecialty(specialty.id)}
-                    >
-                      Manage
-                    </Button>
-                  </CardContent>
-                </Card>
+              {isLoading ? (
+                Array(4).fill(0).map((_, i) => (
+                  <Card key={i} className="animate-pulse">
+                    <CardHeader className="pb-2">
+                      <div className="h-5 w-3/4 bg-muted rounded mb-2"></div>
+                      <div className="h-3 w-full bg-muted rounded"></div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-9 w-24 bg-muted rounded"></div>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : specialties.length === 0 ? (
+                <div className="col-span-2 flex flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
+                  <h3 className="text-lg font-semibold">No specialties available</h3>
+                  <p className="text-muted-foreground mt-2">
+                    Click "Add Specialty" to create your first specialty.
+                  </p>
+                </div>
+              ) : specialties.map((specialty) => (
+                <SpecialtyItem
+                  key={specialty.id}
+                  specialty={specialty}
+                  onDelete={handleDeleteSpecialty}
+                />
               ))}
             </div>
           </TabsContent>
           
-          <TabsContent value="lectures" className="space-y-4">
+          <TabsContent value="lectures" className="space-y-4 animate-fade-in">
             <div className="flex justify-between">
               <h3 className="text-lg font-semibold">Manage Lectures</h3>
               <Button onClick={() => navigate('/admin/lecture/new')}>
@@ -201,24 +217,31 @@ export default function AdminPage() {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {lectures.map((lecture) => (
-                <Card key={lecture.id} className="cursor-pointer hover:shadow-md transition-shadow">
-                  <CardHeader className="pb-2" onClick={() => goToLecture(lecture.id)}>
-                    <CardTitle>{lecture.title}</CardTitle>
-                    <CardDescription className="line-clamp-2">
-                      {lecture.description || 'No description available'}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => goToLecture(lecture.id)}
-                    >
-                      Manage Questions
-                    </Button>
-                  </CardContent>
-                </Card>
+              {isLoading ? (
+                Array(4).fill(0).map((_, i) => (
+                  <Card key={i} className="animate-pulse">
+                    <CardHeader className="pb-2">
+                      <div className="h-5 w-3/4 bg-muted rounded mb-2"></div>
+                      <div className="h-3 w-full bg-muted rounded"></div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-9 w-32 bg-muted rounded"></div>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : lectures.length === 0 ? (
+                <div className="col-span-2 flex flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
+                  <h3 className="text-lg font-semibold">No lectures available</h3>
+                  <p className="text-muted-foreground mt-2">
+                    Click "Add Lecture" to create your first lecture.
+                  </p>
+                </div>
+              ) : lectures.map((lecture) => (
+                <LectureItem
+                  key={lecture.id}
+                  lecture={lecture}
+                  onDelete={handleDeleteLecture}
+                />
               ))}
             </div>
           </TabsContent>
