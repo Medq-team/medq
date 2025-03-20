@@ -26,6 +26,10 @@ export function QuestionForm({ lectureId, editQuestionId, onComplete }: Question
     setQuestionText,
     courseReminder,
     setCourseReminder,
+    questionNumber,
+    setQuestionNumber,
+    session,
+    setSession,
     options,
     setOptions,
     correctAnswers,
@@ -56,6 +60,8 @@ export function QuestionForm({ lectureId, editQuestionId, onComplete }: Question
           questionType={questionType}
           questionText={questionText}
           courseReminder={courseReminder}
+          questionNumber={questionNumber}
+          session={session}
           options={options}
           correctAnswers={correctAnswers}
           setIsLoading={setIsLoading}
@@ -75,6 +81,10 @@ export function QuestionForm({ lectureId, editQuestionId, onComplete }: Question
             courseReminder={courseReminder}
             setCourseReminder={setCourseReminder}
             questionType={questionType}
+            questionNumber={questionNumber}
+            setQuestionNumber={setQuestionNumber}
+            session={session}
+            setSession={setSession}
           />
           
           {questionType === 'mcq' && (

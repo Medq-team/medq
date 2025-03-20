@@ -42,7 +42,11 @@ export function OpenQuestion({ question, onSubmit, onNext }: OpenQuestionProps) 
       className="space-y-6"
     >
       <div className="flex justify-between items-start">
-        <OpenQuestionHeader questionText={question.text} />
+        <OpenQuestionHeader 
+          questionText={question.text} 
+          questionNumber={question.number}
+          session={question.session}
+        />
         
         <Button 
           variant="outline" 

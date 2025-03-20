@@ -38,17 +38,29 @@ export function QuestionItem({ question, onEdit, onDelete }: QuestionItemProps) 
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div>
-            <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-muted mb-2">
-              {question.type === 'mcq' ? (
-                <>
-                  <HelpCircle className="h-3 w-3 mr-1" />
-                  Multiple Choice
-                </>
-              ) : (
-                <>
-                  <PenLine className="h-3 w-3 mr-1" />
-                  Open Question
-                </>
+            <div className="flex items-center space-x-2 mb-2">
+              <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-muted">
+                {question.type === 'mcq' ? (
+                  <>
+                    <HelpCircle className="h-3 w-3 mr-1" />
+                    Multiple Choice
+                  </>
+                ) : (
+                  <>
+                    <PenLine className="h-3 w-3 mr-1" />
+                    Open Question
+                  </>
+                )}
+              </div>
+              {question.number !== null && question.number !== undefined && (
+                <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800">
+                  #{question.number}
+                </div>
+              )}
+              {question.session && (
+                <div className="text-xs text-muted-foreground">
+                  {question.session}
+                </div>
               )}
             </div>
             <CardTitle className="text-base">{question.text}</CardTitle>

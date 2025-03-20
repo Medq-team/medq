@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Question } from '@/types';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -95,6 +94,8 @@ export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
         <MCQHeader 
           questionText={question.text}
           isSubmitted={submitted}
+          questionNumber={question.number}
+          session={question.session}
         />
         
         <Button 

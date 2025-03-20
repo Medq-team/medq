@@ -1,4 +1,3 @@
-
 export type User = {
   id: string;
   email: string;
@@ -38,6 +37,8 @@ export type Question = {
   correctAnswers?: string[]; // Keep for backward compatibility
   explanation?: string; // Keep for backward compatibility
   course_reminder?: string; // Field for "Rappel du cours"
+  number?: number; // Question number
+  session?: string; // Exam session (e.g., "Session 2022")
 };
 
 export type Answer = {

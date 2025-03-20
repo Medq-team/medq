@@ -73,7 +73,9 @@ export type Database = {
           explanation: string | null
           id: string
           lecture_id: string
+          number: number | null
           options: Json | null
+          session: string | null
           text: string
           type: string
         }
@@ -84,7 +86,9 @@ export type Database = {
           explanation?: string | null
           id?: string
           lecture_id: string
+          number?: number | null
           options?: Json | null
+          session?: string | null
           text: string
           type: string
         }
@@ -95,7 +99,9 @@ export type Database = {
           explanation?: string | null
           id?: string
           lecture_id?: string
+          number?: number | null
           options?: Json | null
+          session?: string | null
           text?: string
           type?: string
         }

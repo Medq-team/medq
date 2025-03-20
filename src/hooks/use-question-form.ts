@@ -15,6 +15,8 @@ export function useQuestionForm({ lectureId, editQuestionId, onComplete }: UseQu
   const [questionType, setQuestionType] = useState<QuestionType>('mcq');
   const [questionText, setQuestionText] = useState('');
   const [courseReminder, setCourseReminder] = useState('');
+  const [questionNumber, setQuestionNumber] = useState<number | undefined>(undefined);
+  const [session, setSession] = useState('');
   const [options, setOptions] = useState<Option[]>([
     { id: '1', text: '' },
     { id: '2', text: '' },
@@ -41,6 +43,8 @@ export function useQuestionForm({ lectureId, editQuestionId, onComplete }: UseQu
         setQuestionType(data.type);
         setQuestionText(data.text);
         setCourseReminder(data.course_reminder || data.explanation || '');
+        setQuestionNumber(data.number);
+        setSession(data.session || '');
         
         if (data.type === 'mcq' && data.options) {
           setOptions(data.options);
@@ -85,6 +89,10 @@ export function useQuestionForm({ lectureId, editQuestionId, onComplete }: UseQu
     setQuestionText,
     courseReminder,
     setCourseReminder,
+    questionNumber,
+    setQuestionNumber,
+    session,
+    setSession,
     options,
     setOptions,
     correctAnswers,

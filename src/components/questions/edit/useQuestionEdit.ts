@@ -20,6 +20,8 @@ export function useQuestionEdit({
   const [isLoading, setIsLoading] = useState(false);
   const [questionText, setQuestionText] = useState('');
   const [courseReminder, setCourseReminder] = useState('');
+  const [questionNumber, setQuestionNumber] = useState<number | undefined>(undefined);
+  const [session, setSession] = useState('');
   const [options, setOptions] = useState<{ id: string; text: string; explanation?: string }[]>([]);
   const [correctAnswers, setCorrectAnswers] = useState<string[]>([]);
   const [answerText, setAnswerText] = useState('');
@@ -28,6 +30,8 @@ export function useQuestionEdit({
     if (question) {
       setQuestionText(question.text || '');
       setCourseReminder(question.course_reminder || question.explanation || '');
+      setQuestionNumber(question.number);
+      setSession(question.session || '');
       
       if (question.type === 'mcq' && question.options) {
         setOptions(question.options);
@@ -58,6 +62,8 @@ export function useQuestionEdit({
       let updateData: any = {
         text: questionText,
         course_reminder: courseReminder,
+        number: questionNumber,
+        session: session,
       };
       
       if (question.type === 'mcq') {
@@ -118,6 +124,10 @@ export function useQuestionEdit({
     setQuestionText,
     courseReminder,
     setCourseReminder,
+    questionNumber,
+    setQuestionNumber,
+    session,
+    setSession,
     options,
     correctAnswers,
     updateOptionText,

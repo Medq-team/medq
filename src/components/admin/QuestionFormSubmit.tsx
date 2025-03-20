@@ -13,6 +13,8 @@ interface QuestionFormSubmitProps {
   questionType: QuestionType;
   questionText: string;
   courseReminder: string;
+  questionNumber: number | undefined;
+  session: string;
   options: { id: string; text: string; explanation?: string }[];
   correctAnswers: string[];
   setIsLoading: (loading: boolean) => void;
@@ -26,6 +28,8 @@ export function QuestionFormSubmit({
   questionType,
   questionText,
   courseReminder,
+  questionNumber,
+  session,
   options,
   correctAnswers,
   setIsLoading,
@@ -67,6 +71,8 @@ export function QuestionFormSubmit({
         correct_answers: questionType === 'mcq' ? correctAnswers : [],
         course_reminder: courseReminder,
         explanation: null, // Set old field to null when migrating to new field
+        number: questionNumber,
+        session: session,
       };
       
       let result;

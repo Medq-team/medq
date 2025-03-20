@@ -12,6 +12,10 @@ interface QuestionEditContentProps {
   setQuestionText: (text: string) => void;
   courseReminder: string;
   setCourseReminder: (text: string) => void;
+  questionNumber: number | undefined;
+  setQuestionNumber: (number: number | undefined) => void;
+  session: string;
+  setSession: (session: string) => void;
   options: { id: string; text: string; explanation?: string }[];
   updateOptionText: (id: string, text: string) => void;
   updateOptionExplanation: (id: string, explanation: string) => void;
@@ -28,6 +32,10 @@ export function QuestionEditContent({
   setQuestionText,
   courseReminder,
   setCourseReminder,
+  questionNumber,
+  setQuestionNumber,
+  session,
+  setSession,
   options,
   updateOptionText,
   updateOptionExplanation,
@@ -56,6 +64,10 @@ export function QuestionEditContent({
             courseReminder={courseReminder}
             setCourseReminder={setCourseReminder}
             questionType={question.type}
+            questionNumber={questionNumber}
+            setQuestionNumber={setQuestionNumber}
+            session={session}
+            setSession={setSession}
           />
         </TabsContent>
         
