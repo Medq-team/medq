@@ -63,9 +63,6 @@ export function AppSidebar() {
   return (
     <Sidebar className="border-r" collapsible="icon">
       <SidebarHeader className="flex h-14 items-center px-4 border-b relative">
-        <Link to="/dashboard" className="flex items-center font-semibold text-primary">
-          MedEd Navigator
-        </Link>
         <SidebarTrigger className="ml-auto" />
       </SidebarHeader>
       

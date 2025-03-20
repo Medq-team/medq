@@ -37,25 +37,25 @@ export function MCQOptionItem({
   const optionLetter = String.fromCharCode(65 + index);
   
   // Background color based on state
-  let bgColorClass = 'bg-white';
-  let borderColorClass = 'border-gray-200';
+  let bgColorClass = 'bg-white dark:bg-card';
+  let borderColorClass = 'border-gray-200 dark:border-gray-700';
   let textColorClass = 'text-foreground';
   
   if (isSubmitted) {
     if (isSelected && isCorrect) {
-      bgColorClass = 'bg-green-50';
-      borderColorClass = 'border-green-300';
+      bgColorClass = 'bg-green-50 dark:bg-green-900/20';
+      borderColorClass = 'border-green-300 dark:border-green-700';
     } else if (isSelected && !isCorrect) {
-      bgColorClass = 'bg-red-50';
-      borderColorClass = 'border-red-300';
+      bgColorClass = 'bg-red-50 dark:bg-red-900/20';
+      borderColorClass = 'border-red-300 dark:border-red-700';
     } else if (!isSelected && isCorrect) {
-      bgColorClass = 'bg-amber-50';
-      borderColorClass = 'border-amber-300';
-      textColorClass = 'text-amber-700';
+      bgColorClass = 'bg-amber-50 dark:bg-amber-900/20';
+      borderColorClass = 'border-amber-300 dark:border-amber-700';
+      textColorClass = 'text-amber-700 dark:text-amber-300';
     }
   } else if (isSelected) {
-    bgColorClass = 'bg-primary-50';
-    borderColorClass = 'border-primary-200';
+    bgColorClass = 'bg-primary-50 dark:bg-primary/20';
+    borderColorClass = 'border-primary-200 dark:border-primary/30';
   }
   
   return (
@@ -98,7 +98,7 @@ export function MCQOptionItem({
               </div>
               
               {isExpanded && (
-                <div className="mt-2 text-sm pl-2 border-l-2 border-muted py-2">
+                <div className="mt-2 text-sm pl-2 border-l-2 border-muted py-2 text-foreground">
                   {option.explanation}
                 </div>
               )}
@@ -109,7 +109,7 @@ export function MCQOptionItem({
         {!isSubmitted && (
           <div className={`flex-shrink-0 h-5 w-5 rounded border ${isSelected ? 'border-primary bg-primary' : 'border-muted bg-background'} flex items-center justify-center`}>
             {isSelected && (
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3 text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3 text-white dark:text-black">
                 <polyline points="20 6 9 17 4 12"></polyline>
               </svg>
             )}

@@ -4,6 +4,7 @@
  * 
  * A button that toggles the sidebar open/closed state.
  * Used in application layouts to allow users to collapse/expand the sidebar.
+ * Positioned to ensure it remains accessible in both expanded and collapsed states.
  */
 
 import * as React from "react"
@@ -17,6 +18,7 @@ import { useSidebar } from "./sidebar-context"
  * 
  * Renders a button that toggles the sidebar state when clicked.
  * Uses direction-appropriate chevron icons based on sidebar state.
+ * Positioned to remain accessible regardless of sidebar state.
  */
 export const SidebarTrigger = React.forwardRef<
   React.ElementRef<typeof Button>,
@@ -30,7 +32,7 @@ export const SidebarTrigger = React.forwardRef<
       data-sidebar="trigger"
       variant="ghost"
       size="icon"
-      className={cn("h-7 w-7 z-50 absolute right-1 top-3", className)}
+      className={cn("h-7 w-7 z-50 absolute right-2 top-3", className)}
       onClick={(event) => {
         onClick?.(event)
         toggleSidebar()

@@ -16,16 +16,16 @@ export function OpenQuestionExplanation({ explanation, courseReminder }: OpenQue
       className="space-y-4"
     >
       {explanation && (
-        <div className="p-4 rounded-lg bg-purple-50 text-purple-800">
+        <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200">
           <h4 className="font-medium mb-1">Reference Answer:</h4>
-          <p>{explanation}</p>
+          <p className="text-purple-700 dark:text-purple-200">{explanation}</p>
         </div>
       )}
       
       {courseReminder && (
-        <div className="p-4 rounded-lg bg-purple-50 text-purple-800">
+        <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200">
           <h4 className="font-medium mb-1">Additional Information:</h4>
-          <p>{courseReminder}</p>
+          <p className="text-purple-700 dark:text-purple-200">{courseReminder}</p>
         </div>
       )}
     </motion.div>
