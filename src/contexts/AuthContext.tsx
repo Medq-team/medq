@@ -48,7 +48,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       });
       
       setIsAdmin(role === 'admin');
-      console.log('Is admin set to:', role === 'admin');
+      console.log('Is admin set to:', role === 'admin', 'for user:', authUser.email);
     } catch (error) {
       console.error('Error refreshing user:', error);
       setUser(null);

@@ -12,7 +12,7 @@ export function OpenQuestionHeader({ questionText }: OpenQuestionHeaderProps) {
         <PenLine className="h-4 w-4 mr-1" />
         Open Question
       </div>
-      <h3 className="text-xl font-semibold text-foreground">{questionText}</h3>
+      <h3 className="text-xl font-semibold text-foreground dark:text-gray-200">{questionText}</h3>
     </div>
   );
 }

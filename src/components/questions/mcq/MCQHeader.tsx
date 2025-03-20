@@ -13,8 +13,8 @@ export function MCQHeader({ questionText, isSubmitted }: MCQHeaderProps) {
         <HelpCircle className="h-4 w-4 mr-1" />
         Multiple Choice
       </div>
-      <h3 className="text-xl font-semibold text-foreground">{questionText}</h3>
-      <p className="text-sm text-muted-foreground">
+      <h3 className="text-xl font-semibold text-foreground dark:text-gray-200">{questionText}</h3>
+      <p className="text-sm text-muted-foreground dark:text-gray-300">
         {isSubmitted ? "Review your answers below:" : "Select all correct answers:"}
       </p>
     </div>

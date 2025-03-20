@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { signOut } from '@/lib/supabase';
@@ -18,7 +18,7 @@ import {
   useSidebar
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { Home, Book, Settings, UserCircle, LogOut, LayoutDashboard, Users, Moon, Sun } from 'lucide-react';
+import { LayoutDashboard, UserCircle, Settings, Users, Moon, Sun, LogOut } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useTheme } from '@/contexts/ThemeContext';
 
@@ -39,8 +39,14 @@ export function AppSidebarProvider({ children }: AppSidebarProps) {
 export function AppSidebar() {
   const { user, isAdmin } = useAuth();
   const location = useLocation();
-  const { state } = useSidebar();
+  const { state, setState } = useSidebar();
   const { theme, setTheme } = useTheme();
+  
+  // Set initial sidebar state based on route
+  useEffect(() => {
+    const isDashboard = location.pathname === '/dashboard';
+    setState(isDashboard ? 'expanded' : 'collapsed');
+  }, [location.pathname]);
   
   const menuItems = [
     { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
@@ -63,7 +69,7 @@ export function AppSidebar() {
   return (
     <Sidebar className="border-r" collapsible="icon">
       <SidebarHeader className="flex h-14 items-center px-4 border-b relative">
-        <SidebarTrigger className="ml-auto" />
+        <SidebarTrigger className="absolute right-4 z-10" />
       </SidebarHeader>
       
       <SidebarContent>
@@ -79,8 +85,8 @@ export function AppSidebar() {
                       tooltip={item.label}
                     >
                       <Link to={item.href} className="transition-colors">
-                        <item.icon className="text-foreground" />
-                        <span>{item.label}</span>
+                        <item.icon className="text-foreground dark:text-gray-200" />
+                        <span className="dark:text-gray-200">{item.label}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -97,8 +103,8 @@ export function AppSidebar() {
                       className="w-full justify-start px-2"
                       onClick={toggleTheme}
                     >
-                      {theme === 'dark' ? <Sun /> : <Moon />}
-                      <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+                      {theme === 'dark' ? <Sun className="text-gray-200" /> : <Moon />}
+                      <span className="dark:text-gray-200">{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
                     </Button>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -114,8 +120,8 @@ export function AppSidebar() {
                       className="w-full justify-start px-2"
                       onClick={handleSignOut}
                     >
-                      <LogOut />
-                      <span>Sign out</span>
+                      <LogOut className="dark:text-gray-200" />
+                      <span className="dark:text-gray-200">Sign out</span>
                     </Button>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -127,7 +133,7 @@ export function AppSidebar() {
       
       <SidebarFooter className="border-t py-2 px-2">
         {user?.email && (
-          <div className={`text-xs text-muted-foreground ${state === 'collapsed' ? 'hidden' : 'block'} truncate px-2`}>
+          <div className={`text-xs text-muted-foreground dark:text-gray-400 ${state === 'collapsed' ? 'hidden' : 'block'} truncate px-2`}>
             {user.email}
           </div>
         )}
