@@ -7,7 +7,6 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { Toaster } from './components/ui/toaster';
 import { I18nProvider } from './i18n/I18nProvider';
-import './i18n'; // Import i18n configuration
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
