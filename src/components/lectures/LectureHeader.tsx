@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, PlusCircle } from 'lucide-react';
 import { DialogTrigger } from '@/components/ui/dialog';
 import { Lecture } from '@/types';
+import { useTranslation } from 'react-i18next';
 
 interface LectureHeaderProps {
   lecture: Lecture | null;
@@ -15,6 +16,8 @@ export function LectureHeader({
   onBackClick, 
   onAddQuestionClick 
 }: LectureHeaderProps) {
+  const { t } = useTranslation();
+  
   return (
     <div className="flex justify-between items-center">
       <Button 
@@ -23,13 +26,13 @@ export function LectureHeader({
         onClick={onBackClick}
       >
         <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
-        Back to Specialty
+        {t('lectures.backToSpecialty')}
       </Button>
       
       <DialogTrigger asChild>
         <Button onClick={onAddQuestionClick}>
           <PlusCircle className="h-4 w-4 mr-2" />
-          Add Question
+          {t('questions.addQuestion')}
         </Button>
       </DialogTrigger>
     </div>

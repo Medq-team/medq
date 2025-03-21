@@ -11,10 +11,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { LogOut, Settings, User } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export function AppHeader() {
   const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleSignOut = async () => {
     await signOut();
@@ -26,7 +28,7 @@ export function AppHeader() {
       <div className="container flex h-16 items-center justify-between py-4">
         <div className="flex items-center gap-2">
           <Button variant="link" className="font-bold text-xl p-0" onClick={() => navigate('/dashboard')}>
-            MedQ
+            {t('app.name')}
           </Button>
         </div>
         
@@ -40,7 +42,7 @@ export function AppHeader() {
                   onClick={() => navigate('/admin')}
                   className="font-medium text-primary/90 hover:text-primary"
                 >
-                  Admin Panel
+                  {t('admin.adminPanel')}
                 </Button>
               )}
               
@@ -48,29 +50,29 @@ export function AppHeader() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="icon" className="rounded-full h-8 w-8 border-2">
                     <User className="h-4 w-4" />
-                    <span className="sr-only">User menu</span>
+                    <span className="sr-only">{t('common.edit')}</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <div className="flex flex-col space-y-1 p-2">
                     <p className="text-sm font-medium leading-none">{user.email}</p>
                     <p className="text-xs leading-none text-muted-foreground">
-                      {isAdmin ? 'Administrator' : 'Student'}
+                      {isAdmin ? t('profile.administrator') : t('profile.student')}
                     </p>
                   </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => navigate('/profile')}>
                     <User className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
+                    <span>{t('profile.profile')}</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/settings')}>
                     <Settings className="mr-2 h-4 w-4" />
-                    <span>Settings</span>
+                    <span>{t('sidebar.settings')}</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
+                    <span>{t('auth.signOut')}</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

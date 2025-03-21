@@ -3,10 +3,12 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { SignupHelper } from "@/components/auth/SignupHelper";
+import { useTranslation } from 'react-i18next';
 
 const Index = () => {
   const { user, isLoading } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   useEffect(() => {
     // Only redirect if not loading and user is logged in
@@ -18,8 +20,8 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold mb-4 text-foreground">MedEd Navigator</h1>
-        <p className="text-muted-foreground">Your medical education platform</p>
+        <h1 className="text-3xl font-bold mb-4 text-foreground">{t('app.name')}</h1>
+        <p className="text-muted-foreground">{t('app.tagline')}</p>
       </div>
       
       {isLoading ? (
@@ -34,12 +36,12 @@ const Index = () => {
             <>
               <SignupHelper />
               <p className="text-center text-sm text-muted-foreground mt-4">
-                Already have an account?{" "}
+                {t('auth.alreadyHaveAccount')}{" "}
                 <a 
                   href="/auth" 
                   className="underline underline-offset-4 hover:text-primary"
                 >
-                  Sign in
+                  {t('auth.signIn')}
                 </a>
               </p>
             </>
