@@ -39,6 +39,36 @@ export async function signIn(email: string, password: string) {
   }
 }
 
+export async function signInWithGoogle() {
+  try {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin + '/dashboard',
+      }
+    });
+
+    if (error) {
+      toast({
+        title: "Google authentication error",
+        description: error.message,
+        variant: "destructive",
+      });
+      return { data: null, error };
+    }
+
+    return { data, error: null };
+  } catch (error) {
+    console.error('Google sign in error:', error);
+    toast({
+      title: "Google authentication failed",
+      description: "An unexpected error occurred during Google sign in",
+      variant: "destructive",
+    });
+    return { data: null, error };
+  }
+}
+
 export async function signUp(email: string, password: string) {
   try {
     const { data, error } = await supabase.auth.signUp({

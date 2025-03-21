@@ -42,7 +42,7 @@ export function AppSidebar() {
   const { state, setOpen } = useSidebar();
   const { theme, setTheme } = useTheme();
   
-  // Set initial sidebar state based on route
+  // Set sidebar state based on route
   useEffect(() => {
     const isDashboard = location.pathname === '/dashboard';
     setOpen(isDashboard);
@@ -69,6 +69,9 @@ export function AppSidebar() {
   return (
     <Sidebar className="border-r dark:border-gray-800 dark:bg-[#1A1F2C]" collapsible="icon">
       <SidebarHeader className="flex h-14 items-center px-4 border-b dark:border-gray-800 relative">
+        <div className="flex items-center">
+          <span className={`font-bold text-primary ${state === 'collapsed' ? 'hidden' : 'block'}`}>MedQ</span>
+        </div>
         <SidebarTrigger className="absolute right-4 z-10" />
       </SidebarHeader>
       

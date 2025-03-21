@@ -26,7 +26,7 @@ export function AppHeader() {
       <div className="container flex h-16 items-center justify-between py-4">
         <div className="flex items-center gap-2">
           <Button variant="link" className="font-bold text-xl p-0" onClick={() => navigate('/dashboard')}>
-            MedEd Navigator
+            MedQ
           </Button>
         </div>
         

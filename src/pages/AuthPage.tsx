@@ -27,7 +27,7 @@ export default function AuthPage() {
         transition={{ duration: 0.5 }}
         className="w-full max-w-md text-center mb-8"
       >
-        <h1 className="text-3xl font-bold tracking-tight text-primary">MedEd Navigator</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-primary">MedQ</h1>
         <p className="text-muted-foreground mt-2">Your medical education, simplified</p>
       </motion.div>
       
