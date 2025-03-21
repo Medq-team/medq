@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/button';
 import { LayoutDashboard, UserCircle, Settings, Users, Moon, Sun, LogOut } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 interface AppSidebarProps {
   children: React.ReactNode;
@@ -41,6 +42,7 @@ export function AppSidebar() {
   const location = useLocation();
   const { state, setOpen } = useSidebar();
   const { theme, setTheme } = useTheme();
+  const { t } = useTranslation();
   
   // Set sidebar state based on route
   useEffect(() => {
@@ -49,13 +51,13 @@ export function AppSidebar() {
   }, [location.pathname, setOpen]);
   
   const menuItems = [
-    { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
-    { label: 'Profile', icon: UserCircle, href: '/profile' },
-    { label: 'Settings', icon: Settings, href: '/settings' },
+    { label: t('sidebar.dashboard'), icon: LayoutDashboard, href: '/dashboard' },
+    { label: t('sidebar.profile'), icon: UserCircle, href: '/profile' },
+    { label: t('sidebar.settings'), icon: Settings, href: '/settings' },
   ];
 
   if (isAdmin) {
-    menuItems.push({ label: 'Admin', icon: Users, href: '/admin' });
+    menuItems.push({ label: t('sidebar.admin'), icon: Users, href: '/admin' });
   }
 
   const handleSignOut = async () => {
@@ -70,7 +72,7 @@ export function AppSidebar() {
     <Sidebar className="border-r dark:border-gray-800 dark:bg-[#1A1F2C]" collapsible="icon">
       <SidebarHeader className="flex h-14 items-center px-4 border-b dark:border-gray-800 relative">
         <div className="flex items-center">
-          <span className={`font-bold text-primary ${state === 'collapsed' ? 'hidden' : 'block'}`}>MedQ</span>
+          <span className={`font-bold text-primary ${state === 'collapsed' ? 'hidden' : 'block'}`}>{t('app.name')}</span>
         </div>
         <SidebarTrigger className="absolute right-2 top-1/2 transform -translate-y-1/2 z-50" />
       </SidebarHeader>
@@ -100,7 +102,7 @@ export function AppSidebar() {
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     asChild
-                    tooltip={theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                    tooltip={theme === 'dark' ? t('sidebar.lightMode') : t('sidebar.darkMode')}
                     className="dark:hover:bg-gray-800/60"
                   >
                     <Button
@@ -109,7 +111,7 @@ export function AppSidebar() {
                       onClick={toggleTheme}
                     >
                       {theme === 'dark' ? <Sun className="text-gray-300" /> : <Moon />}
-                      <span className="dark:text-gray-300">{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+                      <span className="dark:text-gray-300">{theme === 'dark' ? t('sidebar.lightMode') : t('sidebar.darkMode')}</span>
                     </Button>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -117,7 +119,7 @@ export function AppSidebar() {
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     asChild
-                    tooltip="Sign Out"
+                    tooltip={t('auth.signOut')}
                     className="text-destructive dark:hover:bg-gray-800/60"
                   >
                     <Button
@@ -126,7 +128,7 @@ export function AppSidebar() {
                       onClick={handleSignOut}
                     >
                       <LogOut className="dark:text-gray-300" />
-                      <span className="dark:text-gray-300">Sign out</span>
+                      <span className="dark:text-gray-300">{t('auth.signOut')}</span>
                     </Button>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Lecture } from '@/types';
 import { BookOpen } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 interface LectureCardProps {
   lecture: Lecture;
@@ -12,6 +13,7 @@ interface LectureCardProps {
 
 export function LectureCard({ lecture }: LectureCardProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleClick = () => {
     navigate(`/lecture/${lecture.id}`);
@@ -33,14 +35,14 @@ export function LectureCard({ lecture }: LectureCardProps) {
             <div>
               <h3 className="font-semibold text-lg mb-1">{lecture.title}</h3>
               <p className="text-muted-foreground text-sm">
-                {lecture.description || 'No description available'}
+                {lecture.description || t('lectures.noDescription')}
               </p>
             </div>
           </div>
         </CardContent>
         <CardFooter className="border-t pt-4">
           <Button onClick={handleClick} className="w-full">
-            Start Lecture
+            {t('lectures.startLecture')}
           </Button>
         </CardFooter>
       </Card>

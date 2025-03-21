@@ -1,17 +1,10 @@
 
-/**
- * @file Sidebar trigger button component
- * 
- * A button that toggles the sidebar open/closed state.
- * Used in application layouts to allow users to collapse/expand the sidebar.
- * Positioned to ensure it remains accessible in both expanded and collapsed states.
- */
-
 import * as React from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { useSidebar } from "./sidebar-context"
+import { useTranslation } from "react-i18next"
 
 /**
  * Sidebar trigger button
@@ -25,6 +18,7 @@ export const SidebarTrigger = React.forwardRef<
   React.ComponentProps<typeof Button>
 >(({ className, onClick, ...props }, ref) => {
   const { toggleSidebar, state } = useSidebar()
+  const { t } = useTranslation()
 
   return (
     <Button
@@ -47,7 +41,7 @@ export const SidebarTrigger = React.forwardRef<
     >
       {state === "expanded" ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
       <span className="sr-only">
-        {state === "expanded" ? "Collapse Sidebar" : "Expand Sidebar"}
+        {state === "expanded" ? t('sidebar.collapseSidebar') : t('sidebar.expandSidebar')}
       </span>
     </Button>
   )

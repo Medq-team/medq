@@ -5,10 +5,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { LoginForm } from '@/components/auth/LoginForm';
 import { RegisterForm } from '@/components/auth/RegisterForm';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 export default function AuthPage() {
   const { user } = useAuth();
   const [isLoginView, setIsLoginView] = useState(true);
+  const { t } = useTranslation();
 
   // If user is already logged in, redirect to dashboard
   if (user) {
@@ -27,8 +29,8 @@ export default function AuthPage() {
         transition={{ duration: 0.5 }}
         className="w-full max-w-md text-center mb-8"
       >
-        <h1 className="text-3xl font-bold tracking-tight text-primary">MedQ</h1>
-        <p className="text-muted-foreground mt-2">Your medical education, simplified</p>
+        <h1 className="text-3xl font-bold tracking-tight text-primary">{t('app.name')}</h1>
+        <p className="text-muted-foreground mt-2">{t('app.tagline')}</p>
       </motion.div>
       
       <AnimatePresence mode="wait">
