@@ -41,14 +41,25 @@ export async function signIn(email: string, password: string) {
 
 export async function signInWithGoogle() {
   try {
+    console.log('Attempting Google sign-in');
+    
+    // Get the current site URL to use for redirects
+    const redirectTo = `${window.location.origin}/dashboard`;
+    console.log('Redirect URL:', redirectTo);
+    
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin + '/dashboard',
+        redirectTo: redirectTo,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        }
       }
     });
 
     if (error) {
+      console.error('Google authentication error:', error);
       toast({
         title: "Google authentication error",
         description: error.message,

@@ -32,7 +32,13 @@ export const SidebarTrigger = React.forwardRef<
       data-sidebar="trigger"
       variant="ghost"
       size="icon"
-      className={cn("h-7 w-7 z-50 absolute right-2 top-3", className)}
+      className={cn(
+        "h-7 w-7 rounded-full bg-background border", 
+        "hover:bg-accent hover:text-accent-foreground transition-all duration-200",
+        "hover:scale-105 focus:scale-105",
+        "absolute right-2 top-1/2 -translate-y-1/2 z-[100]", 
+        className
+      )}
       onClick={(event) => {
         onClick?.(event)
         toggleSidebar()

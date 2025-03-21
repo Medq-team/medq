@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { EyeIcon, EyeOffIcon, Loader2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { toast } from '@/hooks/use-toast';
 
 export function LoginForm({ onToggleForm }: { onToggleForm: () => void }) {
   const navigate = useNavigate();
@@ -47,14 +48,24 @@ export function LoginForm({ onToggleForm }: { onToggleForm: () => void }) {
     setIsGoogleLoading(true);
     
     try {
-      const { error } = await signInWithGoogle();
+      const { data, error } = await signInWithGoogle();
       
       if (error) {
-        setError(error.message);
+        console.error('Google sign-in error:', error);
+        if (error.message.includes('provider is not enabled')) {
+          setError('Google authentication is not enabled. Please contact the administrator.');
+          toast({
+            title: "Google Sign-In Error",
+            description: "Google authentication is not properly configured. Please contact the administrator.",
+            variant: "destructive",
+          });
+        } else {
+          setError(error.message);
+        }
       }
     } catch (err) {
-      setError('An unexpected error occurred');
-      console.error(err);
+      console.error('Unexpected Google sign-in error:', err);
+      setError('An unexpected error occurred during Google sign in');
     } finally {
       setIsGoogleLoading(false);
     }

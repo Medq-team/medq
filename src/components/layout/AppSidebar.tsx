@@ -72,7 +72,7 @@ export function AppSidebar() {
         <div className="flex items-center">
           <span className={`font-bold text-primary ${state === 'collapsed' ? 'hidden' : 'block'}`}>MedQ</span>
         </div>
-        <SidebarTrigger className="absolute right-4 z-10" />
+        <SidebarTrigger className="absolute right-2 top-1/2 transform -translate-y-1/2 z-50" />
       </SidebarHeader>
       
       <SidebarContent className="dark:bg-[#1A1F2C]">
