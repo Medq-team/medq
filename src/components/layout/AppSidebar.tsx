@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,7 +13,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
-  SidebarTrigger,
   useSidebar
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
@@ -30,7 +28,6 @@ export function AppSidebar() {
   const { theme, setTheme } = useTheme();
   const { t } = useTranslation();
   
-  // Set sidebar state based on route
   useEffect(() => {
     const isDashboard = location.pathname === '/dashboard';
     setOpen(isDashboard);
@@ -84,7 +81,6 @@ export function AppSidebar() {
                   </SidebarMenuItem>
                 ))}
                 
-                {/* Night Mode Toggle */}
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     asChild
@@ -137,7 +133,7 @@ export function AppSidebar() {
 
 export function AppSidebarProvider({ children }: { children: React.ReactNode }) {
   return (
-    <SidebarProvider defaultState="collapsed" className="w-full">
+    <SidebarProvider defaultOpen={false} className="w-full">
       <div className="flex min-h-screen w-full">
         {children}
       </div>
