@@ -5,9 +5,6 @@ import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { Specialty, Lecture } from '@/types';
 
-// Set up a key for localStorage to persist the view preference
-const LECTURE_VIEW_PREFERENCE_KEY = 'lectureViewPreference';
-
 export function useSpecialty(specialtyId: string | undefined) {
   const navigate = useNavigate();
   const [specialty, setSpecialty] = useState<Specialty | null>(null);
@@ -16,20 +13,6 @@ export function useSpecialty(specialtyId: string | undefined) {
   const [selectedLectureId, setSelectedLectureId] = useState<string | null>(null);
   const [isAddQuestionOpen, setIsAddQuestionOpen] = useState(false);
   const [isAddLectureOpen, setIsAddLectureOpen] = useState(false);
-  
-  // Add state for view preference (grid or list)
-  const [viewType, setViewType] = useState<'grid' | 'list'>(() => {
-    // Get saved preference from localStorage or default to grid
-    const savedPreference = localStorage.getItem(LECTURE_VIEW_PREFERENCE_KEY);
-    return (savedPreference === 'list' ? 'list' : 'grid') as 'grid' | 'list';
-  });
-
-  // Function to toggle view type with persistence
-  const toggleViewType = () => {
-    const newViewType = viewType === 'grid' ? 'list' : 'grid';
-    setViewType(newViewType);
-    localStorage.setItem(LECTURE_VIEW_PREFERENCE_KEY, newViewType);
-  };
 
   const fetchSpecialtyAndLectures = async () => {
     if (!specialtyId) {
@@ -125,7 +108,5 @@ export function useSpecialty(specialtyId: string | undefined) {
     setIsAddLectureOpen,
     fetchSpecialtyAndLectures,
     handleOpenAddQuestion,
-    viewType,
-    toggleViewType,
   };
 }
