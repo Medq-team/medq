@@ -85,15 +85,38 @@ export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
     window.location.reload();
   };
 
-  // Add keyboard shortcut for submitting answer
+  // Function to select an option by index
+  const selectOptionByIndex = (index: number) => {
+    if (!question.options || index >= question.options.length || submitted) return;
+    
+    const optionId = question.options[index].id;
+    handleOptionSelect(optionId);
+  };
+
+  // Add keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === '1') {
-        // Only trigger if not already submitted and there's at least one selection
+      // Skip if an input or textarea element is focused
+      if (
+        document.activeElement instanceof HTMLInputElement ||
+        document.activeElement instanceof HTMLTextAreaElement
+      ) {
+        return;
+      }
+      
+      // Number keys 1-5 to select options (0-4 index)
+      if (!submitted && ['1', '2', '3', '4', '5'].includes(event.key)) {
+        const optionIndex = parseInt(event.key) - 1;
+        selectOptionByIndex(optionIndex);
+      }
+      
+      // Space to submit or go to next
+      if (event.key === ' ' || event.code === 'Space') {
+        event.preventDefault(); // Prevent page scrolling
+        
         if (!submitted && selectedOptionIds.length > 0) {
           handleSubmit();
         } else if (submitted) {
-          // If already submitted, move to next question
           onNext();
         }
       }
@@ -103,7 +126,7 @@ export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [submitted, selectedOptionIds, onNext]);
+  }, [submitted, selectedOptionIds, question.options, onNext]);
 
   return (
     <motion.div

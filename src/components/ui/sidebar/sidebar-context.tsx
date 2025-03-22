@@ -30,6 +30,7 @@ export type SidebarContext = {
   setOpenMobile: (open: boolean) => void // Function to control mobile sidebar
   isMobile: boolean                // Whether the current view is mobile
   toggleSidebar: () => void        // Helper to toggle sidebar state
+  isTransitioning: boolean         // Whether the sidebar is currently transitioning
 }
 
 const SidebarContext = React.createContext<SidebarContext | null>(null)
@@ -88,6 +89,7 @@ export const SidebarProvider = React.forwardRef<
     const isMobile = useIsMobile()
     const location = useLocation()
     const [openMobile, setOpenMobile] = React.useState(false)
+    const [isTransitioning, setIsTransitioning] = React.useState(false)
 
     // Get the default open state based on the current route
     const routeBasedDefaultOpen = React.useMemo(() => {
@@ -101,6 +103,11 @@ export const SidebarProvider = React.forwardRef<
     const setOpen = React.useCallback(
       (value: boolean | ((value: boolean) => boolean)) => {
         const openState = typeof value === "function" ? value(open) : value
+        
+        // Set transitioning state
+        setIsTransitioning(true)
+        setTimeout(() => setIsTransitioning(false), 300) // Match transition duration
+        
         if (setOpenProp) {
           setOpenProp(openState)
         } else {
@@ -156,8 +163,9 @@ export const SidebarProvider = React.forwardRef<
         openMobile,
         setOpenMobile,
         toggleSidebar,
+        isTransitioning,
       }),
-      [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar]
+      [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar, isTransitioning]
     )
 
     return (

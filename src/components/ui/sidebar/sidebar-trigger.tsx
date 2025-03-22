@@ -17,7 +17,7 @@ export const SidebarTrigger = React.forwardRef<
   React.ElementRef<typeof Button>,
   React.ComponentProps<typeof Button>
 >(({ className, onClick, ...props }, ref) => {
-  const { toggleSidebar, state } = useSidebar()
+  const { toggleSidebar, state, isTransitioning } = useSidebar()
   const { t } = useTranslation()
 
   return (
@@ -30,10 +30,12 @@ export const SidebarTrigger = React.forwardRef<
         "h-7 w-7 rounded-full bg-background border", 
         "hover:bg-accent hover:text-accent-foreground transition-all duration-200",
         "hover:scale-105 focus:scale-105",
-        "absolute right-2 top-1/2 -translate-y-1/2 z-[100]", 
+        "absolute right-2 top-1/2 -translate-y-1/2 z-[100]",
+        isTransitioning && "pointer-events-none opacity-50",
         className
       )}
       onClick={(event) => {
+        if (isTransitioning) return;
         onClick?.(event)
         toggleSidebar()
       }}
