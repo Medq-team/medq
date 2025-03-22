@@ -20,7 +20,18 @@ export default function AuthPage() {
   // Check for password reset parameter in URL
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
-    if (searchParams.get('reset') === 'true') {
+    
+    // Log URL parameters for debugging
+    console.log('Auth page URL parameters:', {
+      reset: searchParams.get('reset'),
+      type: searchParams.get('type'),
+      hasAccessToken: !!searchParams.get('access_token'),
+      fullUrl: window.location.href
+    });
+    
+    // Check for reset=true or if this is a recovery flow from Supabase
+    if (searchParams.get('reset') === 'true' || searchParams.get('type') === 'recovery') {
+      console.log('Showing reset password form');
       setView('resetPassword');
     }
   }, [location]);

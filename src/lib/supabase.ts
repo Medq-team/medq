@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js';
 import { toast } from '../hooks/use-toast';
 
@@ -159,11 +160,16 @@ export async function getCurrentUser() {
 
 export async function resetPassword(email: string) {
   try {
+    // Define the full URL for password reset, ensuring it's correctly formatted
+    const redirectTo = `${window.location.origin}/auth?reset=true`;
+    console.log('Reset password redirect URL:', redirectTo);
+    
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth?reset=true`,
+      redirectTo: redirectTo,
     });
 
     if (error) {
+      console.error('Reset password error:', error);
       toast({
         title: "Reset password error",
         description: error.message,
@@ -190,11 +196,13 @@ export async function resetPassword(email: string) {
 
 export async function updatePassword(newPassword: string) {
   try {
+    console.log('Updating password');
     const { error } = await supabase.auth.updateUser({
       password: newPassword,
     });
 
     if (error) {
+      console.error('Update password error:', error);
       toast({
         title: "Update password error",
         description: error.message,

@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { updatePassword } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,26 @@ export function ResetPasswordForm() {
   const [error, setError] = useState('');
   const { t } = useTranslation();
 
+  // Check if we have a valid reset token by looking at the URL
+  useEffect(() => {
+    // Log current URL parameters for debugging
+    const url = new URL(window.location.href);
+    const params = new URLSearchParams(url.search);
+    const type = params.get('type');
+    const accessToken = params.get('access_token');
+    
+    console.log('Reset password URL parameters:', { 
+      type,
+      hasAccessToken: !!accessToken,
+      fullUrl: window.location.href 
+    });
+    
+    // If we don't have the right parameters, the reset link might be invalid
+    if (!type || type !== 'recovery') {
+      console.log('Not a valid recovery flow');
+    }
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -28,15 +48,28 @@ export function ResetPasswordForm() {
       return;
     }
 
+    if (password.length < 6) {
+      setError(t('auth.passwordTooShort'));
+      return;
+    }
+
     setIsLoading(true);
 
     try {
+      console.log('Submitting password reset');
       const { error } = await updatePassword(password);
       
-      if (!error) {
+      if (error) {
+        console.error('Password update failed:', error);
+        setError(error.message || t('auth.passwordResetFailed'));
+      } else {
+        console.log('Password updated successfully');
         // Redirect to dashboard after successful password reset
         navigate('/dashboard');
       }
+    } catch (err) {
+      console.error('Password reset error:', err);
+      setError(t('auth.passwordResetFailed'));
     } finally {
       setIsLoading(false);
     }
