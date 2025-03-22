@@ -1,25 +1,34 @@
 
-import { useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { LoginForm } from '@/components/auth/LoginForm';
 import { RegisterForm } from '@/components/auth/RegisterForm';
+import { ForgotPasswordForm } from '@/components/auth/ForgotPasswordForm';
+import { ResetPasswordForm } from '@/components/auth/ResetPasswordForm';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
+type AuthView = 'login' | 'register' | 'forgotPassword' | 'resetPassword';
+
 export default function AuthPage() {
   const { user } = useAuth();
-  const [isLoginView, setIsLoginView] = useState(true);
+  const [view, setView] = useState<AuthView>('login');
   const { t } = useTranslation();
+  const location = useLocation();
+
+  // Check for password reset parameter in URL
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    if (searchParams.get('reset') === 'true') {
+      setView('resetPassword');
+    }
+  }, [location]);
 
   // If user is already logged in, redirect to dashboard
   if (user) {
     return <Navigate to="/dashboard" replace />;
   }
-
-  const toggleForm = () => {
-    setIsLoginView(!isLoginView);
-  };
 
   return (
     <div className="min-h-screen flex flex-col justify-center items-center p-4 bg-gradient-to-b from-blue-50 to-white">
@@ -34,10 +43,27 @@ export default function AuthPage() {
       </motion.div>
       
       <AnimatePresence mode="wait">
-        {isLoginView ? (
-          <LoginForm key="login" onToggleForm={toggleForm} />
-        ) : (
-          <RegisterForm key="register" onToggleForm={toggleForm} />
+        {view === 'login' && (
+          <LoginForm 
+            key="login" 
+            onToggleForm={() => setView('register')}
+            onForgotPassword={() => setView('forgotPassword')}
+          />
+        )}
+        {view === 'register' && (
+          <RegisterForm 
+            key="register" 
+            onToggleForm={() => setView('login')} 
+          />
+        )}
+        {view === 'forgotPassword' && (
+          <ForgotPasswordForm 
+            key="forgotPassword"
+            onBack={() => setView('login')}
+          />
+        )}
+        {view === 'resetPassword' && (
+          <ResetPasswordForm key="resetPassword" />
         )}
       </AnimatePresence>
     </div>

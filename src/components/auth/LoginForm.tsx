@@ -11,7 +11,13 @@ import { Separator } from '@/components/ui/separator';
 import { toast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 
-export function LoginForm({ onToggleForm }: { onToggleForm: () => void }) {
+export function LoginForm({ 
+  onToggleForm, 
+  onForgotPassword 
+}: { 
+  onToggleForm: () => void;
+  onForgotPassword: () => void;
+}) {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -147,7 +153,7 @@ export function LoginForm({ onToggleForm }: { onToggleForm: () => void }) {
                   variant="link" 
                   className="px-0 text-xs h-auto"
                   type="button"
-                  onClick={() => {/* Password reset functionality */}}
+                  onClick={onForgotPassword}
                 >
                   {t('auth.forgotPassword')}
                 </Button>

@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 import { toast } from '../hooks/use-toast';
 
@@ -155,6 +154,68 @@ export async function getCurrentUser() {
   } catch (error) {
     console.error('Get current user error:', error);
     return null;
+  }
+}
+
+export async function resetPassword(email: string) {
+  try {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth?reset=true`,
+    });
+
+    if (error) {
+      toast({
+        title: "Reset password error",
+        description: error.message,
+        variant: "destructive",
+      });
+      return { error };
+    }
+
+    toast({
+      title: "Password reset email sent",
+      description: "Please check your email for password reset instructions",
+    });
+    return { error: null };
+  } catch (error) {
+    console.error('Reset password error:', error);
+    toast({
+      title: "Reset password failed",
+      description: "An unexpected error occurred during password reset",
+      variant: "destructive",
+    });
+    return { error };
+  }
+}
+
+export async function updatePassword(newPassword: string) {
+  try {
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+
+    if (error) {
+      toast({
+        title: "Update password error",
+        description: error.message,
+        variant: "destructive",
+      });
+      return { error };
+    }
+
+    toast({
+      title: "Password updated",
+      description: "Your password has been updated successfully",
+    });
+    return { error: null };
+  } catch (error) {
+    console.error('Update password error:', error);
+    toast({
+      title: "Update password failed",
+      description: "An unexpected error occurred during password update",
+      variant: "destructive",
+    });
+    return { error };
   }
 }
 

@@ -1,4 +1,3 @@
-
 {
   "app": {
     "name": "MedQ",
@@ -30,7 +29,19 @@
     "checkEmail": "Veuillez vérifier votre e-mail pour confirmer votre compte.",
     "backToSignIn": "Retour à la connexion",
     "passwordsNotMatch": "Les mots de passe ne correspondent pas",
-    "enterDetails": "Entrez vos informations ci-dessous pour créer votre compte"
+    "enterDetails": "Entrez vos informations ci-dessous pour créer votre compte",
+    "resetPassword": "Réinitialiser le mot de passe",
+    "enterEmailForReset": "Entrez votre adresse e-mail pour recevoir un lien de réinitialisation",
+    "sendResetLink": "Envoyer le lien de réinitialisation",
+    "sending": "Envoi en cours...",
+    "resetLinkSent": "Un lien de réinitialisation a été envoyé à votre adresse e-mail",
+    "checkYourEmail": "Vérifiez votre e-mail",
+    "resetEmailSent": "Un e-mail de réinitialisation a été envoyé à {email}",
+    "checkSpamFolder": "Si vous ne le voyez pas, vérifiez votre dossier spam",
+    "createNewPassword": "Créer un nouveau mot de passe",
+    "enterNewPassword": "Entrez votre nouveau mot de passe ci-dessous",
+    "newPassword": "Nouveau mot de passe",
+    "updating": "Mise à jour en cours..."
   },
   "dashboard": {
     "title": "Tableau de bord",
