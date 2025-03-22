@@ -23,20 +23,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTranslation } from 'react-i18next';
 
-interface AppSidebarProps {
-  children: React.ReactNode;
-}
-
-export function AppSidebarProvider({ children }: AppSidebarProps) {
-  return (
-    <SidebarProvider className="w-full">
-      <div className="flex min-h-screen w-full">
-        {children}
-      </div>
-    </SidebarProvider>
-  );
-}
-
 export function AppSidebar() {
   const { user, isAdmin } = useAuth();
   const location = useLocation();
@@ -146,5 +132,15 @@ export function AppSidebar() {
         )}
       </SidebarFooter>
     </Sidebar>
+  );
+}
+
+export function AppSidebarProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <SidebarProvider defaultState="collapsed" className="w-full">
+      <div className="flex min-h-screen w-full">
+        {children}
+      </div>
+    </SidebarProvider>
   );
 }

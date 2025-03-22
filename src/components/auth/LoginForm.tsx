@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { EyeIcon, EyeOffIcon, Loader2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 export function LoginForm({ onToggleForm }: { onToggleForm: () => void }) {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ export function LoginForm({ onToggleForm }: { onToggleForm: () => void }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [error, setError] = useState('');
+  const { t } = useTranslation();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +38,7 @@ export function LoginForm({ onToggleForm }: { onToggleForm: () => void }) {
         navigate('/dashboard');
       }
     } catch (err) {
-      setError('An unexpected error occurred');
+      setError(t('auth.unexpectedError'));
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -53,10 +55,10 @@ export function LoginForm({ onToggleForm }: { onToggleForm: () => void }) {
       if (error) {
         console.error('Google sign-in error:', error);
         if (error.message.includes('provider is not enabled')) {
-          setError('Google authentication is not enabled. Please contact the administrator.');
+          setError(t('auth.googleAuthNotConfigured'));
           toast({
-            title: "Google Sign-In Error",
-            description: "Google authentication is not properly configured. Please contact the administrator.",
+            title: t('auth.googleSignInError'),
+            description: t('auth.googleAuthNotConfigured'),
             variant: "destructive",
           });
         } else {
@@ -65,7 +67,7 @@ export function LoginForm({ onToggleForm }: { onToggleForm: () => void }) {
       }
     } catch (err) {
       console.error('Unexpected Google sign-in error:', err);
-      setError('An unexpected error occurred during Google sign in');
+      setError(t('auth.unexpectedError'));
     } finally {
       setIsGoogleLoading(false);
     }
@@ -74,9 +76,9 @@ export function LoginForm({ onToggleForm }: { onToggleForm: () => void }) {
   return (
     <Card className="w-full max-w-md mx-auto animate-fade-in shadow-lg">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold tracking-tight">Sign in</CardTitle>
+        <CardTitle className="text-2xl font-bold tracking-tight">{t('auth.signIn')}</CardTitle>
         <CardDescription>
-          Enter your credentials to access your account
+          {t('auth.enterCredentials')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -110,7 +112,7 @@ export function LoginForm({ onToggleForm }: { onToggleForm: () => void }) {
                 />
               </svg>
             )}
-            {isGoogleLoading ? "Signing in..." : "Sign in with Google"}
+            {isGoogleLoading ? t('auth.signingIn') : t('auth.signInWithGoogle')}
           </Button>
           
           <div className="relative">
@@ -119,14 +121,14 @@ export function LoginForm({ onToggleForm }: { onToggleForm: () => void }) {
             </div>
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-background px-2 text-muted-foreground">
-                Or continue with
+                {t('auth.continueWith')}
               </span>
             </div>
           </div>
           
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('auth.email')}</Label>
               <Input
                 id="email"
                 type="email"
@@ -140,14 +142,14 @@ export function LoginForm({ onToggleForm }: { onToggleForm: () => void }) {
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t('auth.password')}</Label>
                 <Button 
                   variant="link" 
                   className="px-0 text-xs h-auto"
                   type="button"
                   onClick={() => {/* Password reset functionality */}}
                 >
-                  Forgot password?
+                  {t('auth.forgotPassword')}
                 </Button>
               </div>
               <div className="relative">
@@ -185,10 +187,10 @@ export function LoginForm({ onToggleForm }: { onToggleForm: () => void }) {
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
-                  Signing in...
+                  {t('auth.signingIn')}
                 </>
               ) : (
-                "Sign in with Email"
+                t('auth.signInWithEmail')
               )}
             </Button>
           </form>
@@ -196,7 +198,7 @@ export function LoginForm({ onToggleForm }: { onToggleForm: () => void }) {
       </CardContent>
       <CardFooter className="flex justify-center">
         <Button variant="link" className="text-sm" onClick={onToggleForm}>
-          Don't have an account? Sign up
+          {t('auth.dontHaveAccount')} {t('auth.signUp')}
         </Button>
       </CardFooter>
     </Card>

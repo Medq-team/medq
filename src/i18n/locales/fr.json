@@ -10,7 +10,7 @@
     "signOut": "Déconnexion",
     "enterCredentials": "Entrez vos identifiants pour accéder à votre compte",
     "continueWith": "Ou continuez avec",
-    "email": "Email",
+    "email": "Adresse e-mail",
     "password": "Mot de passe",
     "forgotPassword": "Mot de passe oublié?",
     "dontHaveAccount": "Vous n'avez pas de compte?",
@@ -22,7 +22,15 @@
     "googleAuthNotConfigured": "L'authentification Google n'est pas correctement configurée. Veuillez contacter l'administrateur.",
     "unexpectedError": "Une erreur inattendue s'est produite",
     "createDemoUser": "Créer un utilisateur de démonstration",
-    "createUser": "Créer un utilisateur"
+    "createUser": "Créer un utilisateur",
+    "confirmPassword": "Confirmer le mot de passe",
+    "createAccount": "Créer un compte",
+    "creatingAccount": "Création de compte en cours...",
+    "registrationSuccess": "Inscription réussie",
+    "checkEmail": "Veuillez vérifier votre e-mail pour confirmer votre compte.",
+    "backToSignIn": "Retour à la connexion",
+    "passwordsNotMatch": "Les mots de passe ne correspondent pas",
+    "enterDetails": "Entrez vos informations ci-dessous pour créer votre compte"
   },
   "dashboard": {
     "title": "Tableau de bord",
@@ -141,7 +149,8 @@
     "editProfile": "Modifier le profil",
     "saveChanges": "Enregistrer les modifications",
     "profileUpdated": "Profil mis à jour",
-    "updateSuccess": "Vos informations de profil ont été mises à jour avec succès."
+    "updateSuccess": "Vos informations de profil ont été mises à jour avec succès.",
+    "saving": "Enregistrement..."
   },
   "settings": {
     "settings": "Paramètres",

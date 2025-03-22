@@ -1,21 +1,34 @@
 
+import { ChangeEvent } from 'react';
 import { Textarea } from '@/components/ui/textarea';
+import { useTranslation } from 'react-i18next';
 
 interface OpenQuestionInputProps {
   answer: string;
-  setAnswer: (value: string) => void;
+  setAnswer: (answer: string) => void;
   isSubmitted: boolean;
 }
 
 export function OpenQuestionInput({ answer, setAnswer, isSubmitted }: OpenQuestionInputProps) {
+  const { t } = useTranslation();
+  
+  const handleAnswerChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    if (isSubmitted) return;
+    setAnswer(e.target.value);
+  };
+  
   return (
     <div className="space-y-2">
       <Textarea
-        placeholder="Type your answer here..."
-        className="min-h-32 transition-all"
+        placeholder={t('questions.answerText')}
         value={answer}
-        onChange={(e) => setAnswer(e.target.value)}
+        onChange={handleAnswerChange}
+        rows={6}
         disabled={isSubmitted}
+        className={`
+          resize-none transition-all duration-200
+          ${isSubmitted ? 'bg-muted' : ''}
+        `}
       />
     </div>
   );

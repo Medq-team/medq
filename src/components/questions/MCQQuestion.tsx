@@ -9,6 +9,7 @@ import { MCQActions } from './mcq/MCQActions';
 import { QuestionEditDialog } from './QuestionEditDialog';
 import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface MCQQuestionProps {
   question: Question;
@@ -22,6 +23,7 @@ export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [expandedExplanations, setExpandedExplanations] = useState<string[]>([]);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const { t } = useTranslation();
 
   // Get correct answers array from question
   const correctAnswers = question.correctAnswers || question.correct_answers || [];
@@ -126,7 +128,7 @@ export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
           className="flex items-center gap-1"
         >
           <Pencil className="h-3.5 w-3.5" />
-          Edit
+          {t('common.edit')}
         </Button>
       </div>
 

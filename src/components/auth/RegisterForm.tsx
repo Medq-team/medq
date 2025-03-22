@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { EyeIcon, EyeOffIcon, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
   const [email, setEmail] = useState('');
@@ -16,13 +17,14 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const { t } = useTranslation();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError(t('auth.passwordsNotMatch'));
       return;
     }
     
@@ -40,7 +42,7 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
         setSuccess(true);
       }
     } catch (err) {
-      setError('An unexpected error occurred');
+      setError(t('auth.unexpectedError'));
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -58,7 +60,7 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
         setError(error.message);
       }
     } catch (err) {
-      setError('An unexpected error occurred');
+      setError(t('auth.unexpectedError'));
       console.error(err);
     } finally {
       setIsGoogleLoading(false);
@@ -69,12 +71,12 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
     return (
       <Card className="w-full max-w-md mx-auto animate-fade-in shadow-lg">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold tracking-tight text-center">Registration Successful</CardTitle>
+          <CardTitle className="text-2xl font-bold tracking-tight text-center">{t('auth.registrationSuccess')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 text-center">
-          <p>Please check your email to verify your account.</p>
+          <p>{t('auth.checkEmail')}</p>
           <Button onClick={onToggleForm} className="mt-4">
-            Back to Sign In
+            {t('auth.backToSignIn')}
           </Button>
         </CardContent>
       </Card>
@@ -84,9 +86,9 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
   return (
     <Card className="w-full max-w-md mx-auto animate-fade-in shadow-lg">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold tracking-tight">Create an account</CardTitle>
+        <CardTitle className="text-2xl font-bold tracking-tight">{t('auth.signUp')}</CardTitle>
         <CardDescription>
-          Enter your details below to create your account
+          {t('auth.enterDetails')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -120,7 +122,7 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
                 />
               </svg>
             )}
-            {isGoogleLoading ? "Signing up..." : "Sign up with Google"}
+            {isGoogleLoading ? t('auth.signingIn') : t('auth.signInWithGoogle')}
           </Button>
           
           <div className="relative">
@@ -129,14 +131,14 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
             </div>
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-background px-2 text-muted-foreground">
-                Or continue with
+                {t('auth.continueWith')}
               </span>
             </div>
           </div>
           
           <form onSubmit={handleRegister} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('auth.email')}</Label>
               <Input
                 id="email"
                 type="email"
@@ -149,7 +151,7 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t('auth.password')}</Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -177,7 +179,7 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Label htmlFor="confirmPassword">{t('auth.confirmPassword')}</Label>
               <Input
                 id="confirmPassword"
                 type={showPassword ? "text" : "password"}
@@ -198,10 +200,10 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
-                  Creating account...
+                  {t('auth.creatingAccount')}
                 </>
               ) : (
-                "Create account"
+                t('auth.createAccount')
               )}
             </Button>
           </form>
@@ -209,7 +211,7 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
       </CardContent>
       <CardFooter className="flex justify-center">
         <Button variant="link" className="text-sm" onClick={onToggleForm}>
-          Already have an account? Sign in
+          {t('auth.alreadyHaveAccount')} {t('auth.signIn')}
         </Button>
       </CardFooter>
     </Card>

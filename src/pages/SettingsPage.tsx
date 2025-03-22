@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useTranslation } from 'react-i18next';
 
 export default function SettingsPage() {
   const { user } = useAuth();
@@ -24,14 +25,15 @@ export default function SettingsPage() {
     newContent: true,
     reminders: false
   });
+  const { t } = useTranslation();
 
   async function handlePasswordChange(e: React.FormEvent) {
     e.preventDefault();
     
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
       toast({
-        title: "Passwords don't match",
-        description: "New password and confirmation must match.",
+        title: t('settings.passwordsNotMatch'),
+        description: t('settings.passwordsNotMatch'),
         variant: "destructive"
       });
       return;
@@ -52,14 +54,14 @@ export default function SettingsPage() {
       });
       
       toast({
-        title: "Password updated",
-        description: "Your password has been changed successfully."
+        title: t('settings.passwordChangeSuccess'),
+        description: t('settings.passwordChangeSuccess')
       });
     } catch (error: any) {
       console.error('Error changing password:', error);
       toast({
-        title: "Password change failed",
-        description: error.message || "Failed to update password. Please try again.",
+        title: t('settings.passwordChangeFailed'),
+        description: error.message || t('settings.passwordChangeFailed'),
         variant: "destructive"
       });
     } finally {
@@ -82,8 +84,8 @@ export default function SettingsPage() {
     });
     
     toast({
-      title: "Preferences saved",
-      description: "Your notification settings have been updated."
+      title: t('settings.preferencesUpdated'),
+      description: t('settings.preferencesUpdated')
     });
   }
   
@@ -91,30 +93,30 @@ export default function SettingsPage() {
     <AppLayout>
       <div className="container max-w-3xl py-6 space-y-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t('settings.settings')}</h1>
           <p className="text-muted-foreground">
-            Manage your account settings and preferences.
+            {t('settings.controlNotifications')}
           </p>
         </div>
         
         <Tabs defaultValue="account" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="account">Account</TabsTrigger>
-            <TabsTrigger value="notifications">Notifications</TabsTrigger>
+            <TabsTrigger value="account">{t('profile.accountInfo')}</TabsTrigger>
+            <TabsTrigger value="notifications">{t('settings.notifications')}</TabsTrigger>
           </TabsList>
           
           <TabsContent value="account" className="space-y-4 pt-4">
             <Card>
               <CardHeader>
-                <CardTitle>Change Password</CardTitle>
+                <CardTitle>{t('settings.changePassword')}</CardTitle>
                 <CardDescription>
-                  Update your password to keep your account secure.
+                  {t('settings.updatePasswordDesc')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handlePasswordChange} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="currentPassword">Current Password</Label>
+                    <Label htmlFor="currentPassword">{t('settings.currentPassword')}</Label>
                     <Input 
                       id="currentPassword" 
                       name="currentPassword"
@@ -127,7 +129,7 @@ export default function SettingsPage() {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="newPassword">New Password</Label>
+                    <Label htmlFor="newPassword">{t('settings.newPassword')}</Label>
                     <Input 
                       id="newPassword" 
                       name="newPassword"
@@ -140,7 +142,7 @@ export default function SettingsPage() {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                    <Label htmlFor="confirmPassword">{t('settings.confirmPassword')}</Label>
                     <Input 
                       id="confirmPassword" 
                       name="confirmPassword"
@@ -157,7 +159,7 @@ export default function SettingsPage() {
                       type="submit"
                       disabled={isLoading}
                     >
-                      {isLoading ? "Updating..." : "Update Password"}
+                      {isLoading ? t('settings.updating') : t('settings.updatePassword')}
                     </Button>
                   </div>
                 </form>
@@ -168,17 +170,17 @@ export default function SettingsPage() {
           <TabsContent value="notifications" className="space-y-4 pt-4">
             <Card>
               <CardHeader>
-                <CardTitle>Notification Preferences</CardTitle>
+                <CardTitle>{t('settings.notificationPreferences')}</CardTitle>
                 <CardDescription>
-                  Control what notifications you receive.
+                  {t('settings.controlNotifications')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label htmlFor="email-notifications">Email Notifications</Label>
+                    <Label htmlFor="email-notifications">{t('settings.emailNotifications')}</Label>
                     <p className="text-sm text-muted-foreground">
-                      Receive email notifications about your account activity.
+                      {t('settings.emailNotificationsDesc')}
                     </p>
                   </div>
                   <Switch 
@@ -190,9 +192,9 @@ export default function SettingsPage() {
                 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label htmlFor="content-notifications">New Content Alerts</Label>
+                    <Label htmlFor="content-notifications">{t('settings.contentAlerts')}</Label>
                     <p className="text-sm text-muted-foreground">
-                      Get notified when new lectures or specialties are added.
+                      {t('settings.contentAlertsDesc')}
                     </p>
                   </div>
                   <Switch 
@@ -204,9 +206,9 @@ export default function SettingsPage() {
                 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label htmlFor="reminder-notifications">Study Reminders</Label>
+                    <Label htmlFor="reminder-notifications">{t('settings.studyReminders')}</Label>
                     <p className="text-sm text-muted-foreground">
-                      Receive periodic reminders to continue your studies.
+                      {t('settings.studyRemindersDesc')}
                     </p>
                   </div>
                   <Switch 

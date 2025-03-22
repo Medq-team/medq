@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
+import { useTranslation } from 'react-i18next';
 
 export default function ProfilePage() {
   const { user, refreshUser } = useAuth();
@@ -18,6 +19,7 @@ export default function ProfilePage() {
     lastName: ''
   });
   const [isLoading, setIsLoading] = useState(false);
+  const { t } = useTranslation();
   
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -38,14 +40,14 @@ export default function ProfilePage() {
       await refreshUser();
       setIsEditing(false);
       toast({
-        title: "Profile updated",
-        description: "Your profile information has been updated successfully."
+        title: t('profile.profileUpdated'),
+        description: t('profile.updateSuccess')
       });
     } catch (error: any) {
       console.error('Error updating profile:', error);
       toast({
-        title: "Update failed",
-        description: error.message || "Failed to update profile. Please try again.",
+        title: t('common.error'),
+        description: error.message || t('common.tryAgain'),
         variant: "destructive"
       });
     } finally {
@@ -65,23 +67,23 @@ export default function ProfilePage() {
     <AppLayout>
       <div className="container max-w-3xl py-6 space-y-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Profile</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t('profile.profile')}</h1>
           <p className="text-muted-foreground">
-            View and update your profile information.
+            {t('profile.viewUpdateInfo')}
           </p>
         </div>
         
         <Card>
           <CardHeader>
-            <CardTitle>Account Information</CardTitle>
+            <CardTitle>{t('profile.accountInfo')}</CardTitle>
             <CardDescription>
-              Your personal information and account details.
+              {t('profile.personalInfo')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('auth.email')}</Label>
                 <Input 
                   id="email" 
                   type="email" 
@@ -90,16 +92,16 @@ export default function ProfilePage() {
                   className="bg-muted"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Email cannot be changed.
+                  {t('profile.emailCannotChange')}
                 </p>
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="firstName">First Name</Label>
+                <Label htmlFor="firstName">{t('profile.firstName')}</Label>
                 <Input 
                   id="firstName" 
                   name="firstName"
-                  placeholder="Enter your first name" 
+                  placeholder={t('profile.firstName')} 
                   value={formData.firstName}
                   onChange={handleInputChange}
                   disabled={!isEditing || isLoading}
@@ -107,11 +109,11 @@ export default function ProfilePage() {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name</Label>
+                <Label htmlFor="lastName">{t('profile.lastName')}</Label>
                 <Input 
                   id="lastName" 
                   name="lastName"
-                  placeholder="Enter your last name" 
+                  placeholder={t('profile.lastName')} 
                   value={formData.lastName}
                   onChange={handleInputChange}
                   disabled={!isEditing || isLoading}
@@ -119,15 +121,15 @@ export default function ProfilePage() {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="role">Role</Label>
+                <Label htmlFor="role">{t('profile.role')}</Label>
                 <Input 
                   id="role" 
-                  value={user?.role || 'student'} 
+                  value={user?.role === 'admin' ? t('profile.administrator') : t('profile.student')} 
                   disabled 
                   className="bg-muted"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Your access level in the system.
+                  {t('profile.accessLevel')}
                 </p>
               </div>
               
@@ -139,13 +141,13 @@ export default function ProfilePage() {
                     onClick={() => setIsEditing(false)}
                     disabled={isLoading}
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </Button>
                   <Button 
                     type="submit"
                     disabled={isLoading}
                   >
-                    {isLoading ? "Saving..." : "Save Changes"}
+                    {isLoading ? t('profile.saving') : t('profile.saveChanges')}
                   </Button>
                 </div>
               ) : (
@@ -154,7 +156,7 @@ export default function ProfilePage() {
                     type="button"
                     onClick={() => setIsEditing(true)}
                   >
-                    Edit Profile
+                    {t('profile.editProfile')}
                   </Button>
                 </div>
               )}
