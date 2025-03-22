@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { QuestionForm } from '@/components/admin/QuestionForm';
 import { Lecture } from '@/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useTranslation } from 'react-i18next';
 
 interface AddQuestionDialogProps {
   isOpen: boolean;
@@ -19,16 +20,18 @@ export function AddQuestionDialog({
   setSelectedLectureId,
   lectures
 }: AddQuestionDialogProps) {
+  const { t } = useTranslation();
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh]">
         <DialogHeader>
-          <DialogTitle>Add New Question</DialogTitle>
+          <DialogTitle>{t('admin.addNewQuestion')}</DialogTitle>
         </DialogHeader>
         <ScrollArea className="max-h-[calc(90vh-120px)] pr-4">
           {selectedLectureId && (
             <div className="mb-4">
-              <label className="text-sm font-medium">Select Lecture:</label>
+              <label className="text-sm font-medium">{t('admin.selectLecture')}:</label>
               <select 
                 className="w-full p-2 mt-1 border rounded-md bg-background"
                 value={selectedLectureId}

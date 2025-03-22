@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 interface AddSpecialtyDialogProps {
   onSpecialtyAdded: () => void;
@@ -23,6 +24,7 @@ export function AddSpecialtyDialog({ onSpecialtyAdded, userId }: AddSpecialtyDia
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { isAdmin, user } = useAuth();
+  const { t } = useTranslation();
   
   useEffect(() => {
     // For debugging
@@ -39,8 +41,8 @@ export function AddSpecialtyDialog({ onSpecialtyAdded, userId }: AddSpecialtyDia
     
     if (!userId) {
       toast({
-        title: "Authentication required",
-        description: "You must be logged in to create specialties.",
+        title: t('auth.signIn'),
+        description: t('auth.enterCredentials'),
         variant: "destructive",
       });
       return;
@@ -48,8 +50,8 @@ export function AddSpecialtyDialog({ onSpecialtyAdded, userId }: AddSpecialtyDia
     
     if (!isAdmin) {
       toast({
-        title: "Permission denied",
-        description: "Only administrators can create specialties.",
+        title: t('specialties.adminOnly'),
+        description: t('specialties.adminOnly'),
         variant: "destructive",
       });
       return;
@@ -57,8 +59,8 @@ export function AddSpecialtyDialog({ onSpecialtyAdded, userId }: AddSpecialtyDia
     
     if (!newSpecialty.name.trim()) {
       toast({
-        title: "Validation Error",
-        description: "Specialty name is required.",
+        title: t('specialties.validationError'),
+        description: t('specialties.nameRequired'),
         variant: "destructive",
       });
       return;
@@ -85,8 +87,8 @@ export function AddSpecialtyDialog({ onSpecialtyAdded, userId }: AddSpecialtyDia
       }
       
       toast({
-        title: "Success",
-        description: "Specialty has been created successfully.",
+        title: t('specialties.success'),
+        description: t('specialties.specialtyCreated'),
       });
       
       // Reset form and close dialog
@@ -102,14 +104,14 @@ export function AddSpecialtyDialog({ onSpecialtyAdded, userId }: AddSpecialtyDia
       
     } catch (error: any) {
       console.error('Error creating specialty:', error);
-      let errorMessage = "An unexpected error occurred. Please try again.";
+      let errorMessage = t('common.tryAgain');
       
       if (error.message) {
         errorMessage = error.message;
       }
       
       toast({
-        title: "Error creating specialty",
+        title: t('common.error'),
         description: errorMessage,
         variant: "destructive",
       });
@@ -124,42 +126,42 @@ export function AddSpecialtyDialog({ onSpecialtyAdded, userId }: AddSpecialtyDia
         <Button className="relative" disabled={!isAdmin}>
           {!isAdmin && (
             <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-md">
-              <span className="text-xs text-white">Admin only</span>
+              <span className="text-xs text-white">{t('specialties.adminOnly')}</span>
             </div>
           )}
           <PlusCircle className="h-4 w-4 mr-2" />
-          Add Specialty
+          {t('specialties.addSpecialty')}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add New Specialty</DialogTitle>
+          <DialogTitle>{t('specialties.addSpecialty')}</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleAddSpecialty} className="space-y-4 mt-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name">{t('specialties.name')}</Label>
             <Input 
               id="name"
               value={newSpecialty.name}
               onChange={(e) => setNewSpecialty({...newSpecialty, name: e.target.value})}
-              placeholder="Specialty name"
+              placeholder={t('specialties.name')}
               required
             />
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t('specialties.description')}</Label>
             <Input 
               id="description"
               value={newSpecialty.description}
               onChange={(e) => setNewSpecialty({...newSpecialty, description: e.target.value})}
-              placeholder="Brief description"
+              placeholder={t('specialties.description')}
             />
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="imageUrl">Image URL (optional)</Label>
+            <Label htmlFor="imageUrl">{t('specialties.imageUrl')}</Label>
             <Input 
               id="imageUrl"
               value={newSpecialty.imageUrl}
@@ -170,7 +172,7 @@ export function AddSpecialtyDialog({ onSpecialtyAdded, userId }: AddSpecialtyDia
           
           <div className="flex justify-end">
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Creating..." : "Create Specialty"}
+              {isSubmitting ? t('specialties.creating') : t('specialties.createSpecialty')}
             </Button>
           </div>
         </form>

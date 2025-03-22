@@ -20,12 +20,16 @@
     "signingIn": "Connexion en cours...",
     "googleSignInError": "Erreur de connexion Google",
     "googleAuthNotConfigured": "L'authentification Google n'est pas correctement configurée. Veuillez contacter l'administrateur.",
-    "unexpectedError": "Une erreur inattendue s'est produite"
+    "unexpectedError": "Une erreur inattendue s'est produite",
+    "createDemoUser": "Créer un utilisateur de démonstration",
+    "createUser": "Créer un utilisateur"
   },
   "dashboard": {
     "title": "Tableau de bord",
     "welcome": "Bienvenue",
-    "selectSpecialty": "Sélectionnez une spécialité pour commencer"
+    "selectSpecialty": "Sélectionnez une spécialité pour commencer",
+    "adminView": "Vue administrateur",
+    "studentView": "Vue étudiant"
   },
   "specialties": {
     "title": "Spécialités",
@@ -39,7 +43,9 @@
     "success": "Succès",
     "specialtyCreated": "La spécialité a été créée avec succès.",
     "validationError": "Erreur de validation",
-    "nameRequired": "Le nom de la spécialité est requis."
+    "nameRequired": "Le nom de la spécialité est requis.",
+    "deleteSpecialty": "Supprimer la spécialité",
+    "deleteConfirmation": "Êtes-vous sûr de vouloir supprimer cette spécialité? Cette action ne peut pas être annulée."
   },
   "lectures": {
     "title": "Cours",
@@ -54,7 +60,9 @@
     "addFirstQuestion": "Ajouter la première question",
     "lectureComplete": "Cours terminé!",
     "completionMessage": "Vous avez terminé toutes les questions de ce cours.",
-    "restartLecture": "Redémarrer le cours"
+    "restartLecture": "Redémarrer le cours",
+    "deleteLecture": "Supprimer le cours",
+    "deleteConfirmation": "Êtes-vous sûr de vouloir supprimer ce cours? Cette action supprimera également toutes les questions associées et ne peut pas être annulée."
   },
   "questions": {
     "multipleChoice": "Choix multiple",
@@ -71,7 +79,18 @@
     "hideExplanation": "Masquer l'explication",
     "courseReminder": "Rappel du cours:",
     "referenceAnswer": "Réponse de référence:",
-    "additionalInfo": "Information supplémentaire:"
+    "additionalInfo": "Information supplémentaire:",
+    "addQuestion": "Ajouter une question",
+    "editQuestion": "Modifier la question",
+    "deleteQuestion": "Supprimer la question",
+    "answerText": "Texte de la réponse",
+    "questionText": "Texte de la question",
+    "optionText": "Texte de l'option",
+    "optionExplanation": "Explication de l'option",
+    "correctOption": "Option correcte",
+    "option": "Option",
+    "explanation": "Explication",
+    "addOption": "Ajouter une option"
   },
   "admin": {
     "adminPanel": "Panneau d'administration",
@@ -94,7 +113,18 @@
     "createQuestion": "Créer une question",
     "questionCreated": "Question créée avec succès",
     "questionUpdated": "Question mise à jour avec succès",
-    "questionDeleted": "Question supprimée"
+    "questionDeleted": "Question supprimée",
+    "manageSpecialties": "Gérer les spécialités",
+    "manageLectures": "Gérer les cours",
+    "manageQuestions": "Gérer les questions",
+    "addSpecialty": "Ajouter une spécialité",
+    "addLecture": "Ajouter un cours",
+    "noSpecialtiesAvailable": "Aucune spécialité disponible",
+    "noLecturesAvailable": "Aucun cours disponible",
+    "noQuestionsYet": "Pas encore de questions",
+    "addYourFirstQuestion": "Ajouter votre première question",
+    "selectLecture": "Sélectionner un cours",
+    "addNewQuestion": "Ajouter une nouvelle question"
   },
   "profile": {
     "profile": "Profil",
@@ -113,6 +143,18 @@
     "profileUpdated": "Profil mis à jour",
     "updateSuccess": "Vos informations de profil ont été mises à jour avec succès."
   },
+  "settings": {
+    "settings": "Paramètres",
+    "appearance": "Apparence",
+    "language": "Langue",
+    "notifications": "Notifications",
+    "theme": "Thème",
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Système",
+    "updateSettings": "Mettre à jour les paramètres",
+    "settingsUpdated": "Paramètres mis à jour"
+  },
   "common": {
     "loading": "Chargement...",
     "error": "Erreur",
@@ -127,7 +169,15 @@
     "back": "Retour",
     "next": "Suivant",
     "of": "de",
-    "complete": "Terminé"
+    "complete": "Terminé",
+    "yes": "Oui",
+    "no": "Non",
+    "confirm": "Confirmer",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "sort": "Trier",
+    "manage": "Gérer",
+    "noResultsFound": "Aucun résultat trouvé"
   },
   "sidebar": {
     "dashboard": "Tableau de bord",

@@ -4,6 +4,7 @@ import { Question } from '@/types';
 import { useQuestionEdit } from './edit/useQuestionEdit';
 import { QuestionEditContent } from './edit/QuestionEditContent';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useTranslation } from 'react-i18next';
 
 interface QuestionEditDialogProps {
   question: Question | null;
@@ -18,6 +19,7 @@ export function QuestionEditDialog({
   onOpenChange,
   onQuestionUpdated
 }: QuestionEditDialogProps) {
+  const { t } = useTranslation();
   const {
     isLoading,
     questionText,
@@ -46,7 +48,7 @@ export function QuestionEditDialog({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh]">
         <DialogHeader>
-          <DialogTitle>Edit Question</DialogTitle>
+          <DialogTitle>{t('questions.editQuestion')}</DialogTitle>
         </DialogHeader>
         
         <ScrollArea className="max-h-[calc(90vh-120px)] pr-4">

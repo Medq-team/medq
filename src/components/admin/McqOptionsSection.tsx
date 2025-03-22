@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Check, Plus, Trash, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface McqOptionsSectionProps {
   options: { id: string; text: string; explanation?: string }[];
@@ -21,6 +22,7 @@ export function McqOptionsSection({
   setCorrectAnswers 
 }: McqOptionsSectionProps) {
   const [expandedOptions, setExpandedOptions] = useState<string[]>([]);
+  const { t } = useTranslation();
   
   const addOption = () => {
     if (options.length >= 5) return;
@@ -66,7 +68,7 @@ export function McqOptionsSection({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <Label>Answer Options (select all correct answers)</Label>
+        <Label>{t('questions.selectAllCorrect')}</Label>
         <Button 
           type="button" 
           variant="outline" 
@@ -75,7 +77,7 @@ export function McqOptionsSection({
           disabled={options.length >= 5}
         >
           <Plus className="h-4 w-4 mr-1" />
-          Add Option
+          {t('questions.addOption')}
         </Button>
       </div>
       
@@ -105,7 +107,7 @@ export function McqOptionsSection({
               </Button>
               
               <Input
-                placeholder={`Option ${String.fromCharCode(65 + index)}`}
+                placeholder={`${t('questions.option')} ${String.fromCharCode(65 + index)}`}
                 value={option.text}
                 onChange={(e) => updateOptionText(option.id, e.target.value)}
                 required
@@ -146,11 +148,11 @@ export function McqOptionsSection({
                 className="pl-12 pr-2"
               >
                 <Label htmlFor={`option-explanation-${option.id}`} className="text-xs mb-1 block">
-                  Explanation for this option
+                  {t('questions.optionExplanation')}
                 </Label>
                 <Textarea
                   id={`option-explanation-${option.id}`}
-                  placeholder="Why is this option correct/incorrect?"
+                  placeholder={t('questions.explanation')}
                   value={option.explanation || ''}
                   onChange={(e) => updateOptionExplanation(option.id, e.target.value)}
                   className="min-h-20 text-sm"

@@ -7,11 +7,13 @@ import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { AddSpecialtyDialog } from '@/components/specialties/AddSpecialtyDialog';
 import { SpecialtiesList } from '@/components/specialties/SpecialtiesList';
+import { useTranslation } from 'react-i18next';
 
 export default function DashboardPage() {
   const { user, isAdmin } = useAuth();
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     fetchSpecialties();
@@ -41,8 +43,8 @@ export default function DashboardPage() {
     } catch (error) {
       console.error('Error fetching specialties:', error);
       toast({
-        title: "Error",
-        description: "Failed to load specialties. Please try again.",
+        title: t('common.error'),
+        description: t('common.tryAgain'),
         variant: "destructive",
       });
     } finally {
@@ -55,9 +57,9 @@ export default function DashboardPage() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+            <h2 className="text-3xl font-bold tracking-tight">{t('dashboard.title')}</h2>
             <p className="text-muted-foreground">
-              Welcome {user?.email}. {isAdmin ? '(Admin)' : '(Student)'} Select a specialty to get started.
+              {t('dashboard.welcome')} {user?.email}. {isAdmin ? `(${t('profile.administrator')})` : `(${t('profile.student')})`} {t('dashboard.selectSpecialty')}
             </p>
           </div>
           

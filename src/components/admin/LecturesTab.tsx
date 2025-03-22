@@ -4,6 +4,7 @@ import { PlusCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Lecture } from '@/types';
 import { LectureItem } from './LectureItem';
+import { useTranslation } from 'react-i18next';
 
 interface LecturesTabProps {
   lectures: Lecture[];
@@ -17,17 +18,18 @@ export function LecturesTab({
   onDeleteLecture 
 }: LecturesTabProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   
   return (
     <div className="space-y-4 animate-fade-in">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Manage Lectures</h3>
+        <h3 className="text-lg font-semibold">{t('admin.manageLectures')}</h3>
         <Button 
           onClick={() => navigate('/admin/lecture/new')}
           className="btn-hover"
         >
           <PlusCircle className="h-4 w-4 mr-2" />
-          Add Lecture
+          {t('admin.addLecture')}
         </Button>
       </div>
       
@@ -42,9 +44,9 @@ export function LecturesTab({
           ))
         ) : lectures.length === 0 ? (
           <div className="col-span-2 flex flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
-            <h3 className="text-lg font-semibold">No lectures available</h3>
+            <h3 className="text-lg font-semibold">{t('admin.noLecturesAvailable')}</h3>
             <p className="text-muted-foreground mt-2">
-              Click "Add Lecture" to create your first lecture.
+              {t('admin.addLecture')}
             </p>
           </div>
         ) : lectures.map((lecture) => (

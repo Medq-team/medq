@@ -4,6 +4,7 @@ import { PlusCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Specialty } from '@/types';
 import { SpecialtyItem } from './SpecialtyItem';
+import { useTranslation } from 'react-i18next';
 
 interface SpecialtiesTabProps {
   specialties: Specialty[];
@@ -17,17 +18,18 @@ export function SpecialtiesTab({
   onDeleteSpecialty 
 }: SpecialtiesTabProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   
   return (
     <div className="space-y-4 animate-fade-in">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Manage Specialties</h3>
+        <h3 className="text-lg font-semibold">{t('admin.manageSpecialties')}</h3>
         <Button 
           onClick={() => navigate('/admin/specialty/new')}
           className="btn-hover"
         >
           <PlusCircle className="h-4 w-4 mr-2" />
-          Add Specialty
+          {t('specialties.addSpecialty')}
         </Button>
       </div>
       
@@ -42,9 +44,9 @@ export function SpecialtiesTab({
           ))
         ) : specialties.length === 0 ? (
           <div className="col-span-2 flex flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
-            <h3 className="text-lg font-semibold">No specialties available</h3>
+            <h3 className="text-lg font-semibold">{t('admin.noSpecialtiesAvailable')}</h3>
             <p className="text-muted-foreground mt-2">
-              Click "Add Specialty" to create your first specialty.
+              {t('specialties.addSpecialty')}
             </p>
           </div>
         ) : specialties.map((specialty) => (

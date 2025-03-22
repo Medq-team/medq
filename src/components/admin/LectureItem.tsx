@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,6 +28,7 @@ interface LectureItemProps {
 export function LectureItem({ lecture, onDelete }: LectureItemProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const navigate = useNavigate();
+  const { t } = useTranslation();
   
   const handleDelete = async () => {
     try {
@@ -59,16 +61,16 @@ export function LectureItem({ lecture, onDelete }: LectureItemProps) {
       if (error) throw error;
       
       toast({
-        title: "Lecture deleted",
-        description: "The lecture and its questions have been successfully removed",
+        title: t('lectures.deleteLecture'),
+        description: t('admin.questionDeleted'),
       });
       
       onDelete(lecture.id);
     } catch (error) {
       console.error('Error deleting lecture:', error);
       toast({
-        title: "Error",
-        description: "Failed to delete lecture. Please try again.",
+        title: t('common.error'),
+        description: t('common.tryAgain'),
         variant: "destructive",
       });
     } finally {
@@ -81,7 +83,7 @@ export function LectureItem({ lecture, onDelete }: LectureItemProps) {
       <CardHeader className="pb-2" onClick={() => navigate(`/admin/lecture/${lecture.id}`)}>
         <CardTitle>{lecture.title}</CardTitle>
         <CardDescription className="line-clamp-2">
-          {lecture.description || 'No description available'}
+          {lecture.description || t('lectures.noDescription')}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex justify-between">
@@ -91,7 +93,7 @@ export function LectureItem({ lecture, onDelete }: LectureItemProps) {
           onClick={() => navigate(`/admin/lecture/${lecture.id}`)}
         >
           <Edit className="h-4 w-4 mr-2" />
-          Manage Questions
+          {t('common.manage')}
         </Button>
         
         <AlertDialog>
@@ -104,23 +106,23 @@ export function LectureItem({ lecture, onDelete }: LectureItemProps) {
               onClick={(e) => e.stopPropagation()}
             >
               <Trash className="h-4 w-4 mr-2" />
-              Delete
+              {t('common.delete')}
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete Lecture</AlertDialogTitle>
+              <AlertDialogTitle>{t('lectures.deleteLecture')}</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to delete "{lecture.title}"? This will also delete all questions associated with this lecture. This action cannot be undone.
+                {t('lectures.deleteConfirmation')}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
               <AlertDialogAction 
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 onClick={handleDelete}
               >
-                Delete
+                {t('common.delete')}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
