@@ -98,7 +98,22 @@
     "correctOption": "Option correcte",
     "option": "Option",
     "explanation": "Explication",
-    "addOption": "Ajouter une option"
+    "addOption": "Ajouter une option",
+    "questionContent": "Contenu de la question",
+    "answersExplanations": "Réponses et Explications",
+    "enterQuestionNumber": "Entrer le numéro de la question",
+    "examplePrefix": "ex.,",
+    "enterQuestionText": "Entrer le texte de la question...",
+    "enterReminderText": "Entrer un rappel éducatif ou des informations de base...",
+    "enterReferenceAnswer": "Entrer la réponse de référence...",
+    "answerText": "Texte de la réponse",
+    "markAsCorrect": "Marquer comme correcte",
+    "correct": "Correcte",
+    "explanationPlaceholder": "Pourquoi cette réponse est-elle correcte/incorrecte ?",
+    "mcq": "QCM",
+    "open": "QROC",
+    "saveChanges": "Enregistrer les modifications",
+    "saving": "Enregistrement..."
   },
   "admin": {
     "adminPanel": "Panneau d'administration",

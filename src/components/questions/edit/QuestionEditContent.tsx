@@ -5,6 +5,7 @@ import { QuestionContentTab } from './QuestionContentTab';
 import { AnswersExplanationsTab } from './AnswersExplanationsTab';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface QuestionEditContentProps {
   question: Question;
@@ -46,13 +47,14 @@ export function QuestionEditContent({
   onSubmit
 }: QuestionEditContentProps) {
   const [activeTab, setActiveTab] = useState<string>("content");
+  const { t } = useTranslation();
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab}>
       <TabsList className="w-full">
-        <TabsTrigger value="content" className="flex-1">Question Content</TabsTrigger>
+        <TabsTrigger value="content" className="flex-1">{t('questions.questionContent')}</TabsTrigger>
         {question.type === 'mcq' && (
-          <TabsTrigger value="answers" className="flex-1">Answers & Explanations</TabsTrigger>
+          <TabsTrigger value="answers" className="flex-1">{t('questions.answersExplanations')}</TabsTrigger>
         )}
       </TabsList>
       
@@ -90,10 +92,10 @@ export function QuestionEditContent({
             onClick={onCancel}
             className="mr-2"
           >
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Saving..." : "Save Changes"}
+            {isLoading ? t('questions.saving') : t('questions.saveChanges')}
           </Button>
         </div>
       </form>

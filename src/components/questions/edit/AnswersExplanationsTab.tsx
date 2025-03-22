@@ -3,6 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from 'react-i18next';
 
 interface AnswersExplanationsTabProps {
   options: { id: string; text: string; explanation?: string }[];
@@ -19,6 +20,8 @@ export function AnswersExplanationsTab({
   updateOptionExplanation,
   toggleCorrectAnswer
 }: AnswersExplanationsTabProps) {
+  const { t } = useTranslation();
+  
   return (
     <div className="space-y-4">
       {options.map((option, index) => (
@@ -30,22 +33,22 @@ export function AnswersExplanationsTab({
             
             <div className="flex-grow space-y-3">
               <div className="space-y-1">
-                <Label htmlFor={`option-text-${option.id}`}>Answer Text</Label>
+                <Label htmlFor={`option-text-${option.id}`}>{t('questions.answerText')}</Label>
                 <Input
                   id={`option-text-${option.id}`}
                   value={option.text}
                   onChange={(e) => updateOptionText(option.id, e.target.value)}
-                  placeholder={`Option ${String.fromCharCode(65 + index)} text`}
+                  placeholder={`${t('questions.option')} ${String.fromCharCode(65 + index)} ${t('questions.optionText')}`}
                 />
               </div>
               
               <div className="space-y-1">
-                <Label htmlFor={`option-explanation-${option.id}`}>Explanation</Label>
+                <Label htmlFor={`option-explanation-${option.id}`}>{t('questions.explanation')}</Label>
                 <Textarea
                   id={`option-explanation-${option.id}`}
                   value={option.explanation || ''}
                   onChange={(e) => updateOptionExplanation(option.id, e.target.value)}
-                  placeholder="Why is this answer correct/incorrect?"
+                  placeholder={t('questions.explanationPlaceholder')}
                   className="min-h-20"
                 />
               </div>
@@ -58,7 +61,7 @@ export function AnswersExplanationsTab({
               className="flex-shrink-0"
               onClick={() => toggleCorrectAnswer(option.id)}
             >
-              {correctAnswers.includes(option.id) ? "Correct" : "Mark as Correct"}
+              {correctAnswers.includes(option.id) ? t('questions.correct') : t('questions.markAsCorrect')}
             </Button>
           </div>
         </div>

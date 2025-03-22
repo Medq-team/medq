@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useTranslation } from 'react-i18next';
 
 interface QuestionTypeSelectProps {
   questionType: QuestionType;
@@ -16,27 +17,29 @@ interface QuestionTypeSelectProps {
 }
 
 export function QuestionTypeSelect({ questionType, setQuestionType }: QuestionTypeSelectProps) {
+  const { t } = useTranslation();
+  
   return (
     <div className="space-y-2">
-      <Label htmlFor="question-type">Question Type</Label>
+      <Label htmlFor="question-type">{t('admin.questionType')}</Label>
       <Select 
         value={questionType} 
         onValueChange={(value: QuestionType) => setQuestionType(value)}
       >
         <SelectTrigger id="question-type" className="w-full">
-          <SelectValue placeholder="Select question type" />
+          <SelectValue placeholder={t('admin.selectQuestionType')} />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="mcq">
             <div className="flex items-center">
               <HelpCircle className="mr-2 h-4 w-4" />
-              <span>Multiple Choice</span>
+              <span>{t('questions.mcq')}</span>
             </div>
           </SelectItem>
           <SelectItem value="open">
             <div className="flex items-center">
               <PenLine className="mr-2 h-4 w-4" />
-              <span>Open Question</span>
+              <span>{t('questions.open')}</span>
             </div>
           </SelectItem>
         </SelectContent>
