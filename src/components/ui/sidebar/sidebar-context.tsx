@@ -51,10 +51,10 @@ export function useSidebar() {
 /**
  * Determines the default open state of the sidebar based on the current route
  * 
- * Dashboard opens expanded, all other routes start collapsed
+ * Always starts collapsed for all routes
  */
 const getDefaultOpenState = (path: string): boolean => {
-  return path === '/dashboard';
+  return false; // Always start collapsed
 }
 
 interface SidebarProviderProps {

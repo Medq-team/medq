@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Question } from '@/types';
 import { motion } from 'framer-motion';
 import { OpenQuestionHeader } from './open/OpenQuestionHeader';
@@ -9,6 +9,7 @@ import { OpenQuestionActions } from './open/OpenQuestionActions';
 import { QuestionEditDialog } from './QuestionEditDialog';
 import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface OpenQuestionProps {
   question: Question;
@@ -20,6 +21,7 @@ export function OpenQuestion({ question, onSubmit, onNext }: OpenQuestionProps) 
   const [answer, setAnswer] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const { t } = useTranslation();
 
   const handleSubmit = () => {
     if (!answer.trim() || submitted) return;
@@ -32,6 +34,26 @@ export function OpenQuestion({ question, onSubmit, onNext }: OpenQuestionProps) 
     // Reload the page to refresh the question data
     window.location.reload();
   };
+
+  // Add keyboard shortcut for submitting answer
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === '1') {
+        // Only trigger if not already submitted and there's text in the answer
+        if (!submitted && answer.trim()) {
+          handleSubmit();
+        } else if (submitted) {
+          // If already submitted, move to next question
+          onNext();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [submitted, answer, onNext]);
 
   return (
     <motion.div
@@ -55,7 +77,7 @@ export function OpenQuestion({ question, onSubmit, onNext }: OpenQuestionProps) 
           className="flex items-center gap-1"
         >
           <Pencil className="h-3.5 w-3.5" />
-          Edit
+          {t('common.edit')}
         </Button>
       </div>
 

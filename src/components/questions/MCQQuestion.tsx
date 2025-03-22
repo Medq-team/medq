@@ -1,4 +1,5 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { Question } from '@/types';
 import { AnimatePresence, motion } from 'framer-motion';
 import { MCQHeader } from './mcq/MCQHeader';
@@ -81,6 +82,26 @@ export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
     // Reload the page to refresh the question data
     window.location.reload();
   };
+
+  // Add keyboard shortcut for submitting answer
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === '1') {
+        // Only trigger if not already submitted and there's at least one selection
+        if (!submitted && selectedOptionIds.length > 0) {
+          handleSubmit();
+        } else if (submitted) {
+          // If already submitted, move to next question
+          onNext();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [submitted, selectedOptionIds, onNext]);
 
   return (
     <motion.div
