@@ -18,6 +18,8 @@ export default function AdminPage() {
   const navigate = useNavigate();
   const [lectures, setLectures] = useState<Lecture[]>([]);
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
+  const [questionsCount, setQuestionsCount] = useState<number>(0);
+  const [usersCount, setUsersCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('lectures');
   const { t } = useTranslation();
@@ -49,6 +51,22 @@ export default function AdminPage() {
 
         if (specialtiesError) throw specialtiesError;
         setSpecialties(specialtiesData || []);
+        
+        // Fetch questions count
+        const { count: questionsTotal, error: questionsError } = await supabase
+          .from('questions')
+          .select('*', { count: 'exact', head: true });
+          
+        if (questionsError) throw questionsError;
+        setQuestionsCount(questionsTotal || 0);
+        
+        // Fetch users count
+        const { count: usersTotal, error: usersError } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true });
+          
+        if (usersError) throw usersError;
+        setUsersCount(usersTotal || 0);
       } catch (error) {
         console.error('Error fetching admin data:', error);
         toast({
@@ -81,7 +99,12 @@ export default function AdminPage() {
       <div className="space-y-6">
         <h1 className="text-2xl font-bold">{t('admin.adminPanel')}</h1>
         
-        <AdminStats lectures={lectures} specialties={specialties} />
+        <AdminStats 
+          lectures={lectures} 
+          specialties={specialties} 
+          questionsCount={questionsCount}
+          usersCount={usersCount}
+        />
         
         <Tabs defaultValue="lectures" value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid grid-cols-3 mb-8 w-full sm:w-auto">

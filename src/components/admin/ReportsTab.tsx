@@ -67,11 +67,11 @@ export function ReportsTab() {
     }
   };
   
-  const handleUpdateStatus = async (reportId: string, status: 'reviewed' | 'dismissed') => {
+  const handleUpdateStatus = async (reportId: string, newStatus: 'pending' | 'reviewed' | 'dismissed') => {
     try {
       const { error } = await supabase
         .from('question_reports')
-        .update({ status })
+        .update({ status: newStatus })
         .eq('id', reportId);
         
       if (error) throw error;
@@ -79,16 +79,18 @@ export function ReportsTab() {
       // Update the local state
       setReports(prev => 
         prev.map(report => 
-          report.id === reportId ? { ...report, status } : report
+          report.id === reportId ? { ...report, status: newStatus } : report
         )
       );
       
       toast({
         title: t('reports.statusUpdated'),
         description: 
-          status === 'reviewed' 
+          newStatus === 'reviewed' 
             ? t('reports.reportMarkedReviewed') 
-            : t('reports.reportDismissed'),
+            : newStatus === 'dismissed'
+            ? t('reports.reportDismissed')
+            : t('reports.reportMarkedPending'),
       });
     } catch (error) {
       console.error('Error updating report status:', error);
