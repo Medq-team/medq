@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { LogOut, Settings, User, Heart, BookMedical } from 'lucide-react';
+import { LogOut, Settings, User, Heart, Stethoscope } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 export function AppHeader() {
@@ -29,7 +29,7 @@ export function AppHeader() {
         <div className="flex items-center gap-2">
           <Button variant="link" className="font-bold text-xl p-0 flex items-center" onClick={() => navigate('/dashboard')}>
             <span className="flex items-center justify-center bg-primary text-primary-foreground rounded-md w-8 h-8 mr-2">
-              <BookMedical className="h-5 w-5" />
+              <Stethoscope className="h-5 w-5" />
             </span>
             {t('app.name')}
           </Button>

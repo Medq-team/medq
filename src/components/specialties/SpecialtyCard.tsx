@@ -14,14 +14,13 @@ import {
   Microscope, 
   Scan, 
   Stethoscope,
-  Lungs,
-  FirstAid,
+  Thermometer,
   Pill,
   Syringe,
-  Virus,
   BookOpen,
-  Needle,
-  Thermometer
+  TestTube,
+  Hospital,
+  Bandage
 } from 'lucide-react';
 
 interface SpecialtyCardProps {
@@ -47,13 +46,13 @@ export function SpecialtyCard({ specialty }: SpecialtyCardProps) {
     if (name.includes('ophtha') || name.includes('eye')) return <Eye className="h-10 w-10 text-blue-500" />;
     if (name.includes('patho')) return <Microscope className="h-10 w-10 text-emerald-600" />;
     if (name.includes('radio')) return <Scan className="h-10 w-10 text-indigo-500" />;
-    if (name.includes('pulmo') || name.includes('respir')) return <Lungs className="h-10 w-10 text-blue-400" />;
-    if (name.includes('emerg')) return <FirstAid className="h-10 w-10 text-red-600" />;
+    if (name.includes('pulmo') || name.includes('respir')) return <TestTube className="h-10 w-10 text-blue-400" />;
+    if (name.includes('emerg')) return <Hospital className="h-10 w-10 text-red-600" />;
     if (name.includes('pharma')) return <Pill className="h-10 w-10 text-green-500" />;
     if (name.includes('immun')) return <Syringe className="h-10 w-10 text-teal-500" />;
-    if (name.includes('infect')) return <Virus className="h-10 w-10 text-orange-500" />;
-    if (name.includes('anesth')) return <Needle className="h-10 w-10 text-gray-500" />;
-    if (name.includes('family') || name.includes('general')) return <Thermometer className="h-10 w-10 text-green-600" />;
+    if (name.includes('infect')) return <Bandage className="h-10 w-10 text-orange-500" />;
+    if (name.includes('anesth')) return <Thermometer className="h-10 w-10 text-gray-500" />;
+    if (name.includes('family') || name.includes('general')) return <Stethoscope className="h-10 w-10 text-green-600" />;
     if (name.includes('psych') || name.includes('mental')) return <BookOpen className="h-10 w-10 text-violet-500" />;
     
     // Default icon if no match
