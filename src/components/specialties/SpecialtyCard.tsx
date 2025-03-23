@@ -8,12 +8,20 @@ import {
   Heart, 
   Brain, 
   Bone, 
-  HandHeart, 
-  Bandage, 
+  Baby, 
+  Scissors, 
   Eye, 
   Microscope, 
   Scan, 
-  Stethoscope 
+  Stethoscope,
+  Lungs,
+  FirstAid,
+  Pill,
+  Syringe,
+  Virus,
+  BookOpen,
+  Needle,
+  Thermometer
 } from 'lucide-react';
 
 interface SpecialtyCardProps {
@@ -29,26 +37,27 @@ export function SpecialtyCard({ specialty }: SpecialtyCardProps) {
   };
 
   const getSpecialtyIcon = () => {
-    switch (specialty.name.toLowerCase()) {
-      case 'cardiology':
-        return <Heart className="h-10 w-10 text-red-500" />;
-      case 'neurology':
-        return <Brain className="h-10 w-10 text-purple-500" />;
-      case 'orthopedics':
-        return <Bone className="h-10 w-10 text-gray-600" />;
-      case 'pediatrics':
-        return <HandHeart className="h-10 w-10 text-pink-500" />;
-      case 'dermatology':
-        return <Bandage className="h-10 w-10 text-amber-500" />;
-      case 'ophthalmology':
-        return <Eye className="h-10 w-10 text-blue-500" />;
-      case 'pathology':
-        return <Microscope className="h-10 w-10 text-emerald-600" />;
-      case 'radiology':
-        return <Scan className="h-10 w-10 text-indigo-500" />;
-      default:
-        return <Stethoscope className="h-10 w-10 text-slate-700" />;
-    }
+    const name = specialty.name.toLowerCase();
+    
+    if (name.includes('cardio')) return <Heart className="h-10 w-10 text-red-500" />;
+    if (name.includes('neuro')) return <Brain className="h-10 w-10 text-purple-500" />;
+    if (name.includes('ortho')) return <Bone className="h-10 w-10 text-gray-600" />;
+    if (name.includes('pediatric')) return <Baby className="h-10 w-10 text-pink-500" />;
+    if (name.includes('derma')) return <Scissors className="h-10 w-10 text-amber-500" />;
+    if (name.includes('ophtha') || name.includes('eye')) return <Eye className="h-10 w-10 text-blue-500" />;
+    if (name.includes('patho')) return <Microscope className="h-10 w-10 text-emerald-600" />;
+    if (name.includes('radio')) return <Scan className="h-10 w-10 text-indigo-500" />;
+    if (name.includes('pulmo') || name.includes('respir')) return <Lungs className="h-10 w-10 text-blue-400" />;
+    if (name.includes('emerg')) return <FirstAid className="h-10 w-10 text-red-600" />;
+    if (name.includes('pharma')) return <Pill className="h-10 w-10 text-green-500" />;
+    if (name.includes('immun')) return <Syringe className="h-10 w-10 text-teal-500" />;
+    if (name.includes('infect')) return <Virus className="h-10 w-10 text-orange-500" />;
+    if (name.includes('anesth')) return <Needle className="h-10 w-10 text-gray-500" />;
+    if (name.includes('family') || name.includes('general')) return <Thermometer className="h-10 w-10 text-green-600" />;
+    if (name.includes('psych') || name.includes('mental')) return <BookOpen className="h-10 w-10 text-violet-500" />;
+    
+    // Default icon if no match
+    return <Stethoscope className="h-10 w-10 text-slate-700" />;
   };
 
   return (

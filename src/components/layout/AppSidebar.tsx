@@ -18,7 +18,7 @@ import {
   useSidebar
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, UserCircle, Settings, Users, Moon, Sun, LogOut } from 'lucide-react';
+import { LayoutDashboard, UserCircle, Settings, Users, Moon, Sun, LogOut, BookMedical } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTranslation } from 'react-i18next';
@@ -60,7 +60,12 @@ export function AppSidebar() {
     <Sidebar className="border-r dark:border-gray-800 dark:bg-[#1A1F2C] shadow-sm transition-all duration-200" collapsible="icon">
       <SidebarHeader className="flex h-14 items-center px-4 border-b dark:border-gray-800 relative">
         <div className="flex items-center">
-          <span className={`font-bold text-primary ${state === 'collapsed' ? 'hidden' : 'block'}`}>{t('app.name')}</span>
+          <div className="flex items-center gap-2">
+            <span className="flex items-center justify-center bg-primary text-primary-foreground rounded-md w-8 h-8">
+              <BookMedical className="h-5 w-5" />
+            </span>
+            <span className={`font-bold text-primary ${state === 'collapsed' ? 'hidden' : 'block'}`}>{t('app.name')}</span>
+          </div>
         </div>
         <SidebarTrigger className="absolute right-2 top-1/2 transform -translate-y-1/2 z-50 shadow-sm" />
       </SidebarHeader>
