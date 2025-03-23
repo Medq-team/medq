@@ -31,6 +31,9 @@ export async function signInWithGoogle() {
       return { data: null, error };
     }
 
+    // If successful, the user will be redirected to the Google authentication page
+    // and then back to the redirectTo URL specified above
+    console.log('Google authentication flow initiated', data);
     return { data, error: null };
   } catch (error) {
     console.error('Google sign in error:', error);

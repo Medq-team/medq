@@ -1,4 +1,5 @@
 
+// Export the authentication functions from their respective modules
 export { signIn, signUp, signOut } from './basic';
 export { signInWithGoogle } from './oauth';
 export { resetPassword, updatePassword } from './password';
