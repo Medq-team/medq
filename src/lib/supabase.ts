@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 import { toast } from '../hooks/use-toast';
 
@@ -276,3 +275,5 @@ export async function getUserRole() {
     return 'student'; // Default to student on error
   }
 }
+
+export { fetchReports, updateReportStatus } from './lib/supabase/reports';
