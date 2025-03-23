@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { signOut } from '@/lib/supabase';
 import {
@@ -22,10 +22,12 @@ import { LayoutDashboard, UserCircle, Settings, Users, Moon, Sun, LogOut, Stetho
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTranslation } from 'react-i18next';
+import { toast } from '@/hooks/use-toast';
 
 export function AppSidebar() {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, refreshUser } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const { state, setOpen } = useSidebar();
   const { theme, setTheme } = useTheme();
   const { t } = useTranslation();
@@ -49,7 +51,32 @@ export function AppSidebar() {
   }
 
   const handleSignOut = async () => {
-    await signOut();
+    try {
+      const { error } = await signOut();
+      
+      if (error) {
+        console.error('Sign out error:', error);
+        toast({
+          title: t('auth.signOutError'),
+          description: error.message || t('auth.unexpectedError'),
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Force refresh the user state to ensure UI updates
+      await refreshUser();
+      
+      // Navigate to auth page after successful sign out
+      navigate('/auth');
+    } catch (err) {
+      console.error('Unexpected sign out error:', err);
+      toast({
+        title: t('auth.signOutError'),
+        description: t('auth.unexpectedError'),
+        variant: "destructive",
+      });
+    }
   };
 
   const toggleTheme = () => {

@@ -12,15 +12,40 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { LogOut, Settings, User, Heart, Stethoscope } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { toast } from '@/hooks/use-toast';
 
 export function AppHeader() {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, refreshUser } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
 
   const handleSignOut = async () => {
-    await signOut();
-    navigate('/auth');
+    try {
+      const { error } = await signOut();
+      
+      if (error) {
+        console.error('Sign out error:', error);
+        toast({
+          title: t('auth.signOutError'),
+          description: error.message || t('auth.unexpectedError'),
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Force refresh the user state to ensure UI updates
+      await refreshUser();
+      
+      // Navigate to auth page after successful sign out
+      navigate('/auth');
+    } catch (err) {
+      console.error('Unexpected sign out error:', err);
+      toast({
+        title: t('auth.signOutError'),
+        description: t('auth.unexpectedError'),
+        variant: "destructive",
+      });
+    }
   };
 
   return (

@@ -118,9 +118,12 @@ export async function signUp(email: string, password: string) {
 
 export async function signOut() {
   try {
+    // Clear any local session data first
+    console.log('Signing out user...');
     const { error } = await supabase.auth.signOut();
     
     if (error) {
+      console.error('Sign out error:', error);
       toast({
         title: "Sign out error",
         description: error.message,
@@ -129,6 +132,11 @@ export async function signOut() {
       return { error };
     }
 
+    console.log('Sign out successful');
+    toast({
+      title: "Sign out successful",
+      description: "You have been successfully signed out",
+    });
     return { error: null };
   } catch (error) {
     console.error('Sign out error:', error);
