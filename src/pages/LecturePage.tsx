@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { MCQQuestion } from '@/components/questions/MCQQuestion';
 import { OpenQuestion } from '@/components/questions/OpenQuestion';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { QuestionForm } from '@/components/admin/QuestionForm';
 import { LectureHeader } from '@/components/lectures/LectureHeader';
 import { LectureProgress } from '@/components/lectures/LectureProgress';
@@ -45,6 +45,9 @@ export default function LecturePage() {
           <DialogContent className="max-w-3xl max-h-[90vh]">
             <DialogHeader>
               <DialogTitle>Add New Question</DialogTitle>
+              <DialogDescription>
+                Create a new question for this lecture. Questions help students test their knowledge.
+              </DialogDescription>
             </DialogHeader>
             <ScrollArea className="max-h-[calc(90vh-120px)] pr-4">
               {lectureId && (

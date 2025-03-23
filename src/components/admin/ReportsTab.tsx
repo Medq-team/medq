@@ -43,7 +43,7 @@ export function ReportsTab() {
     setIsLoading(true);
     try {
       const { data, error } = await supabase
-        .from('question_reports')
+        .from('reports')
         .select(`
           *,
           question:question_id(text, type),
@@ -70,7 +70,7 @@ export function ReportsTab() {
   const handleUpdateStatus = async (reportId: string, newStatus: 'pending' | 'reviewed' | 'dismissed') => {
     try {
       const { error } = await supabase
-        .from('question_reports')
+        .from('reports')
         .update({ status: newStatus })
         .eq('id', reportId);
         

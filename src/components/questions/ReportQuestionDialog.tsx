@@ -6,12 +6,14 @@ import { Flag } from 'lucide-react';
 import { Question } from '@/types';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogTrigger,
   DialogFooter,
   DialogClose,
@@ -27,6 +29,7 @@ export function ReportQuestionDialog({ question, lectureId }: ReportQuestionDial
   const [reportMessage, setReportMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { t } = useTranslation();
+  const { user } = useAuth();
   
   const handleSubmitReport = async () => {
     if (!reportMessage.trim()) return;
@@ -34,15 +37,22 @@ export function ReportQuestionDialog({ question, lectureId }: ReportQuestionDial
     setIsSubmitting(true);
     
     try {
+      console.log('Submitting report for question:', question.id);
+      
       const { error } = await supabase
-        .from('question_reports')
+        .from('reports')
         .insert({
           question_id: question.id,
           lecture_id: lectureId,
           message: reportMessage,
+          user_id: user?.id || null,
+          status: 'pending'
         });
         
-      if (error) throw error;
+      if (error) {
+        console.error('Error details:', error);
+        throw error;
+      }
       
       toast({
         title: t('reports.reportSubmitted'),
@@ -78,6 +88,9 @@ export function ReportQuestionDialog({ question, lectureId }: ReportQuestionDial
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t('reports.reportQuestion')}</DialogTitle>
+          <DialogDescription>
+            {t('reports.reportDescription')}
+          </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-4 py-4">
