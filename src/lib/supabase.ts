@@ -276,4 +276,4 @@ export async function getUserRole() {
   }
 }
 
-export { fetchReports, updateReportStatus } from './lib/supabase/reports';
+export { fetchReports, updateReportStatus } from './supabase/reports';
