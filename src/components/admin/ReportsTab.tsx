@@ -42,6 +42,7 @@ export function ReportsTab() {
   const fetchReports = async () => {
     setIsLoading(true);
     try {
+      console.log('Fetching reports from the database...');
       const { data, error } = await supabase
         .from('reports')
         .select(`
@@ -52,8 +53,12 @@ export function ReportsTab() {
         `)
         .order('created_at', { ascending: false });
         
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching reports:', error);
+        throw error;
+      }
       
+      console.log('Reports fetched:', data);
       setReports(data || []);
     } catch (error) {
       console.error('Error fetching reports:', error);
@@ -69,12 +74,16 @@ export function ReportsTab() {
   
   const handleUpdateStatus = async (reportId: string, newStatus: 'pending' | 'reviewed' | 'dismissed') => {
     try {
+      console.log(`Updating report ${reportId} status to ${newStatus}`);
       const { error } = await supabase
         .from('reports')
         .update({ status: newStatus })
         .eq('id', reportId);
         
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating report status:', error);
+        throw error;
+      }
       
       // Update the local state
       setReports(prev => 

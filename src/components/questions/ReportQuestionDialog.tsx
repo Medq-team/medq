@@ -50,7 +50,7 @@ export function ReportQuestionDialog({ question, lectureId }: ReportQuestionDial
         });
         
       if (error) {
-        console.error('Error details:', error);
+        console.error('Error submitting report:', error);
         throw error;
       }
       
