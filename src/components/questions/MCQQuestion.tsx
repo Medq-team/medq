@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Question } from '@/types';
 import { AnimatePresence, motion } from 'framer-motion';
 import { MCQHeader } from './mcq/MCQHeader';
@@ -48,7 +48,7 @@ export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
     );
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(() => {
     if (selectedOptionIds.length === 0 || submitted) return;
     
     setSubmitted(true);
@@ -78,18 +78,35 @@ export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
     setExpandedExplanations(autoExpandIds);
     
     onSubmit(selectedOptionIds);
-  };
+  }, [correctAnswers, onSubmit, selectedOptionIds, submitted]);
 
   const handleQuestionUpdated = () => {
     // Reload the page to refresh the question data
     window.location.reload();
   };
 
-  // Add keyboard shortcut for submitting answer
+  // Add keyboard shortcuts for submitting answer and selecting options
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === '1') {
-        // Only trigger if not already submitted and there's at least one selection
+      // Don't process keyboard shortcuts when focus is on input elements
+      if (event.target instanceof HTMLInputElement || 
+          event.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+      
+      // Number keys 1-5 select options A-E (only if options exist)
+      if (!submitted && question.options && ['1', '2', '3', '4', '5'].includes(event.key)) {
+        const index = parseInt(event.key) - 1;
+        if (index < question.options.length) {
+          const optionId = question.options[index].id;
+          handleOptionSelect(optionId);
+        }
+      }
+      
+      // Spacebar to submit answer or go to next question
+      if (event.key === ' ' || event.key === 'Spacebar') {
+        event.preventDefault(); // Prevent page scrolling
+        
         if (!submitted && selectedOptionIds.length > 0) {
           handleSubmit();
         } else if (submitted) {
@@ -103,7 +120,7 @@ export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [submitted, selectedOptionIds, onNext]);
+  }, [question.options, submitted, selectedOptionIds, handleSubmit, onNext]);
 
   return (
     <motion.div

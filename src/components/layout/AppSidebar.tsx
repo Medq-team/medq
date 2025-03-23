@@ -32,8 +32,11 @@ export function AppSidebar() {
   
   useEffect(() => {
     const isDashboard = location.pathname === '/dashboard';
-    setOpen(isDashboard);
-  }, [location.pathname, setOpen]);
+    // Don't force sidebar state change on route change - only on initial load
+    if (location.key === 'default') {
+      setOpen(isDashboard);
+    }
+  }, [location.pathname, location.key, setOpen]);
   
   const menuItems = [
     { label: t('sidebar.dashboard'), icon: LayoutDashboard, href: '/dashboard' },
@@ -54,12 +57,12 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className="border-r dark:border-gray-800 dark:bg-[#1A1F2C]" collapsible="icon">
+    <Sidebar className="border-r dark:border-gray-800 dark:bg-[#1A1F2C] shadow-sm transition-all duration-200" collapsible="icon">
       <SidebarHeader className="flex h-14 items-center px-4 border-b dark:border-gray-800 relative">
         <div className="flex items-center">
           <span className={`font-bold text-primary ${state === 'collapsed' ? 'hidden' : 'block'}`}>{t('app.name')}</span>
         </div>
-        <SidebarTrigger className="absolute right-2 top-1/2 transform -translate-y-1/2 z-50" />
+        <SidebarTrigger className="absolute right-2 top-1/2 transform -translate-y-1/2 z-50 shadow-sm" />
       </SidebarHeader>
       
       <SidebarContent className="dark:bg-[#1A1F2C]">

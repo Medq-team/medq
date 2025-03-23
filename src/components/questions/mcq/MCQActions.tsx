@@ -1,7 +1,13 @@
 
 import { Button } from '@/components/ui/button';
-import { CheckCircle, XCircle, ArrowRight } from 'lucide-react';
+import { CheckCircle, XCircle, ArrowRight, Keyboard } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface MCQActionsProps {
   isSubmitted: boolean;
@@ -22,6 +28,34 @@ export function MCQActions({
   
   return (
     <div className="flex justify-between pt-4">
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex items-center text-xs text-muted-foreground">
+              <Keyboard className="h-3.5 w-3.5 mr-1" />
+              <span>
+                {isSubmitted ? "Spacebar: Next" : "1-5: Select options, Spacebar: Submit"}
+              </span>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent className="max-w-xs p-4">
+            <div className="space-y-2 text-sm">
+              <h4 className="font-semibold">Keyboard Shortcuts:</h4>
+              <ul className="space-y-1.5">
+                <li className="flex justify-between">
+                  <span className="font-mono bg-muted px-1.5 rounded text-xs">1-5</span>
+                  <span>Select answer options A-E</span>
+                </li>
+                <li className="flex justify-between">
+                  <span className="font-mono bg-muted px-1.5 rounded text-xs">Spacebar</span>
+                  <span>{isSubmitted ? "Next question" : "Submit answer"}</span>
+                </li>
+              </ul>
+            </div>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
       {!isSubmitted ? (
         <Button 
           onClick={onSubmit} 

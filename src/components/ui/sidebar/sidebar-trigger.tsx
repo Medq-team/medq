@@ -20,6 +20,13 @@ export const SidebarTrigger = React.forwardRef<
   const { toggleSidebar, state } = useSidebar()
   const { t } = useTranslation()
 
+  const handleClick = React.useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+    // Prevent event propagation to avoid double triggering
+    event.stopPropagation();
+    onClick?.(event);
+    toggleSidebar();
+  }, [onClick, toggleSidebar]);
+
   return (
     <Button
       ref={ref}
@@ -28,15 +35,13 @@ export const SidebarTrigger = React.forwardRef<
       size="icon"
       className={cn(
         "h-7 w-7 rounded-full bg-background border", 
-        "hover:bg-accent hover:text-accent-foreground transition-all duration-200",
+        "hover:bg-accent hover:text-accent-foreground transition-all duration-150",
         "hover:scale-105 focus:scale-105",
-        "absolute right-2 top-1/2 -translate-y-1/2 z-[100]", 
+        "absolute right-2 top-1/2 -translate-y-1/2 z-[100] shadow-sm", 
+        "will-change-transform",
         className
       )}
-      onClick={(event) => {
-        onClick?.(event)
-        toggleSidebar()
-      }}
+      onClick={handleClick}
       {...props}
     >
       {state === "expanded" ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
