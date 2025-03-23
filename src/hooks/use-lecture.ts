@@ -104,7 +104,7 @@ export function useLecture(lectureId: string | undefined) {
   };
 
   const handleBackToSpecialty = () => {
-    if (lecture) {
+    if (lecture && lecture.specialtyId) {
       navigate(`/specialty/${lecture.specialtyId}`);
     } else {
       navigate('/dashboard');

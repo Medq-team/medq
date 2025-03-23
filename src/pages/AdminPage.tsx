@@ -1,100 +1,75 @@
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Specialty, Lecture } from '@/types';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
+import { Lecture, Specialty } from '@/types';
 import { AdminStats } from '@/components/admin/AdminStats';
-import { SpecialtiesTab } from '@/components/admin/SpecialtiesTab';
 import { LecturesTab } from '@/components/admin/LecturesTab';
+import { SpecialtiesTab } from '@/components/admin/SpecialtiesTab';
+import { ReportsTab } from '@/components/admin/ReportsTab';
+import { useTranslation } from 'react-i18next';
 
 export default function AdminPage() {
   const { isAdmin } = useAuth();
   const navigate = useNavigate();
-  const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [lectures, setLectures] = useState<Lecture[]>([]);
+  const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [statsData, setStatsData] = useState({
-    specialtiesCount: 0,
-    lecturesCount: 0,
-    questionsCount: 0,
-    usersCount: 0
-  });
-
-  const fetchAdminData = async () => {
-    setIsLoading(true);
-    
-    try {
-      // Fetch specialties
-      const { data: specialtiesData, error: specialtiesError } = await supabase
-        .from('specialties')
-        .select('*')
-        .order('name');
-
-      if (specialtiesError) throw specialtiesError;
-      setSpecialties(specialtiesData || []);
-
-      // Fetch lectures
-      const { data: lecturesData, error: lecturesError } = await supabase
-        .from('lectures')
-        .select('*')
-        .order('title');
-
-      if (lecturesError) throw lecturesError;
-      setLectures(lecturesData || []);
-
-      // Fetch counts for stats
-      const [specialtiesCount, lecturesCount, questionsCount, usersCount] = await Promise.all([
-        supabase.from('specialties').select('id', { count: 'exact', head: true }),
-        supabase.from('lectures').select('id', { count: 'exact', head: true }),
-        supabase.from('questions').select('id', { count: 'exact', head: true }),
-        supabase.from('profiles').select('id', { count: 'exact', head: true })
-      ]);
-
-      setStatsData({
-        specialtiesCount: specialtiesCount.count || 0,
-        lecturesCount: lecturesCount.count || 0,
-        questionsCount: questionsCount.count || 0,
-        usersCount: usersCount.count || 0
-      });
-    } catch (error) {
-      console.error('Error fetching admin data:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load admin data. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+  const [activeTab, setActiveTab] = useState('lectures');
+  const { t } = useTranslation();
+  
   useEffect(() => {
     if (!isAdmin) {
       navigate('/dashboard');
       return;
     }
 
-    fetchAdminData();
+    async function fetchData() {
+      setIsLoading(true);
+      
+      try {
+        // Fetch lectures
+        const { data: lecturesData, error: lecturesError } = await supabase
+          .from('lectures')
+          .select('*')
+          .order('title');
+
+        if (lecturesError) throw lecturesError;
+        setLectures(lecturesData || []);
+
+        // Fetch specialties
+        const { data: specialtiesData, error: specialtiesError } = await supabase
+          .from('specialties')
+          .select('*')
+          .order('name');
+
+        if (specialtiesError) throw specialtiesError;
+        setSpecialties(specialtiesData || []);
+      } catch (error) {
+        console.error('Error fetching admin data:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load admin data. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchData();
   }, [isAdmin, navigate]);
 
-  const handleDeleteSpecialty = (specialtyId: string) => {
-    setSpecialties(specialties.filter(s => s.id !== specialtyId));
-    setStatsData(prev => ({
-      ...prev,
-      specialtiesCount: prev.specialtiesCount - 1
-    }));
+  const handleDeleteLecture = (id: string) => {
+    setLectures(lectures.filter(lecture => lecture.id !== id));
   };
 
-  const handleDeleteLecture = (lectureId: string) => {
-    setLectures(lectures.filter(l => l.id !== lectureId));
-    setStatsData(prev => ({
-      ...prev,
-      lecturesCount: prev.lecturesCount - 1
-    }));
+  const handleDeleteSpecialty = (id: string) => {
+    setSpecialties(specialties.filter(specialty => specialty.id !== id));
   };
 
   if (!isAdmin) {
@@ -103,29 +78,17 @@ export default function AdminPage() {
 
   return (
     <AppLayout>
-      <div className="space-y-6 animate-fade-in">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Admin Dashboard</h2>
-          <p className="text-muted-foreground">
-            Manage specialties, lectures, and questions
-          </p>
-        </div>
-
-        <AdminStats {...statsData} />
-
-        <Tabs defaultValue="specialties" className="w-full">
-          <TabsList className="mb-4">
-            <TabsTrigger value="specialties">Specialties</TabsTrigger>
-            <TabsTrigger value="lectures">Lectures</TabsTrigger>
+      <div className="space-y-6">
+        <h1 className="text-2xl font-bold">{t('admin.adminPanel')}</h1>
+        
+        <AdminStats lectures={lectures} specialties={specialties} />
+        
+        <Tabs defaultValue="lectures" value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid grid-cols-3 mb-8 w-full sm:w-auto">
+            <TabsTrigger value="lectures">{t('admin.lectures')}</TabsTrigger>
+            <TabsTrigger value="specialties">{t('admin.specialties')}</TabsTrigger>
+            <TabsTrigger value="reports">{t('admin.reports')}</TabsTrigger>
           </TabsList>
-          
-          <TabsContent value="specialties">
-            <SpecialtiesTab 
-              specialties={specialties} 
-              isLoading={isLoading} 
-              onDeleteSpecialty={handleDeleteSpecialty} 
-            />
-          </TabsContent>
           
           <TabsContent value="lectures">
             <LecturesTab 
@@ -133,6 +96,18 @@ export default function AdminPage() {
               isLoading={isLoading} 
               onDeleteLecture={handleDeleteLecture} 
             />
+          </TabsContent>
+          
+          <TabsContent value="specialties">
+            <SpecialtiesTab 
+              specialties={specialties} 
+              isLoading={isLoading}
+              onDeleteSpecialty={handleDeleteSpecialty}
+            />
+          </TabsContent>
+          
+          <TabsContent value="reports">
+            <ReportsTab />
           </TabsContent>
         </Tabs>
       </div>

@@ -26,7 +26,7 @@ export function LectureHeader({
         onClick={onBackClick}
       >
         <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
-        {t('lectures.backToSpecialty')}
+        {lecture?.specialtyId ? t('lectures.backToSpecialty') : t('common.back')}
       </Button>
       
       <DialogTrigger asChild>

@@ -7,9 +7,11 @@ import { OpenQuestionInput } from './open/OpenQuestionInput';
 import { OpenQuestionExplanation } from './open/OpenQuestionExplanation';
 import { OpenQuestionActions } from './open/OpenQuestionActions';
 import { QuestionEditDialog } from './QuestionEditDialog';
+import { ReportQuestionDialog } from './ReportQuestionDialog';
 import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
 
 interface OpenQuestionProps {
   question: Question;
@@ -22,6 +24,7 @@ export function OpenQuestion({ question, onSubmit, onNext }: OpenQuestionProps) 
   const [submitted, setSubmitted] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const { t } = useTranslation();
+  const { lectureId } = useParams<{ lectureId: string }>();
 
   const handleSubmit = () => {
     if (!answer.trim() || submitted) return;
@@ -70,15 +73,19 @@ export function OpenQuestion({ question, onSubmit, onNext }: OpenQuestionProps) 
           session={question.session}
         />
         
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => setIsEditDialogOpen(true)}
-          className="flex items-center gap-1"
-        >
-          <Pencil className="h-3.5 w-3.5" />
-          {t('common.edit')}
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setIsEditDialogOpen(true)}
+            className="flex items-center gap-1"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+            {t('common.edit')}
+          </Button>
+          
+          {lectureId && <ReportQuestionDialog question={question} lectureId={lectureId} />}
+        </div>
       </div>
 
       <OpenQuestionInput 
