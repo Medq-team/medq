@@ -1,3 +1,4 @@
+
 import { useParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { MCQQuestion } from '@/components/questions/MCQQuestion';
@@ -12,7 +13,10 @@ import { EmptyLectureState } from '@/components/lectures/EmptyLectureState';
 import { useLecture } from '@/hooks/use-lecture';
 import { AnimatePresence } from 'framer-motion';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useTranslation } from 'react-i18next';
+
 export default function LecturePage() {
+  const { t } = useTranslation();
   const {
     lectureId
   } = useParams<{
@@ -33,6 +37,7 @@ export default function LecturePage() {
     handleRestart,
     handleBackToSpecialty
   } = useLecture(lectureId);
+  
   return <AppLayout>
       <div className="space-y-6 max-w-3xl mx-auto">
         <Dialog open={isAddQuestionOpen} onOpenChange={setIsAddQuestionOpen}>
@@ -40,9 +45,9 @@ export default function LecturePage() {
           
           <DialogContent className="max-w-3xl max-h-[90vh]">
             <DialogHeader>
-              <DialogTitle>Add New Question</DialogTitle>
+              <DialogTitle>{t('admin.addNewQuestion')}</DialogTitle>
               <DialogDescription>
-                Create a new question for this lecture. Questions help students test their knowledge.
+                {t('questions.addQuestion')}
               </DialogDescription>
             </DialogHeader>
             <ScrollArea className="max-h-[calc(90vh-120px)] pr-4">
