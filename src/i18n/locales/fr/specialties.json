@@ -1,0 +1,17 @@
+
+{
+  "title": "Spécialités",
+  "addSpecialty": "Ajouter une spécialité",
+  "name": "Nom",
+  "description": "Description",
+  "imageUrl": "URL de l'image (optionnel)",
+  "creating": "Création en cours...",
+  "createSpecialty": "Créer une spécialité",
+  "adminOnly": "Admin seulement",
+  "success": "Succès",
+  "specialtyCreated": "La spécialité a été créée avec succès.",
+  "validationError": "Erreur de validation",
+  "nameRequired": "Le nom de la spécialité est requis.",
+  "deleteSpecialty": "Supprimer la spécialité",
+  "deleteConfirmation": "Êtes-vous sûr de vouloir supprimer cette spécialité? Cette action ne peut pas être annulée."
+}

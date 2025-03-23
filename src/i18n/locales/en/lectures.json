@@ -1,0 +1,19 @@
+
+{
+  "title": "Lectures",
+  "addLecture": "Add Lecture",
+  "startLecture": "Start Lecture",
+  "noDescription": "No description available",
+  "creating": "Creating...",
+  "createLecture": "Create Lecture",
+  "backToSpecialty": "Back to specialty",
+  "noQuestions": "No questions available",
+  "emptyLectureMessage": "This lecture doesn't have any questions yet. Be the first to add one!",
+  "addFirstQuestion": "Add first question",
+  "lectureComplete": "Lecture complete!",
+  "completionMessage": "You have completed all questions in this lecture.",
+  "restartLecture": "Restart lecture",
+  "deleteLecture": "Delete Lecture",
+  "deleteConfirmation": "Are you sure you want to delete this lecture? This will also delete all associated questions and cannot be undone.",
+  "searchPlaceholder": "Search lectures..."
+}

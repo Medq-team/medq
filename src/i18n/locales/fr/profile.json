@@ -1,0 +1,19 @@
+
+{
+  "profile": "Profil",
+  "viewUpdateInfo": "Voir et mettre à jour vos informations de profil.",
+  "accountInfo": "Informations du compte",
+  "personalInfo": "Vos informations personnelles et détails du compte.",
+  "emailCannotChange": "L'email ne peut pas être modifié.",
+  "firstName": "Prénom",
+  "lastName": "Nom",
+  "role": "Rôle",
+  "accessLevel": "Votre niveau d'accès dans le système.",
+  "student": "Étudiant",
+  "administrator": "Administrateur",
+  "editProfile": "Modifier le profil",
+  "saveChanges": "Enregistrer les modifications",
+  "profileUpdated": "Profil mis à jour",
+  "updateSuccess": "Vos informations de profil ont été mises à jour avec succès.",
+  "saving": "Enregistrement..."
+}

@@ -1,4 +1,5 @@
 
+import { useTranslation as useReactI18next } from 'react-i18next';
 import i18n from './index';
 
 /**
@@ -27,7 +28,7 @@ export function sanitizeTranslatedText(text: string): string {
  * to prevent duplicated language text
  */
 export function useEnhancedTranslation() {
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useReactI18next();
   
   const enhancedT = (key: string, options?: object) => {
     const translated = t(key, options);

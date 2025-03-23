@@ -1,0 +1,11 @@
+
+{
+  "dashboard": "Dashboard",
+  "profile": "Profile",
+  "settings": "Settings",
+  "admin": "Admin",
+  "collapseSidebar": "Collapse sidebar",
+  "expandSidebar": "Expand sidebar",
+  "lightMode": "Light mode",
+  "darkMode": "Dark mode"
+}

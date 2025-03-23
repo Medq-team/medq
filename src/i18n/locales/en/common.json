@@ -1,0 +1,25 @@
+
+{
+  "loading": "Loading...",
+  "error": "Error",
+  "tryAgain": "Please try again.",
+  "save": "Save",
+  "edit": "Edit",
+  "update": "Update",
+  "create": "Create",
+  "add": "Add",
+  "delete": "Delete",
+  "cancel": "Cancel",
+  "back": "Back",
+  "next": "Next",
+  "of": "of",
+  "complete": "Complete",
+  "yes": "Yes",
+  "no": "No",
+  "confirm": "Confirm",
+  "search": "Search",
+  "filter": "Filter",
+  "sort": "Sort",
+  "manage": "Manage",
+  "noResultsFound": "No results found"
+}
