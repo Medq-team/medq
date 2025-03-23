@@ -94,6 +94,8 @@ export default function AdminPage() {
     return null; // Will redirect in useEffect
   }
 
+  console.log('Current active tab:', activeTab);
+
   return (
     <AppLayout>
       <div className="space-y-6">

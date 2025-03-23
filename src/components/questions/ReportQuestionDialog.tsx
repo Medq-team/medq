@@ -38,6 +38,13 @@ export function ReportQuestionDialog({ question, lectureId }: ReportQuestionDial
     
     try {
       console.log('Submitting report for question:', question.id);
+      console.log('Report data:', {
+        question_id: question.id,
+        lecture_id: lectureId,
+        message: reportMessage,
+        user_id: user?.id || null,
+        status: 'pending'
+      });
       
       const { error } = await supabase
         .from('reports')
@@ -54,6 +61,7 @@ export function ReportQuestionDialog({ question, lectureId }: ReportQuestionDial
         throw error;
       }
       
+      console.log('Report submitted successfully');
       toast({
         title: t('reports.reportSubmitted'),
         description: t('reports.thankYouForReport'),

@@ -20,10 +20,10 @@ interface Report {
   question: {
     text: string;
     type: string;
-  };
+  } | null;
   lecture: {
     title: string;
-  };
+  } | null;
   profile: {
     email: string;
   } | null;
