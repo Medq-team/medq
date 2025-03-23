@@ -55,7 +55,7 @@ export default function LecturePage() {
             <LectureProgress lecture={lecture} currentQuestionIndex={currentQuestionIndex} totalQuestions={questions.length} progress={progress} />
 
             {isComplete ? <LectureComplete onRestart={handleRestart} onBackToSpecialty={handleBackToSpecialty} /> : currentQuestion ? <AnimatePresence mode="wait">
-                <div className="border rounded-lg p-6 shadow-sm bg-gray-800">
+                <div className="border rounded-lg p-6 shadow-sm bg-inherit dark:bg-gray-800">
                   {currentQuestion.type === 'mcq' ? <MCQQuestion key={currentQuestion.id} question={currentQuestion} onSubmit={answer => handleAnswerSubmit(currentQuestion.id, answer)} onNext={handleNext} /> : <OpenQuestion key={currentQuestion.id} question={currentQuestion} onSubmit={answer => handleAnswerSubmit(currentQuestion.id, answer)} onNext={handleNext} />}
                 </div>
               </AnimatePresence> : null}
