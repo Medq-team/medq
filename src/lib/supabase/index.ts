@@ -10,3 +10,4 @@ export {
   updatePassword
 } from './auth';
 export { getUserRole } from './user';
+export { fetchReports, updateReportStatus } from './reports';

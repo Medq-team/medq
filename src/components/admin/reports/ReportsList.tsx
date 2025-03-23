@@ -1,11 +1,11 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ReportCard } from './ReportCard';
 import { Report } from './types';
+import { fetchReports, updateReportStatus } from '@/lib/supabase';
 
 export function ReportsList() {
   const [reports, setReports] = useState<Report[]>([]);
@@ -13,22 +13,14 @@ export function ReportsList() {
   const { t } = useTranslation();
   
   useEffect(() => {
-    fetchReports();
+    loadReports();
   }, []);
   
-  const fetchReports = async () => {
+  const loadReports = async () => {
     setIsLoading(true);
     try {
       console.log('Fetching reports from the database...');
-      const { data, error } = await supabase
-        .from('reports')
-        .select(`
-          *,
-          question:question_id(text, type),
-          lecture:lecture_id(title),
-          profile:user_id(email)
-        `)
-        .order('created_at', { ascending: false });
+      const { data, error } = await fetchReports();
         
       if (error) {
         console.error('Error fetching reports:', error);
@@ -52,10 +44,7 @@ export function ReportsList() {
   const handleUpdateStatus = async (reportId: string, newStatus: 'pending' | 'reviewed' | 'dismissed') => {
     try {
       console.log(`Updating report ${reportId} status to ${newStatus}`);
-      const { error } = await supabase
-        .from('reports')
-        .update({ status: newStatus })
-        .eq('id', reportId);
+      const { error } = await updateReportStatus(reportId, newStatus);
         
       if (error) {
         console.error('Error updating report status:', error);
