@@ -1,13 +1,14 @@
 
 import React, { useEffect, useState } from 'react';
-import { useBackgroundTasks, Task } from '@/hooks/use-background-tasks';
+import { useBackgroundTasksContext } from '@/contexts/BackgroundTasksContext';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { X, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Task } from '@/hooks/use-background-tasks';
 
 export function TaskIndicator() {
-  const { tasks, cancelTask, clearCompletedTasks, isVisible } = useBackgroundTasks();
+  const { tasks, cancelTask, clearCompletedTasks, isVisible } = useBackgroundTasksContext();
   const [showTasks, setShowTasks] = useState(false);
   const [hasNewUpdates, setHasNewUpdates] = useState(false);
   const [lastTaskCount, setLastTaskCount] = useState(0);
