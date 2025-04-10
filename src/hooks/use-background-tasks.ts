@@ -75,7 +75,7 @@ export function useBackgroundTasks() {
         break;
         
       case 'TASK_PROGRESS':
-        setTasks(prev => ({
+        setTasks((prev: Record<string, Task>) => ({
           ...prev,
           [payload.taskId]: {
             ...prev[payload.taskId],
@@ -87,7 +87,7 @@ export function useBackgroundTasks() {
         break;
         
       case 'TASK_COMPLETED':
-        setTasks(prev => ({
+        setTasks((prev: Record<string, Task>) => ({
           ...prev,
           [payload.taskId]: {
             ...prev[payload.taskId],
@@ -100,7 +100,7 @@ export function useBackgroundTasks() {
         break;
         
       case 'UPDATE_STORAGE':
-        setTasks(prev => ({
+        setTasks((prev: Record<string, Task>) => ({
           ...prev,
           [payload.task.id]: payload.task
         }));
@@ -153,7 +153,7 @@ export function useBackgroundTasks() {
 
   // Clear completed tasks
   const clearCompletedTasks = useCallback(() => {
-    setTasks(prev => {
+    setTasks((prev: Record<string, Task>) => {
       const newTasks = { ...prev };
       Object.keys(newTasks).forEach(taskId => {
         if (newTasks[taskId].status === 'completed' || newTasks[taskId].status === 'failed') {
