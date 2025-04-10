@@ -8,6 +8,7 @@ import { toast } from '@/hooks/use-toast';
 import { AddSpecialtyDialog } from '@/components/specialties/AddSpecialtyDialog';
 import { SpecialtiesList } from '@/components/specialties/SpecialtiesList';
 import { useTranslation } from 'react-i18next';
+import { DemoTaskButton } from '@/components/tasks/DemoTaskButton';
 
 export default function DashboardPage() {
   const { user, isAdmin } = useAuth();
@@ -63,10 +64,13 @@ export default function DashboardPage() {
             </p>
           </div>
           
-          <AddSpecialtyDialog 
-            onSpecialtyAdded={fetchSpecialties} 
-            userId={user?.id}
-          />
+          <div className="flex gap-2">
+            <DemoTaskButton />
+            <AddSpecialtyDialog 
+              onSpecialtyAdded={fetchSpecialties} 
+              userId={user?.id}
+            />
+          </div>
         </div>
 
         <SpecialtiesList 
