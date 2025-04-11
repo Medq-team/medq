@@ -9,7 +9,10 @@ export function useLecture(lectureId: string | undefined) {
   const navigate = useNavigate();
   const [lecture, setLecture] = useState<Lecture | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [answers, setAnswers] = useState<Record<string, any>>({});
   const [isLoading, setIsLoading] = useState(true);
+  const [isComplete, setIsComplete] = useState(false);
   const [isAddQuestionOpen, setIsAddQuestionOpen] = useState(false);
 
   useEffect(() => {
@@ -79,6 +82,27 @@ export function useLecture(lectureId: string | undefined) {
     fetchLectureAndQuestions();
   }, [lectureId, navigate, isAddQuestionOpen]);
 
+  const handleAnswerSubmit = (questionId: string, answer: any) => {
+    setAnswers({
+      ...answers,
+      [questionId]: answer
+    });
+  };
+
+  const handleNext = () => {
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    } else {
+      setIsComplete(true);
+    }
+  };
+
+  const handleRestart = () => {
+    setCurrentQuestionIndex(0);
+    setAnswers({});
+    setIsComplete(false);
+  };
+
   const handleBackToSpecialty = () => {
     if (lecture && lecture.specialtyId) {
       navigate(`/specialty/${lecture.specialtyId}`);
@@ -87,12 +111,25 @@ export function useLecture(lectureId: string | undefined) {
     }
   };
 
+  const currentQuestion = questions[currentQuestionIndex];
+  const progress = questions.length > 0 
+    ? ((currentQuestionIndex + (Object.keys(answers).includes(currentQuestion?.id) ? 1 : 0)) / questions.length) * 100
+    : 0;
+
   return {
     lecture,
     questions,
+    currentQuestionIndex,
+    answers,
     isLoading,
+    isComplete,
     isAddQuestionOpen,
     setIsAddQuestionOpen,
+    currentQuestion,
+    progress,
+    handleAnswerSubmit,
+    handleNext,
+    handleRestart,
     handleBackToSpecialty
   };
 }
