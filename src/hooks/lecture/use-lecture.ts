@@ -5,6 +5,7 @@ import { useLectureData } from './use-lecture-data';
 import { useLectureActions } from './use-lecture-actions';
 import { useLectureDialog } from './use-lecture-dialog';
 import { useCallback, useEffect } from 'react';
+import { useLectureProgress } from '../use-lecture-progress';
 
 export function useLecture(lectureId: string | undefined) {
   const navigate = useNavigate();
@@ -20,6 +21,9 @@ export function useLecture(lectureId: string | undefined) {
   
   // Handle dialog interactions
   useLectureDialog(lectureId, state, fetchQuestionByIndex);
+  
+  // Get lecture progress tracking
+  const { updateProgress } = useLectureProgress(lectureId);
   
   // Prefetch adjacent questions for smoother navigation
   useEffect(() => {
@@ -42,6 +46,14 @@ export function useLecture(lectureId: string | undefined) {
     lectureId, 
     state.totalQuestions
   ]);
+
+  // Update progress tracking when answers change
+  useEffect(() => {
+    if (lectureId && state.totalQuestions > 0) {
+      const answeredCount = Object.keys(state.answers).length;
+      updateProgress(state.totalQuestions, answeredCount, state.answers);
+    }
+  }, [lectureId, state.answers, state.totalQuestions, updateProgress]);
 
   // Computed properties
   const currentQuestion = state.questions[state.currentQuestionIndex];
