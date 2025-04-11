@@ -1,38 +1,56 @@
 
 import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface OpenQuestionActionsProps {
   isSubmitted: boolean;
   canSubmit: boolean;
   onSubmit: () => void;
   onNext: () => void;
+  onPrevious?: () => void;
+  showPrevious?: boolean;
 }
 
-export function OpenQuestionActions({ 
-  isSubmitted, 
-  canSubmit, 
-  onSubmit, 
-  onNext 
+export function OpenQuestionActions({
+  isSubmitted,
+  canSubmit,
+  onSubmit,
+  onNext,
+  onPrevious,
+  showPrevious = false
 }: OpenQuestionActionsProps) {
-  const { t } = useTranslation();
-  
   return (
-    <div className="flex justify-end space-x-3 pt-4">
-      {!isSubmitted ? (
-        <Button 
-          onClick={onSubmit} 
-          disabled={!canSubmit}
+    <div className="flex justify-between mt-6">
+      {showPrevious && onPrevious && (
+        <Button
+          variant="outline"
+          onClick={onPrevious}
+          className="flex items-center gap-1"
         >
-          {t('questions.submitAnswer')}
-        </Button>
-      ) : (
-        <Button onClick={onNext} className="group">
-          {t('questions.nextQuestion')}
-          <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+          <ChevronLeft className="h-4 w-4" />
+          Previous
         </Button>
       )}
+      
+      <div className={`flex gap-2 ${showPrevious ? 'ml-auto' : ''}`}>
+        {!isSubmitted ? (
+          <Button 
+            onClick={onSubmit} 
+            disabled={!canSubmit}
+            className="flex items-center gap-1"
+          >
+            Submit
+          </Button>
+        ) : (
+          <Button 
+            onClick={onNext}
+            className="flex items-center gap-1"
+          >
+            Next
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

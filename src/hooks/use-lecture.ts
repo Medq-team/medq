@@ -137,6 +137,7 @@ export function useLecture(lectureId: string | undefined) {
     lecture,
     questions,
     currentQuestionIndex,
+    setCurrentQuestionIndex,
     answers,
     isLoading,
     isComplete,
