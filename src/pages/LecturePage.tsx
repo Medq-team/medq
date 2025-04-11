@@ -103,14 +103,16 @@ export default function LecturePage() {
                       key={currentQuestion.id} 
                       question={currentQuestion} 
                       onSubmit={answer => handleAnswerSubmit(currentQuestion.id, answer)} 
-                      onNext={handleNext} 
+                      onNext={handleNext}
+                      onPrevious={handlePrevious}
                     />
                   ) : (
                     <OpenQuestion 
                       key={currentQuestion.id} 
                       question={currentQuestion} 
                       onSubmit={answer => handleAnswerSubmit(currentQuestion.id, answer)} 
-                      onNext={handleNext} 
+                      onNext={handleNext}
+                      onPrevious={handlePrevious}
                     />
                   )}
                 </AnimatePresence>

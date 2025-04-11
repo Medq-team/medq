@@ -59,8 +59,10 @@ export function useLecture(lectureId: string | undefined) {
   const handleQuestionSelect = useCallback((index: number) => {
     if (index >= 0 && index < state.totalQuestions) {
       state.setCurrentQuestionIndex(index);
+      // Make sure we fetch the question if it's not already loaded
+      fetchQuestionByIndex(index);
     }
-  }, [state]);
+  }, [state, fetchQuestionByIndex]);
 
   // Handler for navigating to previous question
   const handlePrevious = useCallback(() => {
