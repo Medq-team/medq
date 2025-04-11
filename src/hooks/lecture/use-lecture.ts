@@ -62,7 +62,7 @@ export function useLecture(lectureId: string | undefined) {
       // Make sure we fetch the question if it's not already loaded
       fetchQuestionByIndex(index);
     }
-  }, [state, fetchQuestionByIndex]);
+  }, [state, fetchQuestionByIndex, state.totalQuestions]);
 
   // Handler for navigating to previous question
   const handlePrevious = useCallback(() => {
@@ -70,6 +70,16 @@ export function useLecture(lectureId: string | undefined) {
       handleQuestionSelect(state.currentQuestionIndex - 1);
     }
   }, [state.currentQuestionIndex, handleQuestionSelect]);
+
+  // Handler for navigating to next question
+  const handleNext = useCallback(() => {
+    if (state.currentQuestionIndex < state.totalQuestions - 1) {
+      handleQuestionSelect(state.currentQuestionIndex + 1);
+    } else if (!state.isComplete) {
+      // If we're at the last question and not completed, mark as complete
+      state.setIsComplete(true);
+    }
+  }, [state.currentQuestionIndex, state.totalQuestions, state.isComplete, handleQuestionSelect, state]);
 
   // Computed properties
   const currentQuestion = state.questions[state.currentQuestionIndex];
@@ -103,6 +113,7 @@ export function useLecture(lectureId: string | undefined) {
     // Navigation helpers
     handleQuestionSelect,
     handlePrevious,
+    handleNext,
     
     // Data functions
     fetchQuestionByIndex

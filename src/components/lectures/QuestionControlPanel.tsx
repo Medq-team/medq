@@ -71,8 +71,8 @@ export function QuestionControlPanel({
     <div className="space-y-2">
       {Array.from({ length: totalQuestions }).map((_, index) => {
         const question = questions[index];
-        const isLoaded = question !== null && question !== undefined;
-        const isAnswered = isLoaded && answers[question?.id] !== undefined;
+        const isLoaded = question !== undefined;
+        const isAnswered = isLoaded && question?.id && answers[question.id] !== undefined;
         const isCurrent = index === currentQuestionIndex && !isComplete;
         
         return (

@@ -20,11 +20,7 @@ import { AnimatePresence } from 'framer-motion';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 export default function LecturePage() {
-  const {
-    lectureId
-  } = useParams<{
-    lectureId: string;
-  }>();
+  const { lectureId } = useParams<{ lectureId: string }>();
   
   const isVisible = useVisibility();
   
