@@ -31,6 +31,7 @@ export default function LecturePage() {
     lecture,
     questions,
     currentQuestionIndex,
+    setCurrentQuestionIndex,  // Added this line
     isLoading,
     isComplete,
     isAddQuestionOpen,
