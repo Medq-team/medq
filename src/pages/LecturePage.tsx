@@ -10,6 +10,7 @@ import { LectureHeader } from '@/components/lectures/LectureHeader';
 import { LectureProgress } from '@/components/lectures/LectureProgress';
 import { LectureComplete } from '@/components/lectures/LectureComplete';
 import { LectureLoadingState } from '@/components/lectures/LectureLoadingState';
+import { QuestionLoadingState } from '@/components/lectures/QuestionLoadingState';
 import { EmptyLectureState } from '@/components/lectures/EmptyLectureState';
 import { LectureTimer } from '@/components/lectures/LectureTimer';
 import { QuestionControlPanel } from '@/components/lectures/QuestionControlPanel';
@@ -30,9 +31,11 @@ export default function LecturePage() {
   const {
     lecture,
     questions,
+    totalQuestions,
     currentQuestionIndex,
-    setCurrentQuestionIndex,  // Added this line
+    setCurrentQuestionIndex,
     isLoading,
+    isLoadingQuestions,
     isComplete,
     isAddQuestionOpen,
     setIsAddQuestionOpen,
@@ -42,7 +45,8 @@ export default function LecturePage() {
     handleAnswerSubmit,
     handleNext,
     handleRestart,
-    handleBackToSpecialty
+    handleBackToSpecialty,
+    fetchQuestionByIndex
   } = useLecture(lectureId);
 
   // Log visibility state changes for debugging
@@ -52,7 +56,7 @@ export default function LecturePage() {
 
   // Add handler to navigate to specific question
   const handleQuestionSelect = (index: number) => {
-    if (index >= 0 && index < questions.length) {
+    if (index >= 0 && index < totalQuestions) {
       setCurrentQuestionIndex(index);
     }
   };
@@ -63,6 +67,21 @@ export default function LecturePage() {
       handleQuestionSelect(currentQuestionIndex - 1);
     }
   };
+
+  // Prefetch adjacent questions for smoother navigation
+  useEffect(() => {
+    if (!isLoading && !isComplete && lectureId) {
+      // Prefetch next question
+      if (currentQuestionIndex < totalQuestions - 1) {
+        fetchQuestionByIndex(currentQuestionIndex + 1);
+      }
+      
+      // Prefetch previous question
+      if (currentQuestionIndex > 0) {
+        fetchQuestionByIndex(currentQuestionIndex - 1);
+      }
+    }
+  }, [currentQuestionIndex, fetchQuestionByIndex, isComplete, isLoading, lectureId, totalQuestions]);
 
   return <AppLayout>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-6xl mx-auto">
@@ -75,7 +94,7 @@ export default function LecturePage() {
                 onAddQuestionClick={() => setIsAddQuestionOpen(true)} 
               />
               
-              {lectureId && !isLoading && questions.length > 0 && !isComplete && (
+              {lectureId && !isLoading && totalQuestions > 0 && !isComplete && (
                 <LectureTimer lectureId={lectureId} />
               )}
             </div>
@@ -93,22 +112,39 @@ export default function LecturePage() {
             </DialogContent>
           </Dialog>
 
-          {isLoading ? <LectureLoadingState /> : lecture && questions.length > 0 ? <>
-              <LectureProgress lecture={lecture} currentQuestionIndex={currentQuestionIndex} totalQuestions={questions.length} progress={progress} />
+          {isLoading ? <LectureLoadingState /> : lecture && totalQuestions > 0 ? <>
+              <LectureProgress lecture={lecture} currentQuestionIndex={currentQuestionIndex} totalQuestions={totalQuestions} progress={progress} />
 
-              {isComplete ? <LectureComplete onRestart={handleRestart} onBackToSpecialty={handleBackToSpecialty} /> : currentQuestion ? <AnimatePresence mode="wait">
-                  <div className="border rounded-lg p-6 shadow-sm bg-inherit dark:bg-gray-800">
-                    {currentQuestion.type === 'mcq' ? <MCQQuestion key={currentQuestion.id} question={currentQuestion} onSubmit={answer => handleAnswerSubmit(currentQuestion.id, answer)} onNext={handleNext} /> : <OpenQuestion key={currentQuestion.id} question={currentQuestion} onSubmit={answer => handleAnswerSubmit(currentQuestion.id, answer)} onNext={handleNext} />}
-                  </div>
-                </AnimatePresence> : null}
+              {isComplete ? <LectureComplete onRestart={handleRestart} onBackToSpecialty={handleBackToSpecialty} /> : (
+                <AnimatePresence mode="wait">
+                  {isLoadingQuestions || !currentQuestion ? (
+                    <QuestionLoadingState />
+                  ) : currentQuestion.type === 'mcq' ? (
+                    <MCQQuestion 
+                      key={currentQuestion.id} 
+                      question={currentQuestion} 
+                      onSubmit={answer => handleAnswerSubmit(currentQuestion.id, answer)} 
+                      onNext={handleNext} 
+                    />
+                  ) : (
+                    <OpenQuestion 
+                      key={currentQuestion.id} 
+                      question={currentQuestion} 
+                      onSubmit={answer => handleAnswerSubmit(currentQuestion.id, answer)} 
+                      onNext={handleNext} 
+                    />
+                  )}
+                </AnimatePresence>
+              )}
             </> : <EmptyLectureState onAddQuestion={() => setIsAddQuestionOpen(true)} />}
         </div>
         
         {/* Question Control Panel - only shown when we have questions */}
-        {!isLoading && questions.length > 0 && (
+        {!isLoading && totalQuestions > 0 && (
           <div className="md:col-span-1">
             <QuestionControlPanel 
               questions={questions}
+              totalQuestions={totalQuestions}
               currentQuestionIndex={currentQuestionIndex}
               answers={answers}
               onQuestionSelect={handleQuestionSelect}
