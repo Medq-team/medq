@@ -42,6 +42,7 @@ export default function LecturePage() {
     currentQuestion,
     progress,
     answers,
+    answeredCount,
     handleAnswerSubmit,
     handleNext,
     handleRestart,
@@ -113,7 +114,13 @@ export default function LecturePage() {
           </Dialog>
 
           {isLoading ? <LectureLoadingState /> : lecture && totalQuestions > 0 ? <>
-              <LectureProgress lecture={lecture} currentQuestionIndex={currentQuestionIndex} totalQuestions={totalQuestions} progress={progress} />
+              <LectureProgress 
+                lecture={lecture} 
+                currentQuestionIndex={currentQuestionIndex} 
+                totalQuestions={totalQuestions} 
+                answeredCount={answeredCount}
+                progress={progress} 
+              />
 
               {isComplete ? <LectureComplete onRestart={handleRestart} onBackToSpecialty={handleBackToSpecialty} /> : (
                 <AnimatePresence mode="wait">

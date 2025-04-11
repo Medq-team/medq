@@ -246,8 +246,9 @@ export function useLecture(lectureId: string | undefined) {
   };
 
   const currentQuestion = questions[currentQuestionIndex];
+  const answeredCount = Object.keys(answers).length;
   const progress = totalQuestions > 0 
-    ? ((currentQuestionIndex + (Object.keys(answers).includes(currentQuestion?.id) ? 1 : 0)) / totalQuestions) * 100
+    ? (answeredCount / totalQuestions) * 100
     : 0;
 
   return {
@@ -264,6 +265,7 @@ export function useLecture(lectureId: string | undefined) {
     setIsAddQuestionOpen,
     currentQuestion,
     progress,
+    answeredCount,
     handleAnswerSubmit,
     handleNext,
     handleRestart,
