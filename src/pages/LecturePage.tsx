@@ -1,5 +1,6 @@
 
 import { useParams } from 'react-router-dom';
+import { useEffect } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { MCQQuestion } from '@/components/questions/MCQQuestion';
 import { OpenQuestion } from '@/components/questions/OpenQuestion';
@@ -10,15 +11,21 @@ import { LectureProgress } from '@/components/lectures/LectureProgress';
 import { LectureComplete } from '@/components/lectures/LectureComplete';
 import { LectureLoadingState } from '@/components/lectures/LectureLoadingState';
 import { EmptyLectureState } from '@/components/lectures/EmptyLectureState';
+import { LectureTimer } from '@/components/lectures/LectureTimer';
 import { useLecture } from '@/hooks/use-lecture';
+import { useVisibility } from '@/hooks/use-visibility';
 import { AnimatePresence } from 'framer-motion';
 import { ScrollArea } from '@/components/ui/scroll-area';
+
 export default function LecturePage() {
   const {
     lectureId
   } = useParams<{
     lectureId: string;
   }>();
+  
+  const isVisible = useVisibility();
+  
   const {
     lecture,
     questions,
@@ -34,10 +41,26 @@ export default function LecturePage() {
     handleRestart,
     handleBackToSpecialty
   } = useLecture(lectureId);
+
+  // Log visibility state changes for debugging
+  useEffect(() => {
+    console.log(`Tab visibility changed: ${isVisible ? 'visible' : 'hidden'}`);
+  }, [isVisible]);
+
   return <AppLayout>
       <div className="space-y-6 max-w-3xl mx-auto">
         <Dialog open={isAddQuestionOpen} onOpenChange={setIsAddQuestionOpen}>
-          <LectureHeader lecture={lecture} onBackClick={handleBackToSpecialty} onAddQuestionClick={() => setIsAddQuestionOpen(true)} />
+          <div className="flex justify-between items-center mb-6">
+            <LectureHeader 
+              lecture={lecture} 
+              onBackClick={handleBackToSpecialty} 
+              onAddQuestionClick={() => setIsAddQuestionOpen(true)} 
+            />
+            
+            {lectureId && !isLoading && questions.length > 0 && !isComplete && (
+              <LectureTimer lectureId={lectureId} />
+            )}
+          </div>
           
           <DialogContent className="max-w-3xl max-h-[90vh]">
             <DialogHeader>
