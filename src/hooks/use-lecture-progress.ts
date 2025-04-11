@@ -47,8 +47,8 @@ export function useLectureProgress(lectureId: string | undefined) {
     setProgress(calculatedProgress);
     setIsComplete(newIsComplete);
     
-    // Update storage - fixed by explicitly typing the function return type
-    setProgressData((prev: LectureProgressData): LectureProgressData => ({
+    // Update storage with the functional update pattern
+    setProgressData((prev) => ({
       ...prev,
       [lectureId]: {
         totalQuestions,
@@ -68,8 +68,8 @@ export function useLectureProgress(lectureId: string | undefined) {
     setProgress(0);
     setIsComplete(false);
     
-    // Remove from storage - fixed by explicitly typing the function return type
-    setProgressData((prev: LectureProgressData): LectureProgressData => {
+    // Remove from storage with the functional update pattern
+    setProgressData((prev) => {
       const newData = { ...prev };
       if (newData[lectureId]) {
         delete newData[lectureId];
