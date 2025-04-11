@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useLocalStorage } from './use-local-storage';
 
-interface LectureProgressData {
+export interface LectureProgressData {
   [lectureId: string]: {
     totalQuestions: number;
     answeredCount: number;
@@ -47,8 +47,8 @@ export function useLectureProgress(lectureId: string | undefined) {
     setProgress(calculatedProgress);
     setIsComplete(newIsComplete);
     
-    // Update storage
-    setProgressData(prev => ({
+    // Update storage - fixed by explicitly typing the function return type
+    setProgressData((prev: LectureProgressData): LectureProgressData => ({
       ...prev,
       [lectureId]: {
         totalQuestions,
@@ -68,8 +68,8 @@ export function useLectureProgress(lectureId: string | undefined) {
     setProgress(0);
     setIsComplete(false);
     
-    // Remove from storage
-    setProgressData(prev => {
+    // Remove from storage - fixed by explicitly typing the function return type
+    setProgressData((prev: LectureProgressData): LectureProgressData => {
       const newData = { ...prev };
       if (newData[lectureId]) {
         delete newData[lectureId];
