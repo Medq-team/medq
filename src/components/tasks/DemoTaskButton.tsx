@@ -1,29 +1,42 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { LightbulbIcon } from 'lucide-react';
 import { useBackgroundTasksContext } from '@/contexts/BackgroundTasksContext';
-import { PlayCircle } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 export function DemoTaskButton() {
   const { createTask, isReady } = useBackgroundTasksContext();
 
-  const handleStartTask = () => {
+  const startDemoTask = () => {
     if (!isReady) {
-      console.error('Background task system is not ready');
+      toast({
+        title: "Task system not ready",
+        description: "Please wait a moment and try again.",
+        variant: "destructive",
+      });
       return;
     }
 
-    // Create a sample background task
-    createTask('Demo Task', {
-      description: 'This is a demo background task',
-      timestamp: Date.now()
-    });
+    const taskId = createTask('demo-task', { message: 'This is a test task' });
+    
+    if (taskId) {
+      toast({
+        title: "Demo task started",
+        description: "Check the task indicator to see progress.",
+      });
+    }
   };
 
   return (
-    <Button onClick={handleStartTask} variant="outline" disabled={!isReady}>
-      <PlayCircle className="h-4 w-4 mr-2" />
-      Start Demo Background Task
+    <Button 
+      onClick={startDemoTask} 
+      variant="outline" 
+      size="sm" 
+      className="flex items-center gap-1"
+    >
+      <LightbulbIcon className="h-4 w-4" />
+      Demo Task
     </Button>
   );
 }
