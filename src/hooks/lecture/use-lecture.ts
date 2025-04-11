@@ -55,6 +55,20 @@ export function useLecture(lectureId: string | undefined) {
     }
   }, [lectureId, state.answers, state.totalQuestions, updateProgress]);
 
+  // Handler for navigating to specific question
+  const handleQuestionSelect = useCallback((index: number) => {
+    if (index >= 0 && index < state.totalQuestions) {
+      state.setCurrentQuestionIndex(index);
+    }
+  }, [state]);
+
+  // Handler for navigating to previous question
+  const handlePrevious = useCallback(() => {
+    if (state.currentQuestionIndex > 0) {
+      handleQuestionSelect(state.currentQuestionIndex - 1);
+    }
+  }, [state.currentQuestionIndex, handleQuestionSelect]);
+
   // Computed properties
   const currentQuestion = state.questions[state.currentQuestionIndex];
   const answeredCount = Object.keys(state.answers).length;
@@ -83,6 +97,10 @@ export function useLecture(lectureId: string | undefined) {
     
     // Actions
     ...actions,
+    
+    // Navigation helpers
+    handleQuestionSelect,
+    handlePrevious,
     
     // Data functions
     fetchQuestionByIndex

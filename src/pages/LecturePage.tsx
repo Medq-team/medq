@@ -33,7 +33,6 @@ export default function LecturePage() {
     questions,
     totalQuestions,
     currentQuestionIndex,
-    setCurrentQuestionIndex,
     isLoading,
     isLoadingQuestions,
     isComplete,
@@ -45,6 +44,8 @@ export default function LecturePage() {
     answeredCount,
     handleAnswerSubmit,
     handleNext,
+    handlePrevious,
+    handleQuestionSelect,
     handleRestart,
     handleBackToSpecialty,
     fetchQuestionByIndex
@@ -54,35 +55,6 @@ export default function LecturePage() {
   useEffect(() => {
     console.log(`Tab visibility changed: ${isVisible ? 'visible' : 'hidden'}`);
   }, [isVisible]);
-
-  // Add handler to navigate to specific question
-  const handleQuestionSelect = (index: number) => {
-    if (index >= 0 && index < totalQuestions) {
-      setCurrentQuestionIndex(index);
-    }
-  };
-
-  // Add handler for previous question
-  const handlePrevious = () => {
-    if (currentQuestionIndex > 0) {
-      handleQuestionSelect(currentQuestionIndex - 1);
-    }
-  };
-
-  // Prefetch adjacent questions for smoother navigation
-  useEffect(() => {
-    if (!isLoading && !isComplete && lectureId) {
-      // Prefetch next question
-      if (currentQuestionIndex < totalQuestions - 1) {
-        fetchQuestionByIndex(currentQuestionIndex + 1);
-      }
-      
-      // Prefetch previous question
-      if (currentQuestionIndex > 0) {
-        fetchQuestionByIndex(currentQuestionIndex - 1);
-      }
-    }
-  }, [currentQuestionIndex, fetchQuestionByIndex, isComplete, isLoading, lectureId, totalQuestions]);
 
   return <AppLayout>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-6xl mx-auto">

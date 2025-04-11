@@ -17,7 +17,7 @@ export function OpenQuestionActions({
   onSubmit,
   onNext,
   onPrevious,
-  showPrevious = false
+  showPrevious = true
 }: OpenQuestionActionsProps) {
   return (
     <div className="flex justify-between mt-6">
@@ -32,7 +32,7 @@ export function OpenQuestionActions({
         </Button>
       )}
       
-      <div className={`flex gap-2 ${showPrevious ? 'ml-auto' : ''}`}>
+      <div className={`flex gap-2 ${showPrevious && onPrevious ? 'ml-auto' : ''}`}>
         {!isSubmitted ? (
           <Button 
             onClick={onSubmit} 
