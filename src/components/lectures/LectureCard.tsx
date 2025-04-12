@@ -1,4 +1,3 @@
-
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,44 +8,48 @@ import { useTranslation } from 'react-i18next';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { useLectureProgress, ProgressStatus } from '@/hooks/use-lecture-progress';
-
 interface LectureCardProps {
   lecture: Lecture;
 }
-
-export function LectureCard({ lecture }: LectureCardProps) {
+export function LectureCard({
+  lecture
+}: LectureCardProps) {
   const navigate = useNavigate();
-  const { t } = useTranslation();
-  const { getLectureProgress } = useLectureProgress();
+  const {
+    t
+  } = useTranslation();
+  const {
+    getLectureProgress
+  } = useLectureProgress();
   const progress = getLectureProgress(lecture.id);
-
   const handleClick = () => {
     navigate(`/lecture/${lecture.id}`);
   };
-
   const getStatusBadge = (status: ProgressStatus) => {
-    switch(status) {
+    switch (status) {
       case 'completed':
-        return (
-          <Badge className="bg-green-500 hover:bg-green-600 flex gap-1 items-center">
+        return <Badge className="bg-green-500 hover:bg-green-600 flex gap-1 items-center mx-0 px-0">
             <CheckCircle2 className="h-3 w-3" />
             {t('lectures.completed')}
-          </Badge>
-        );
+          </Badge>;
       case 'in-progress':
         return <Badge variant="secondary">{t('lectures.inProgress')}</Badge>;
       default:
         return <Badge variant="outline">{t('lectures.notStarted')}</Badge>;
     }
   };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      transition={{ duration: 0.3 }}
-    >
+  return <motion.div initial={{
+    opacity: 0,
+    y: 10
+  }} animate={{
+    opacity: 1,
+    y: 0
+  }} exit={{
+    opacity: 0,
+    y: -10
+  }} transition={{
+    duration: 0.3
+  }}>
       <Card className="h-full flex flex-col">
         <CardContent className="flex-grow pt-6">
           <div className="flex items-start gap-4">
@@ -62,8 +65,7 @@ export function LectureCard({ lecture }: LectureCardProps) {
                 {lecture.description || t('lectures.noDescription')}
               </p>
               
-              {progress && (
-                <div className="mt-2">
+              {progress && <div className="mt-2">
                   <div className="flex justify-between text-xs mb-1">
                     <span className="text-muted-foreground">
                       {progress.answeredCount} / {progress.totalQuestions} {t('common.answered')}
@@ -73,21 +75,15 @@ export function LectureCard({ lecture }: LectureCardProps) {
                     </span>
                   </div>
                   <Progress value={progress.progress} className="h-1" />
-                </div>
-              )}
+                </div>}
             </div>
           </div>
         </CardContent>
         <CardFooter className="border-t pt-4">
           <Button onClick={handleClick} className="w-full">
-            {progress?.status === 'in-progress' 
-              ? t('lectures.continueLecture') 
-              : progress?.status === 'completed'
-                ? t('lectures.reviewLecture')
-                : t('lectures.startLecture')}
+            {progress?.status === 'in-progress' ? t('lectures.continueLecture') : progress?.status === 'completed' ? t('lectures.reviewLecture') : t('lectures.startLecture')}
           </Button>
         </CardFooter>
       </Card>
-    </motion.div>
-  );
+    </motion.div>;
 }
