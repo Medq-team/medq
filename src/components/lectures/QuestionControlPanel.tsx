@@ -7,6 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { ChevronLeft, ChevronRight, CheckCircle, Circle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface QuestionControlPanelProps {
   questions: Question[];
@@ -71,18 +72,18 @@ export function QuestionControlPanel({
     <div className="space-y-2">
       {Array.from({ length: totalQuestions }).map((_, index) => {
         const question = questions[index];
-        const isLoaded = question !== undefined;
-        const isAnswered = isLoaded && question?.id && answers[question.id] !== undefined;
+        const isLoaded = question !== null && question !== undefined;
+        const isAnswered = isLoaded && answers[question.id] !== undefined;
         const isCurrent = index === currentQuestionIndex && !isComplete;
         
         return (
           <Button
             key={`question-${index}`}
-            variant={isCurrent ? "default" : "outline"}
+            variant="outline"
             className={cn(
               "w-full justify-start",
               isCurrent && "border-primary",
-              isAnswered && !isCurrent && "bg-muted"
+              isAnswered && "bg-muted"
             )}
             onClick={() => {
               onQuestionSelect(index);
@@ -91,7 +92,7 @@ export function QuestionControlPanel({
             disabled={isComplete}
           >
             <div className="flex items-center w-full">
-              <span className="mr-2">Q{isLoaded && question?.number ? question.number : index + 1}</span>
+              <span className="mr-2">Q{isLoaded && question.number ? question.number : index + 1}</span>
               
               {isAnswered ? (
                 <CheckCircle className="h-4 w-4 text-primary ml-auto" />
@@ -125,7 +126,7 @@ export function QuestionControlPanel({
           onNext();
           setIsDrawerOpen(false);
         }}
-        disabled={currentQuestionIndex >= totalQuestions - 1 || isComplete}
+        disabled={isComplete}
       >
         Next
         <ChevronRight className="h-4 w-4 ml-2" />

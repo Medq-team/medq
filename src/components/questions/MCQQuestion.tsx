@@ -17,10 +17,9 @@ interface MCQQuestionProps {
   question: Question;
   onSubmit: (selectedOptionIds: string[]) => void;
   onNext: () => void;
-  onPrevious?: () => void;
 }
 
-export function MCQQuestion({ question, onSubmit, onNext, onPrevious }: MCQQuestionProps) {
+export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
   const [selectedOptionIds, setSelectedOptionIds] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
@@ -31,49 +30,6 @@ export function MCQQuestion({ question, onSubmit, onNext, onPrevious }: MCQQuest
 
   // Get correct answers array from question
   const correctAnswers = question.correctAnswers || question.correct_answers || [];
-
-  // Load saved answer if it exists
-  useEffect(() => {
-    if (question && question.id) {
-      const savedAnswer = localStorage.getItem(`lecture-${lectureId}-answers`);
-      if (savedAnswer) {
-        try {
-          const answers = JSON.parse(savedAnswer);
-          if (answers[question.id]) {
-            setSelectedOptionIds(answers[question.id]);
-            setSubmitted(true);
-            
-            // Calculate if answer is correct
-            const allCorrectSelected = correctAnswers.every(id => answers[question.id].includes(id));
-            const noIncorrectSelected = answers[question.id].every(id => correctAnswers.includes(id));
-            setIsCorrect(allCorrectSelected && noIncorrectSelected);
-
-            // Auto-expand explanations for saved answers
-            const autoExpandIds: string[] = [];
-            answers[question.id].forEach((id: string) => {
-              if (!correctAnswers.includes(id)) {
-                autoExpandIds.push(id);
-              }
-            });
-            correctAnswers.forEach(id => {
-              if (!answers[question.id].includes(id)) {
-                autoExpandIds.push(id);
-              }
-            });
-            setExpandedExplanations(autoExpandIds);
-          } else {
-            // Reset state for a new question
-            setSelectedOptionIds([]);
-            setSubmitted(false);
-            setIsCorrect(null);
-            setExpandedExplanations([]);
-          }
-        } catch (e) {
-          console.error('Error parsing saved answers:', e);
-        }
-      }
-    }
-  }, [question, lectureId, correctAnswers]);
 
   // Handle checkbox change
   const handleOptionSelect = (optionId: string) => {
@@ -230,8 +186,6 @@ export function MCQQuestion({ question, onSubmit, onNext, onPrevious }: MCQQuest
         isCorrect={isCorrect}
         onSubmit={handleSubmit}
         onNext={onNext}
-        onPrevious={onPrevious}
-        showPrevious={!!onPrevious}
       />
       
       <QuestionEditDialog

@@ -1,6 +1,13 @@
 
 import { Button } from '@/components/ui/button';
-import { CheckCircle, XCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { CheckCircle, XCircle, ArrowRight, Keyboard } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface MCQActionsProps {
   isSubmitted: boolean;
@@ -8,62 +15,76 @@ interface MCQActionsProps {
   isCorrect: boolean | null;
   onSubmit: () => void;
   onNext: () => void;
-  onPrevious?: () => void;
-  showPrevious?: boolean;
 }
 
-export function MCQActions({
-  isSubmitted,
-  canSubmit,
-  isCorrect,
-  onSubmit,
-  onNext,
-  onPrevious,
-  showPrevious = true
+export function MCQActions({ 
+  isSubmitted, 
+  canSubmit, 
+  isCorrect, 
+  onSubmit, 
+  onNext 
 }: MCQActionsProps) {
+  const { t } = useTranslation();
+  
   return (
-    <div className="flex justify-between mt-6">
-      {showPrevious && onPrevious && (
-        <Button
-          variant="outline"
-          onClick={onPrevious}
-          className="flex items-center gap-1"
+    <div className="flex justify-between pt-4">
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex items-center text-xs text-muted-foreground">
+              <Keyboard className="h-3.5 w-3.5 mr-1" />
+              <span>
+                {isSubmitted ? "Spacebar: Next" : "1-5: Select options, Spacebar: Submit"}
+              </span>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent className="max-w-xs p-4">
+            <div className="space-y-2 text-sm">
+              <h4 className="font-semibold">Keyboard Shortcuts:</h4>
+              <ul className="space-y-1.5">
+                <li className="flex justify-between">
+                  <span className="font-mono bg-muted px-1.5 rounded text-xs">1-5</span>
+                  <span>Select answer options A-E</span>
+                </li>
+                <li className="flex justify-between">
+                  <span className="font-mono bg-muted px-1.5 rounded text-xs">Spacebar</span>
+                  <span>{isSubmitted ? "Next question" : "Submit answer"}</span>
+                </li>
+              </ul>
+            </div>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
+      {!isSubmitted ? (
+        <Button 
+          onClick={onSubmit} 
+          disabled={!canSubmit}
+          className="ml-auto"
         >
-          <ChevronLeft className="h-4 w-4" />
-          Previous
+          {t('questions.submitAnswer')}
         </Button>
-      )}
-      
-      <div className={`flex gap-2 ${showPrevious && onPrevious ? 'ml-auto' : ''}`}>
-        {!isSubmitted ? (
-          <Button 
-            onClick={onSubmit} 
-            disabled={!canSubmit}
-            className="flex items-center gap-1"
-          >
-            Submit
-          </Button>
-        ) : (
-          <>
-            {isCorrect !== null && (
-              <div className="flex items-center mr-2">
-                {isCorrect ? (
-                  <CheckCircle className="text-green-500 h-5 w-5" />
-                ) : (
-                  <XCircle className="text-red-500 h-5 w-5" />
-                )}
+      ) : (
+        <div className="flex items-center ml-auto gap-2">
+          <div className="flex items-center mr-4">
+            {isCorrect ? (
+              <div className="flex items-center text-green-600">
+                <CheckCircle className="h-5 w-5 mr-2" />
+                <span className="font-medium">{t('questions.correct')}</span>
+              </div>
+            ) : (
+              <div className="flex items-center text-red-600">
+                <XCircle className="h-5 w-5 mr-2" />
+                <span className="font-medium">{t('questions.incorrect')}</span>
               </div>
             )}
-            <Button 
-              onClick={onNext}
-              className="flex items-center gap-1"
-            >
-              Next
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </>
-        )}
-      </div>
+          </div>
+          <Button onClick={onNext} className="group">
+            {t('questions.nextQuestion')}
+            <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

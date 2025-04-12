@@ -17,38 +17,14 @@ interface OpenQuestionProps {
   question: Question;
   onSubmit: (answer: string) => void;
   onNext: () => void;
-  onPrevious?: () => void;
 }
 
-export function OpenQuestion({ question, onSubmit, onNext, onPrevious }: OpenQuestionProps) {
+export function OpenQuestion({ question, onSubmit, onNext }: OpenQuestionProps) {
   const [answer, setAnswer] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const { t } = useTranslation();
   const { lectureId } = useParams<{ lectureId: string }>();
-
-  // If the question has an answer already, show it as submitted
-  useEffect(() => {
-    if (question && question.id) {
-      // Check if this component is mounted
-      const savedAnswer = localStorage.getItem(`lecture-${lectureId}-answers`);
-      if (savedAnswer) {
-        try {
-          const answers = JSON.parse(savedAnswer);
-          if (answers[question.id]) {
-            setAnswer(answers[question.id]);
-            setSubmitted(true);
-          } else {
-            // Reset state for a new question
-            setAnswer('');
-            setSubmitted(false);
-          }
-        } catch (e) {
-          console.error('Error parsing saved answers:', e);
-        }
-      }
-    }
-  }, [question, lectureId]);
 
   const handleSubmit = () => {
     if (!answer.trim() || submitted) return;
@@ -130,8 +106,6 @@ export function OpenQuestion({ question, onSubmit, onNext, onPrevious }: OpenQue
         canSubmit={!!answer.trim()}
         onSubmit={handleSubmit}
         onNext={onNext}
-        onPrevious={onPrevious}
-        showPrevious={!!onPrevious}
       />
       
       <QuestionEditDialog
