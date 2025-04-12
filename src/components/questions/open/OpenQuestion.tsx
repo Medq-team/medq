@@ -1,12 +1,13 @@
+
 import { useState, useEffect } from 'react';
 import { Question } from '@/types';
 import { motion } from 'framer-motion';
-import { OpenQuestionHeader } from './open/OpenQuestionHeader';
-import { OpenQuestionInput } from './open/OpenQuestionInput';
-import { OpenQuestionExplanation } from './open/OpenQuestionExplanation';
-import { OpenQuestionActions } from './open/OpenQuestionActions';
-import { QuestionEditDialog } from './QuestionEditDialog';
-import { ReportQuestionDialog } from './ReportQuestionDialog';
+import { OpenQuestionHeader } from '@/components/questions/open/OpenQuestionHeader';
+import { OpenQuestionInput } from '@/components/questions/open/OpenQuestionInput';
+import { OpenQuestionExplanation } from '@/components/questions/open/OpenQuestionExplanation';
+import { OpenQuestionActions } from '@/components/questions/open/OpenQuestionActions';
+import { QuestionEditDialog } from '@/components/questions/QuestionEditDialog';
+import { ReportQuestionDialog } from '@/components/questions/ReportQuestionDialog';
 import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
