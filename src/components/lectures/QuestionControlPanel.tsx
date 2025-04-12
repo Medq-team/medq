@@ -4,14 +4,12 @@ import { Question } from '@/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ChevronLeft, ChevronRight, CheckCircle, Circle, Loader2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CheckCircle, Circle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
-import { Skeleton } from '@/components/ui/skeleton';
 
 interface QuestionControlPanelProps {
   questions: Question[];
-  totalQuestions: number;
   currentQuestionIndex: number;
   answers: Record<string, any>;
   onQuestionSelect: (index: number) => void;
@@ -22,7 +20,6 @@ interface QuestionControlPanelProps {
 
 export function QuestionControlPanel({
   questions,
-  totalQuestions,
   currentQuestionIndex,
   answers,
   onQuestionSelect,
@@ -39,7 +36,7 @@ export function QuestionControlPanel({
         <Button variant="outline" className="fixed bottom-4 right-4 md:hidden z-10 gap-2">
           <span>Questions</span>
           <span className="text-xs bg-primary text-primary-foreground rounded-full px-2 py-0.5">
-            {totalQuestions}
+            {questions.length}
           </span>
         </Button>
       </DrawerTrigger>
@@ -70,15 +67,13 @@ export function QuestionControlPanel({
 
   const renderQuestionsList = () => (
     <div className="space-y-2">
-      {Array.from({ length: totalQuestions }).map((_, index) => {
-        const question = questions[index];
-        const isLoaded = question !== null && question !== undefined;
-        const isAnswered = isLoaded && answers[question.id] !== undefined;
+      {questions.map((question, index) => {
+        const isAnswered = answers[question.id] !== undefined;
         const isCurrent = index === currentQuestionIndex && !isComplete;
         
         return (
           <Button
-            key={`question-${index}`}
+            key={question.id}
             variant="outline"
             className={cn(
               "w-full justify-start",
@@ -89,15 +84,11 @@ export function QuestionControlPanel({
               onQuestionSelect(index);
               setIsDrawerOpen(false);
             }}
-            disabled={isComplete}
           >
             <div className="flex items-center w-full">
-              <span className="mr-2">Q{isLoaded && question.number ? question.number : index + 1}</span>
-              
+              <span className="mr-2">Q{question.number || index + 1}</span>
               {isAnswered ? (
                 <CheckCircle className="h-4 w-4 text-primary ml-auto" />
-              ) : !isLoaded ? (
-                <Loader2 className="h-4 w-4 text-muted-foreground ml-auto animate-spin" />
               ) : (
                 <Circle className="h-4 w-4 text-muted-foreground ml-auto" />
               )}
