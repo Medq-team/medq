@@ -2,7 +2,7 @@
 import { Question } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Edit, Trash, HelpCircle, PenLine, ChevronDown, ChevronUp } from 'lucide-react';
+import { Edit, Trash, HelpCircle, PenLine, ChevronDown, ChevronUp, Image, Video } from 'lucide-react';
 import { useState } from 'react';
 import {
   AlertDialog,
@@ -62,6 +62,21 @@ export function QuestionItem({ question, onEdit, onDelete }: QuestionItemProps) 
                   {question.session}
                 </div>
               )}
+              {question.media_type && (
+                <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                  {question.media_type === 'image' ? (
+                    <>
+                      <Image className="h-3 w-3 mr-1" />
+                      Image
+                    </>
+                  ) : (
+                    <>
+                      <Video className="h-3 w-3 mr-1" />
+                      Video
+                    </>
+                  )}
+                </div>
+              )}
             </div>
             <CardTitle className="text-base">{question.text}</CardTitle>
           </div>
@@ -102,6 +117,24 @@ export function QuestionItem({ question, onEdit, onDelete }: QuestionItemProps) 
         </div>
       </CardHeader>
       <CardContent className="text-sm">
+        {question.media_url && (
+          <div className="mb-4 border rounded overflow-hidden">
+            {question.media_type === 'image' ? (
+              <img 
+                src={question.media_url} 
+                alt="Question media" 
+                className="w-full h-auto max-h-[200px] object-contain"
+              />
+            ) : question.media_type === 'video' ? (
+              <video 
+                src={question.media_url} 
+                controls 
+                className="w-full max-h-[200px]"
+              />
+            ) : null}
+          </div>
+        )}
+      
         {question.type === 'mcq' && question.options && (
           <div className="space-y-2">
             {question.options.map((option, index) => (

@@ -17,6 +17,8 @@ interface QuestionFormSubmitProps {
   session: string;
   options: { id: string; text: string; explanation?: string }[];
   correctAnswers: string[];
+  mediaUrl?: string;
+  mediaType?: 'image' | 'video';
   setIsLoading: (loading: boolean) => void;
   children: React.ReactNode;
 }
@@ -32,6 +34,8 @@ export function QuestionFormSubmit({
   session,
   options,
   correctAnswers,
+  mediaUrl,
+  mediaType,
   setIsLoading,
   children
 }: QuestionFormSubmitProps) {
@@ -73,6 +77,8 @@ export function QuestionFormSubmit({
         explanation: null, // Set old field to null when migrating to new field
         number: questionNumber,
         session: session,
+        media_url: mediaUrl,
+        media_type: mediaType
       };
       
       let result;

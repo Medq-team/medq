@@ -22,6 +22,8 @@ export function useQuestionForm({ lectureId, editQuestionId, onComplete }: UseQu
     { id: '2', text: '' },
   ]);
   const [correctAnswers, setCorrectAnswers] = useState<string[]>([]);
+  const [mediaUrl, setMediaUrl] = useState<string | undefined>(undefined);
+  const [mediaType, setMediaType] = useState<'image' | 'video' | undefined>(undefined);
 
   useEffect(() => {
     if (editQuestionId) {
@@ -45,6 +47,8 @@ export function useQuestionForm({ lectureId, editQuestionId, onComplete }: UseQu
         setCourseReminder(data.course_reminder || data.explanation || '');
         setQuestionNumber(data.number);
         setSession(data.session || '');
+        setMediaUrl(data.media_url);
+        setMediaType(data.media_type);
         
         if (data.type === 'mcq' && data.options) {
           setOptions(data.options);
@@ -80,6 +84,11 @@ export function useQuestionForm({ lectureId, editQuestionId, onComplete }: UseQu
     }
   };
 
+  const handleMediaChange = (url: string | undefined, type: 'image' | 'video' | undefined) => {
+    setMediaUrl(url);
+    setMediaType(type);
+  };
+
   return {
     isLoading,
     setIsLoading,
@@ -97,6 +106,9 @@ export function useQuestionForm({ lectureId, editQuestionId, onComplete }: UseQu
     setOptions,
     correctAnswers,
     setCorrectAnswers,
+    mediaUrl,
+    mediaType,
+    handleMediaChange,
     handleParsedContent,
     fetchQuestionData
   };

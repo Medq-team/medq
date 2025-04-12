@@ -73,6 +73,8 @@ export type Database = {
           explanation: string | null
           id: string
           lecture_id: string
+          media_type: string | null
+          media_url: string | null
           number: number | null
           options: Json | null
           session: string | null
@@ -86,6 +88,8 @@ export type Database = {
           explanation?: string | null
           id?: string
           lecture_id: string
+          media_type?: string | null
+          media_url?: string | null
           number?: number | null
           options?: Json | null
           session?: string | null
@@ -99,6 +103,8 @@ export type Database = {
           explanation?: string | null
           id?: string
           lecture_id?: string
+          media_type?: string | null
+          media_url?: string | null
           number?: number | null
           options?: Json | null
           session?: string | null

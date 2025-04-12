@@ -25,6 +25,8 @@ export function useQuestionEdit({
   const [options, setOptions] = useState<{ id: string; text: string; explanation?: string }[]>([]);
   const [correctAnswers, setCorrectAnswers] = useState<string[]>([]);
   const [answerText, setAnswerText] = useState('');
+  const [mediaUrl, setMediaUrl] = useState<string | undefined>(undefined);
+  const [mediaType, setMediaType] = useState<'image' | 'video' | undefined>(undefined);
 
   useEffect(() => {
     if (question) {
@@ -32,6 +34,8 @@ export function useQuestionEdit({
       setCourseReminder(question.course_reminder || question.explanation || '');
       setQuestionNumber(question.number);
       setSession(question.session || '');
+      setMediaUrl(question.media_url);
+      setMediaType(question.media_type);
       
       if (question.type === 'mcq' && question.options) {
         setOptions(question.options);
@@ -64,6 +68,8 @@ export function useQuestionEdit({
         course_reminder: courseReminder,
         number: questionNumber,
         session: session,
+        media_url: mediaUrl,
+        media_type: mediaType
       };
       
       if (question.type === 'mcq') {
@@ -118,6 +124,11 @@ export function useQuestionEdit({
     }
   };
 
+  const handleMediaChange = (url: string | undefined, type: 'image' | 'video' | undefined) => {
+    setMediaUrl(url);
+    setMediaType(type);
+  };
+
   return {
     isLoading,
     questionText,
@@ -130,6 +141,9 @@ export function useQuestionEdit({
     setSession,
     options,
     correctAnswers,
+    mediaUrl,
+    mediaType,
+    handleMediaChange,
     updateOptionText,
     updateOptionExplanation,
     toggleCorrectAnswer,

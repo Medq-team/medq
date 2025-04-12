@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { QuestionMedia } from './QuestionMedia';
 
 interface OpenQuestionProps {
   question: Question;
@@ -87,6 +88,9 @@ export function OpenQuestion({ question, onSubmit, onNext }: OpenQuestionProps) 
           {lectureId && <ReportQuestionDialog question={question} lectureId={lectureId} />}
         </div>
       </div>
+      
+      {/* Question Media */}
+      <QuestionMedia question={question} className="mb-4" />
 
       <OpenQuestionInput 
         answer={answer}

@@ -1,3 +1,4 @@
+
 export type User = {
   id: string;
   email: string;
@@ -39,6 +40,8 @@ export type Question = {
   course_reminder?: string; // Field for "Rappel du cours"
   number?: number; // Question number
   session?: string; // Exam session (e.g., "Session 2022")
+  media_url?: string; // URL to the media file
+  media_type?: 'image' | 'video'; // Type of media
 };
 
 export type Answer = {

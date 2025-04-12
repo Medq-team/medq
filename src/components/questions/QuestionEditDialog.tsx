@@ -32,6 +32,9 @@ export function QuestionEditDialog({
     setSession,
     options,
     correctAnswers,
+    mediaUrl,
+    mediaType,
+    handleMediaChange,
     updateOptionText,
     updateOptionExplanation,
     toggleCorrectAnswer,
@@ -67,6 +70,9 @@ export function QuestionEditDialog({
             updateOptionExplanation={updateOptionExplanation}
             correctAnswers={correctAnswers}
             toggleCorrectAnswer={toggleCorrectAnswer}
+            mediaUrl={mediaUrl}
+            mediaType={mediaType}
+            handleMediaChange={handleMediaChange}
             isLoading={isLoading}
             onCancel={() => onOpenChange(false)}
             onSubmit={handleSubmit}

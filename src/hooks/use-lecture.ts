@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { Lecture, Question } from '@/types';
 import { useLocalStorage } from './use-local-storage';
+import { ensureQuestionMediaBucket } from '@/lib/supabase';
 
 export function useLecture(lectureId: string | undefined) {
   const navigate = useNavigate();
@@ -21,6 +22,9 @@ export function useLecture(lectureId: string | undefined) {
   const [isAddQuestionOpen, setIsAddQuestionOpen] = useState(false);
 
   useEffect(() => {
+    // Ensure the storage bucket exists for question media
+    ensureQuestionMediaBucket();
+    
     async function fetchLectureAndQuestions() {
       if (!lectureId) return;
       

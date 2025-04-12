@@ -8,6 +8,8 @@ import { QuestionFields } from './QuestionFields';
 import { McqOptionsSection } from './McqOptionsSection';
 import { AutoParseInput } from './AutoParseInput';
 import { FormActionButtons } from './FormActionButtons';
+import { MediaUpload } from './MediaUpload';
+import { Separator } from '@/components/ui/separator';
 
 interface QuestionFormProps {
   lectureId: string;
@@ -34,6 +36,9 @@ export function QuestionForm({ lectureId, editQuestionId, onComplete }: Question
     setOptions,
     correctAnswers,
     setCorrectAnswers,
+    mediaUrl,
+    mediaType,
+    handleMediaChange,
     handleParsedContent
   } = useQuestionForm({ lectureId, editQuestionId, onComplete });
 
@@ -64,6 +69,8 @@ export function QuestionForm({ lectureId, editQuestionId, onComplete }: Question
           session={session}
           options={options}
           correctAnswers={correctAnswers}
+          mediaUrl={mediaUrl}
+          mediaType={mediaType}
           setIsLoading={setIsLoading}
         >
           <QuestionTypeSelect 
@@ -87,13 +94,24 @@ export function QuestionForm({ lectureId, editQuestionId, onComplete }: Question
             setSession={setSession}
           />
           
+          <Separator className="my-6" />
+          
+          <MediaUpload
+            mediaUrl={mediaUrl}
+            mediaType={mediaType}
+            onMediaChange={handleMediaChange}
+          />
+          
           {questionType === 'mcq' && (
-            <McqOptionsSection
-              options={options}
-              setOptions={setOptions}
-              correctAnswers={correctAnswers}
-              setCorrectAnswers={setCorrectAnswers}
-            />
+            <>
+              <Separator className="my-6" />
+              <McqOptionsSection
+                options={options}
+                setOptions={setOptions}
+                correctAnswers={correctAnswers}
+                setCorrectAnswers={setCorrectAnswers}
+              />
+            </>
           )}
           
           <FormActionButtons 

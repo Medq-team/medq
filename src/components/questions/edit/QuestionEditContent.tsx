@@ -6,6 +6,8 @@ import { AnswersExplanationsTab } from './AnswersExplanationsTab';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { MediaUpload } from '@/components/admin/MediaUpload';
+import { Separator } from '@/components/ui/separator';
 
 interface QuestionEditContentProps {
   question: Question;
@@ -22,6 +24,9 @@ interface QuestionEditContentProps {
   updateOptionExplanation: (id: string, explanation: string) => void;
   correctAnswers: string[];
   toggleCorrectAnswer: (id: string) => void;
+  mediaUrl?: string;
+  mediaType?: 'image' | 'video';
+  handleMediaChange: (url: string | undefined, type: 'image' | 'video' | undefined) => void;
   isLoading: boolean;
   onCancel: () => void;
   onSubmit: (e: React.FormEvent) => void;
@@ -42,6 +47,9 @@ export function QuestionEditContent({
   updateOptionExplanation,
   correctAnswers,
   toggleCorrectAnswer,
+  mediaUrl,
+  mediaType,
+  handleMediaChange,
   isLoading,
   onCancel,
   onSubmit
@@ -53,6 +61,7 @@ export function QuestionEditContent({
     <Tabs value={activeTab} onValueChange={setActiveTab}>
       <TabsList className="w-full">
         <TabsTrigger value="content" className="flex-1">{t('questions.questionContent')}</TabsTrigger>
+        <TabsTrigger value="media" className="flex-1">{t('questions.media')}</TabsTrigger>
         {question.type === 'mcq' && (
           <TabsTrigger value="answers" className="flex-1">{t('questions.answersExplanations')}</TabsTrigger>
         )}
@@ -73,6 +82,14 @@ export function QuestionEditContent({
           />
         </TabsContent>
         
+        <TabsContent value="media" className="space-y-4">
+          <MediaUpload 
+            mediaUrl={mediaUrl}
+            mediaType={mediaType}
+            onMediaChange={handleMediaChange}
+          />
+        </TabsContent>
+        
         {question.type === 'mcq' && (
           <TabsContent value="answers" className="space-y-4">
             <AnswersExplanationsTab
@@ -84,6 +101,8 @@ export function QuestionEditContent({
             />
           </TabsContent>
         )}
+        
+        <Separator className="my-2" />
         
         <div className="flex justify-end pt-4">
           <Button 

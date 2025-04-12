@@ -11,3 +11,4 @@ export {
 } from './auth';
 export { getUserRole } from './user';
 export { fetchReports, updateReportStatus } from './reports';
+export { ensureQuestionMediaBucket } from './storage';
