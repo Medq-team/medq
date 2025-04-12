@@ -34,17 +34,20 @@ export function useLectureProgress() {
       status = 'in-progress';
     }
     
-    setProgressData((prev) => {
-      const newData = { ...prev };
-      newData[lectureId] = {
-        lectureId,
-        answeredCount,
-        totalQuestions,
-        progress,
-        status,
-        lastUpdated: Date.now()
-      };
-      return newData;
+    // Create a new progress object
+    const newProgressItem: LectureProgress = {
+      lectureId,
+      answeredCount,
+      totalQuestions,
+      progress,
+      status,
+      lastUpdated: Date.now()
+    };
+    
+    // Update the state with the new progress object
+    setProgressData({
+      ...progressData,
+      [lectureId]: newProgressItem
     });
   };
   
@@ -67,11 +70,9 @@ export function useLectureProgress() {
   
   // Clear progress for a specific lecture
   const clearLectureProgress = (lectureId: string) => {
-    setProgressData((prev) => {
-      const newData = { ...prev };
-      delete newData[lectureId];
-      return newData;
-    });
+    const newData = { ...progressData };
+    delete newData[lectureId];
+    setProgressData(newData);
   };
   
   // Clear all progress data
