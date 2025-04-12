@@ -34,17 +34,19 @@ export function useLectureProgress() {
       status = 'in-progress';
     }
     
-    setProgressData(prev => ({
-      ...prev,
-      [lectureId]: {
-        lectureId,
-        answeredCount,
-        totalQuestions,
-        progress,
-        status,
-        lastUpdated: Date.now()
-      }
-    }));
+    setProgressData((prev: Record<string, LectureProgress>) => {
+      return {
+        ...prev,
+        [lectureId]: {
+          lectureId,
+          answeredCount,
+          totalQuestions,
+          progress,
+          status,
+          lastUpdated: Date.now()
+        }
+      };
+    });
   };
   
   // Get progress for a specific lecture
@@ -66,7 +68,7 @@ export function useLectureProgress() {
   
   // Clear progress for a specific lecture
   const clearLectureProgress = (lectureId: string) => {
-    setProgressData(prev => {
+    setProgressData((prev: Record<string, LectureProgress>) => {
       const newData = { ...prev };
       delete newData[lectureId];
       return newData;

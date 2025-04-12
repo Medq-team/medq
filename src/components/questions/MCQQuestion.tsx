@@ -17,9 +17,17 @@ interface MCQQuestionProps {
   question: Question;
   onSubmit: (selectedOptionIds: string[]) => void;
   onNext: () => void;
+  onPrevious?: () => void;
+  showPrevious?: boolean;
 }
 
-export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
+export function MCQQuestion({ 
+  question, 
+  onSubmit, 
+  onNext,
+  onPrevious,
+  showPrevious = false
+}: MCQQuestionProps) {
   const [selectedOptionIds, setSelectedOptionIds] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
@@ -186,6 +194,8 @@ export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
         isCorrect={isCorrect}
         onSubmit={handleSubmit}
         onNext={onNext}
+        onPrevious={onPrevious}
+        showPrevious={showPrevious}
       />
       
       <QuestionEditDialog

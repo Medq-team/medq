@@ -1,6 +1,6 @@
 
 import { Button } from '@/components/ui/button';
-import { CheckCircle, XCircle, ArrowRight, Keyboard } from 'lucide-react';
+import { CheckCircle, XCircle, ArrowRight, Keyboard, ChevronLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { 
   Tooltip,
@@ -15,6 +15,8 @@ interface MCQActionsProps {
   isCorrect: boolean | null;
   onSubmit: () => void;
   onNext: () => void;
+  onPrevious?: () => void;
+  showPrevious?: boolean;
 }
 
 export function MCQActions({ 
@@ -22,7 +24,9 @@ export function MCQActions({
   canSubmit, 
   isCorrect, 
   onSubmit, 
-  onNext 
+  onNext,
+  onPrevious,
+  showPrevious = false
 }: MCQActionsProps) {
   const { t } = useTranslation();
   
@@ -56,16 +60,27 @@ export function MCQActions({
         </Tooltip>
       </TooltipProvider>
 
+      {showPrevious && onPrevious && (
+        <Button
+          variant="outline"
+          onClick={onPrevious}
+          className="flex items-center gap-1"
+        >
+          <ChevronLeft className="h-4 w-4" />
+          {t('common.previous')}
+        </Button>
+      )}
+
       {!isSubmitted ? (
         <Button 
           onClick={onSubmit} 
           disabled={!canSubmit}
-          className="ml-auto"
+          className={`${!showPrevious ? 'ml-auto' : ''}`}
         >
           {t('questions.submitAnswer')}
         </Button>
       ) : (
-        <div className="flex items-center ml-auto gap-2">
+        <div className={`flex items-center gap-2 ${!showPrevious ? 'ml-auto' : ''}`}>
           <div className="flex items-center mr-4">
             {isCorrect ? (
               <div className="flex items-center text-green-600">
