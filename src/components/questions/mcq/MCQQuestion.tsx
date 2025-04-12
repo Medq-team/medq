@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Question } from '@/types';
 import { AnimatePresence, motion } from 'framer-motion';
 import { MCQHeader } from './MCQHeader';
@@ -33,13 +33,6 @@ export function MCQQuestion({
   const { t } = useTranslation();
   const { lectureId } = useParams<{ lectureId: string }>();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  
-  // Initialize with any previously submitted answers
-  const initialSubmitted = lectureId ? localStorage.getItem(`lecture-${lectureId}-answers`) !== null && 
-    JSON.parse(localStorage.getItem(`lecture-${lectureId}-answers`) || '{}')[question.id] !== undefined : false;
-  
-  const initialSelectedOptionIds = initialSubmitted && lectureId ? 
-    JSON.parse(localStorage.getItem(`lecture-${lectureId}-answers`) || '{}')[question.id] || [] : [];
 
   // Use custom hooks to manage state and keyboard shortcuts
   const {
@@ -52,9 +45,7 @@ export function MCQQuestion({
     handleSubmit
   } = useMCQState({
     question,
-    onSubmit,
-    initialSubmitted,
-    initialSelectedOptionIds
+    onSubmit
   });
 
   // Set up keyboard shortcuts

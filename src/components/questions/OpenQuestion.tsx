@@ -28,19 +28,11 @@ export function OpenQuestion({
   onPrevious,
   showPrevious = false 
 }: OpenQuestionProps) {
+  const [answer, setAnswer] = useState('');
+  const [submitted, setSubmitted] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const { t } = useTranslation();
   const { lectureId } = useParams<{ lectureId: string }>();
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  
-  // Initialize with any previously submitted answer
-  const initialSubmitted = lectureId ? localStorage.getItem(`lecture-${lectureId}-answers`) !== null && 
-    JSON.parse(localStorage.getItem(`lecture-${lectureId}-answers`) || '{}')[question.id] !== undefined : false;
-  
-  const initialAnswer = initialSubmitted && lectureId ? 
-    JSON.parse(localStorage.getItem(`lecture-${lectureId}-answers`) || '{}')[question.id] || '' : '';
-  
-  const [answer, setAnswer] = useState(initialAnswer);
-  const [submitted, setSubmitted] = useState(initialSubmitted);
 
   const handleSubmit = () => {
     if (!answer.trim() || submitted) return;
@@ -57,12 +49,6 @@ export function OpenQuestion({
   // Add keyboard shortcut for submitting answer
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      // Don't process keyboard shortcuts when focus is on input elements
-      if (event.target instanceof HTMLInputElement || 
-          event.target instanceof HTMLTextAreaElement) {
-        return;
-      }
-      
       if (event.key === '1') {
         // Only trigger if not already submitted and there's text in the answer
         if (!submitted && answer.trim()) {
@@ -79,14 +65,6 @@ export function OpenQuestion({
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [submitted, answer, onNext]);
-
-  // Reset state when question changes, unless we have an initial answer from localStorage
-  useEffect(() => {
-    if (question.id && initialAnswer === '' && !initialSubmitted) {
-      setAnswer('');
-      setSubmitted(false);
-    }
-  }, [question.id, initialAnswer, initialSubmitted]);
 
   return (
     <motion.div

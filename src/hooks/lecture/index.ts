@@ -1,9 +1,8 @@
 
-// Re-export all the lecture hooks from their respective modules
 import { useLectureCore } from './use-lecture-core';
+import { LectureHookResult } from './types';
 
-// Export the main hook as useLecture
-export function useLecture(lectureId: string | undefined) {
+export function useLecture(lectureId: string | undefined): LectureHookResult {
   return useLectureCore(lectureId);
 }
 

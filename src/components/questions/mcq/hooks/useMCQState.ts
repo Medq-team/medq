@@ -1,23 +1,15 @@
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { Question } from '@/types';
 
 interface UseMCQStateProps {
   question: Question;
   onSubmit: (selectedOptionIds: string[]) => void;
-  initialSubmitted?: boolean;
-  initialSelectedOptionIds?: string[];
 }
 
-export function useMCQState({ 
-  question, 
-  onSubmit, 
-  initialSubmitted = false, 
-  initialSelectedOptionIds = [] 
-}: UseMCQStateProps) {
-  // Use initial state from props if provided
-  const [selectedOptionIds, setSelectedOptionIds] = useState<string[]>(initialSelectedOptionIds);
-  const [submitted, setSubmitted] = useState(initialSubmitted);
+export function useMCQState({ question, onSubmit }: UseMCQStateProps) {
+  const [selectedOptionIds, setSelectedOptionIds] = useState<string[]>([]);
+  const [submitted, setSubmitted] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [expandedExplanations, setExpandedExplanations] = useState<string[]>([]);
 
@@ -25,7 +17,7 @@ export function useMCQState({
   const correctAnswers = question.correctAnswers || question.correct_answers || [];
 
   // Handle checkbox change
-  const handleOptionSelect = useCallback((optionId: string) => {
+  const handleOptionSelect = (optionId: string) => {
     if (submitted) return;
     
     setSelectedOptionIds(prev => 
@@ -33,16 +25,16 @@ export function useMCQState({
         ? prev.filter(id => id !== optionId)
         : [...prev, optionId]
     );
-  }, [submitted]);
+  };
 
   // Toggle explanation visibility
-  const toggleExplanation = useCallback((optionId: string) => {
+  const toggleExplanation = (optionId: string) => {
     setExpandedExplanations(prev =>
       prev.includes(optionId)
         ? prev.filter(id => id !== optionId)
         : [...prev, optionId]
     );
-  }, []);
+  };
 
   const handleSubmit = useCallback(() => {
     if (selectedOptionIds.length === 0 || submitted) return;
@@ -75,16 +67,6 @@ export function useMCQState({
     
     onSubmit(selectedOptionIds);
   }, [correctAnswers, onSubmit, selectedOptionIds, submitted]);
-
-  // Reset state when question changes
-  useEffect(() => {
-    if (question.id && initialSelectedOptionIds.length === 0 && !initialSubmitted) {
-      setSelectedOptionIds([]);
-      setSubmitted(false);
-      setIsCorrect(null);
-      setExpandedExplanations([]);
-    }
-  }, [question.id, initialSelectedOptionIds, initialSubmitted]);
 
   return {
     selectedOptionIds,
