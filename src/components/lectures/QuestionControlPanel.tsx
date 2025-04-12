@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Question } from '@/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,7 +7,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { ChevronLeft, ChevronRight, CheckCircle, Circle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
-import { Skeleton } from '@/components/ui/skeleton';
 
 interface QuestionControlPanelProps {
   questions: Question[];
@@ -31,6 +30,12 @@ export function QuestionControlPanel({
   isComplete
 }: QuestionControlPanelProps) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(currentQuestionIndex);
+
+  // Update highlight whenever current question changes
+  useEffect(() => {
+    setHighlightedIndex(currentQuestionIndex);
+  }, [currentQuestionIndex]);
 
   // Only show on mobile devices using a drawer
   const MobileDrawer = () => (
@@ -73,8 +78,8 @@ export function QuestionControlPanel({
       {Array.from({ length: totalQuestions }).map((_, index) => {
         const question = questions[index];
         const isLoaded = question !== null && question !== undefined;
-        const isAnswered = isLoaded && answers[question.id] !== undefined;
-        const isCurrent = index === currentQuestionIndex && !isComplete;
+        const isAnswered = isLoaded && answers[question?.id] !== undefined;
+        const isCurrent = index === highlightedIndex && !isComplete;
         
         return (
           <Button
@@ -92,7 +97,7 @@ export function QuestionControlPanel({
             disabled={isComplete}
           >
             <div className="flex items-center w-full">
-              <span className="mr-2">Q{isLoaded && question.number ? question.number : index + 1}</span>
+              <span className="mr-2">Q{isLoaded && question?.number ? question.number : index + 1}</span>
               
               {isAnswered ? (
                 <CheckCircle className="h-4 w-4 text-primary ml-auto" />

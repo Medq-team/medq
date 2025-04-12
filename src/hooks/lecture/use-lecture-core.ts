@@ -36,9 +36,9 @@ export function useLectureCore(lectureId: string | undefined): LectureHookResult
     }
   }, [answers, lectureId, totalQuestions, updateProgress]);
 
-  // Fetch lecture data and total question count
+  // Fetch lecture data and all questions at once
   useEffect(() => {
-    async function fetchLectureAndQuestionCount() {
+    async function fetchLectureAndQuestions() {
       if (!lectureId) return;
       
       setIsLoading(true);
@@ -57,19 +57,29 @@ export function useLectureCore(lectureId: string | undefined): LectureHookResult
         const count = await getQuestionCount(lectureId);
         setTotalQuestions(count);
         
-        // Initialize questions array with empty placeholders based on count
         if (count > 0) {
-          // Create an empty array with placeholders for all questions
-          const placeholders = Array(count).fill(null);
-          setQuestions(placeholders as any);
+          // Fetch all questions at once
+          const allQuestions = await fetchLectureQuestions(lectureId);
           
-          // If we have a current question index beyond the total, reset it
-          if (currentQuestionIndex >= count) {
-            setCurrentQuestionIndex(0);
+          if (allQuestions && allQuestions.length > 0) {
+            // Sort questions
+            const sortedQuestions = sortQuestions(allQuestions);
+            
+            // Update state with all questions
+            setQuestions(sortedQuestions);
+            
+            // Cache all questions by index
+            const newCache: Record<number, Question> = {};
+            sortedQuestions.forEach((question, idx) => {
+              newCache[idx] = question;
+            });
+            setQuestionCache(newCache);
+            
+            // If we have a current question index beyond the total, reset it
+            if (currentQuestionIndex >= count) {
+              setCurrentQuestionIndex(0);
+            }
           }
-          
-          // Load the first question immediately
-          await fetchQuestionByIndex(currentQuestionIndex);
         }
       } catch (error) {
         console.error('Error fetching lecture data:', error);
@@ -79,48 +89,45 @@ export function useLectureCore(lectureId: string | undefined): LectureHookResult
       }
     }
 
-    fetchLectureAndQuestionCount();
-  }, [lectureId, navigate, isAddQuestionOpen, currentQuestionIndex]);
+    fetchLectureAndQuestions();
+  }, [lectureId, navigate, isAddQuestionOpen]);
 
-  // Function to fetch question by index
+  // Function to fetch question by index - now just retrieves from cache
   const fetchQuestionByIndex = useCallback(async (index: number) => {
     if (!lectureId || index < 0 || index >= totalQuestions) return null;
     
-    // If we already have this question in cache, use it
+    // If we have questions loaded already, just return the requested one
+    if (questions.length > 0 && questions[index]) {
+      return questions[index];
+    }
+    
+    // If we already have this question in cache, return it
     if (questionCache[index]) {
-      // Update the questions array with the cached question
-      setQuestions(prevQuestions => {
-        const newQuestions = [...prevQuestions];
-        newQuestions[index] = questionCache[index];
-        return newQuestions;
-      });
       return questionCache[index];
     }
     
+    // If we don't have it cached, try to fetch all questions again
     setIsLoadingQuestions(true);
     
     try {
-      // Fetch all questions to get them in the right order
       const allQuestions = await fetchLectureQuestions(lectureId);
       
       if (!allQuestions || allQuestions.length === 0) {
         return null;
       }
 
-      // Sort questions
       const sortedQuestions = sortQuestions(allQuestions);
-
-      // Update our cache with all the questions
+      
+      // Update our questions array and cache
+      setQuestions(sortedQuestions);
+      
+      // Update cache
       const newCache = { ...questionCache };
       sortedQuestions.forEach((q, idx) => {
         newCache[idx] = q;
       });
       setQuestionCache(newCache);
       
-      // Update the questions array with all fetched questions
-      setQuestions(sortedQuestions);
-      
-      // Return the requested question
       return sortedQuestions[index] || null;
     } catch (error) {
       console.error('Error fetching question:', error);
@@ -128,40 +135,7 @@ export function useLectureCore(lectureId: string | undefined): LectureHookResult
     } finally {
       setIsLoadingQuestions(false);
     }
-  }, [lectureId, questionCache, totalQuestions]);
-
-  // Load the current question whenever the index changes
-  useEffect(() => {
-    if (lectureId && totalQuestions > 0 && !isComplete) {
-      fetchQuestionByIndex(currentQuestionIndex);
-    }
-  }, [currentQuestionIndex, fetchQuestionByIndex, lectureId, totalQuestions, isComplete]);
-
-  // Reset data when a new question is added
-  useEffect(() => {
-    if (isAddQuestionOpen === false) {
-      // Refresh question count and data when the add question dialog is closed
-      async function refreshData() {
-        if (!lectureId) return;
-        
-        try {
-          // Get updated total question count
-          const count = await getQuestionCount(lectureId);
-
-          if (count !== totalQuestions) {
-            setTotalQuestions(count);
-            // Clear cache to ensure we fetch fresh data
-            setQuestionCache({});
-            await fetchQuestionByIndex(currentQuestionIndex);
-          }
-        } catch (error) {
-          console.error('Error refreshing question data:', error);
-        }
-      }
-      
-      refreshData();
-    }
-  }, [isAddQuestionOpen, lectureId, currentQuestionIndex, fetchQuestionByIndex, totalQuestions]);
+  }, [lectureId, questionCache, totalQuestions, questions]);
 
   const handleAnswerSubmit = (questionId: string, answer: any) => {
     setAnswers(prevAnswers => {
@@ -203,10 +177,6 @@ export function useLectureCore(lectureId: string | undefined): LectureHookResult
     setAnswers({});
     setIsComplete(false);
     
-    // Clear cache to ensure we fetch fresh data
-    setQuestionCache({});
-    fetchQuestionByIndex(0);
-    
     // Update progress to zero
     if (lectureId) {
       updateProgress(lectureId, 0, totalQuestions);
@@ -225,7 +195,6 @@ export function useLectureCore(lectureId: string | undefined): LectureHookResult
     setCurrentQuestionIndex(0);
     setAnswers({});
     setIsComplete(false);
-    setQuestionCache({});
     
     // Update progress to zero
     if (lectureId) {
