@@ -2,7 +2,7 @@
 import { useParams } from 'react-router-dom';
 import { useEffect } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { MCQQuestion } from '@/components/questions/MCQQuestion';
+import { MCQQuestion } from '@/components/questions/mcq/MCQQuestion';
 import { OpenQuestion } from '@/components/questions/OpenQuestion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { QuestionForm } from '@/components/admin/QuestionForm';
