@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { Lecture, Question } from '@/types';
 import { useLocalStorage } from './use-local-storage';
-import { ensureQuestionMediaBucket } from '@/lib/supabase';
+import { ensureQuestionMediaBucket } from '@/lib/supabase/storage';
 
 export function useLecture(lectureId: string | undefined) {
   const navigate = useNavigate();
