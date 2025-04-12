@@ -4,14 +4,13 @@ import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { Lecture, Question } from '@/types';
 import { useLocalStorage } from './use-local-storage';
-import { ensureQuestionMediaBucket } from '@/lib/supabase/storage';
+import { ensureQuestionMediaBucket } from '@/lib/supabase';
 
 export function useLecture(lectureId: string | undefined) {
   const navigate = useNavigate();
   const [lecture, setLecture] = useState<Lecture | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   
-  // Use localStorage for persistent state
   const storageKey = `lecture-${lectureId}`;
   const [currentQuestionIndex, setCurrentQuestionIndex] = useLocalStorage<number>(`${storageKey}-currentIndex`, 0);
   const [answers, setAnswers] = useLocalStorage<Record<string, any>>(`${storageKey}-answers`, {});
@@ -21,7 +20,6 @@ export function useLecture(lectureId: string | undefined) {
   const [isAddQuestionOpen, setIsAddQuestionOpen] = useState(false);
 
   useEffect(() => {
-    // Ensure the storage bucket exists for question media
     ensureQuestionMediaBucket();
     
     async function fetchLectureAndQuestions() {
@@ -30,7 +28,6 @@ export function useLecture(lectureId: string | undefined) {
       setIsLoading(true);
       
       try {
-        // Fetch lecture
         const { data: lectureData, error: lectureError } = await supabase
           .from('lectures')
           .select('*')
@@ -43,7 +40,6 @@ export function useLecture(lectureId: string | undefined) {
 
         setLecture(lectureData);
 
-        // Fetch questions for this lecture
         const { data: questionsData, error: questionsError } = await supabase
           .from('questions')
           .select('*')
@@ -53,30 +49,23 @@ export function useLecture(lectureId: string | undefined) {
           throw questionsError;
         }
 
-        // Sort questions: first by type (MCQ first, then open), then by number
         const sortedQuestions = [...(questionsData || [])].sort((a, b) => {
-          // First sort by type (MCQ first)
           if (a.type !== b.type) {
             return a.type === 'mcq' ? -1 : 1;
           }
           
-          // If numbers are present, sort by number
           if (a.number !== undefined && b.number !== undefined) {
             return a.number - b.number;
           }
           
-          // If one has a number and the other doesn't, prioritize the one with a number
           if (a.number !== undefined) return -1;
           if (b.number !== undefined) return 1;
           
-          // Default sort by id
           return a.id.localeCompare(b.id);
         });
 
         setQuestions(sortedQuestions);
         
-        // If we have questions but user hasn't started yet (current index is still 0), 
-        // ensure we have proper initialization
         if (sortedQuestions.length > 0 && currentQuestionIndex >= sortedQuestions.length) {
           setCurrentQuestionIndex(0);
         }
