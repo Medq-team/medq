@@ -4,15 +4,20 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { Lecture, Question } from '@/types';
+import { useLocalStorage } from './use-local-storage';
 
 export function useLecture(lectureId: string | undefined) {
   const navigate = useNavigate();
   const [lecture, setLecture] = useState<Lecture | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, any>>({});
+  
+  // Use localStorage for persistent state
+  const storageKey = `lecture-${lectureId}`;
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useLocalStorage<number>(`${storageKey}-currentIndex`, 0);
+  const [answers, setAnswers] = useLocalStorage<Record<string, any>>(`${storageKey}-answers`, {});
+  const [isComplete, setIsComplete] = useLocalStorage<boolean>(`${storageKey}-complete`, false);
+  
   const [isLoading, setIsLoading] = useState(true);
-  const [isComplete, setIsComplete] = useState(false);
   const [isAddQuestionOpen, setIsAddQuestionOpen] = useState(false);
 
   useEffect(() => {
@@ -66,6 +71,12 @@ export function useLecture(lectureId: string | undefined) {
         });
 
         setQuestions(sortedQuestions);
+        
+        // If we have questions but user hasn't started yet (current index is still 0), 
+        // ensure we have proper initialization
+        if (sortedQuestions.length > 0 && currentQuestionIndex >= sortedQuestions.length) {
+          setCurrentQuestionIndex(0);
+        }
       } catch (error) {
         console.error('Error fetching data:', error);
         toast({
@@ -80,13 +91,13 @@ export function useLecture(lectureId: string | undefined) {
     }
 
     fetchLectureAndQuestions();
-  }, [lectureId, navigate, isAddQuestionOpen]);
+  }, [lectureId, navigate, isAddQuestionOpen, currentQuestionIndex]);
 
   const handleAnswerSubmit = (questionId: string, answer: any) => {
-    setAnswers({
-      ...answers,
+    setAnswers(prevAnswers => ({
+      ...prevAnswers,
       [questionId]: answer
-    });
+    }));
   };
 
   const handleNext = () => {
@@ -111,6 +122,12 @@ export function useLecture(lectureId: string | undefined) {
     }
   };
 
+  const clearSessionData = () => {
+    setCurrentQuestionIndex(0);
+    setAnswers({});
+    setIsComplete(false);
+  };
+
   const currentQuestion = questions[currentQuestionIndex];
   const progress = questions.length > 0 
     ? ((currentQuestionIndex + (Object.keys(answers).includes(currentQuestion?.id) ? 1 : 0)) / questions.length) * 100
@@ -130,6 +147,7 @@ export function useLecture(lectureId: string | undefined) {
     handleAnswerSubmit,
     handleNext,
     handleRestart,
-    handleBackToSpecialty
+    handleBackToSpecialty,
+    clearSessionData
   };
 }
