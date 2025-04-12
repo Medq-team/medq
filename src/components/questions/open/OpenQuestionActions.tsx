@@ -1,6 +1,7 @@
 
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface OpenQuestionActionsProps {
   isSubmitted: boolean;
@@ -19,6 +20,8 @@ export function OpenQuestionActions({
   onPrevious,
   showPrevious = false
 }: OpenQuestionActionsProps) {
+  const { t } = useTranslation();
+  
   return (
     <div className="flex justify-between mt-6">
       {showPrevious && onPrevious && (
@@ -28,7 +31,7 @@ export function OpenQuestionActions({
           className="flex items-center gap-1"
         >
           <ChevronLeft className="h-4 w-4" />
-          Previous
+          {t('common.previous')}
         </Button>
       )}
       
@@ -39,14 +42,14 @@ export function OpenQuestionActions({
             disabled={!canSubmit}
             className="flex items-center gap-1"
           >
-            Submit
+            {t('common.submit')}
           </Button>
         ) : (
           <Button 
             onClick={onNext}
             className="flex items-center gap-1"
           >
-            Next
+            {t('common.next')}
             <ChevronRight className="h-4 w-4" />
           </Button>
         )}

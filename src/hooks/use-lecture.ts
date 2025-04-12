@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { Lecture, Question } from '@/types';
 import { useLocalStorage } from './use-local-storage';
+import { useLectureProgress } from './use-lecture-progress';
 
 export function useLecture(lectureId: string | undefined) {
   const navigate = useNavigate();
@@ -22,6 +23,17 @@ export function useLecture(lectureId: string | undefined) {
   
   const [isLoading, setIsLoading] = useState(true);
   const [isAddQuestionOpen, setIsAddQuestionOpen] = useState(false);
+
+  // Use the progress hook
+  const { updateProgress } = useLectureProgress();
+
+  // Update progress whenever answers change
+  useEffect(() => {
+    if (lectureId && totalQuestions > 0) {
+      const answeredCount = Object.keys(answers).length;
+      updateProgress(lectureId, answeredCount, totalQuestions);
+    }
+  }, [answers, lectureId, totalQuestions, updateProgress]);
 
   // Fetch lecture data and total question count
   useEffect(() => {
@@ -206,10 +218,19 @@ export function useLecture(lectureId: string | undefined) {
   }, [isAddQuestionOpen, lectureId, currentQuestionIndex, fetchQuestionByIndex, totalQuestions]);
 
   const handleAnswerSubmit = (questionId: string, answer: any) => {
-    setAnswers(prevAnswers => ({
-      ...prevAnswers,
-      [questionId]: answer
-    }));
+    setAnswers(prevAnswers => {
+      const newAnswers = {
+        ...prevAnswers,
+        [questionId]: answer
+      };
+      
+      // Update progress after updating answers
+      if (lectureId) {
+        updateProgress(lectureId, Object.keys(newAnswers).length, totalQuestions);
+      }
+      
+      return newAnswers;
+    });
   };
 
   const handleNext = () => {
@@ -217,6 +238,17 @@ export function useLecture(lectureId: string | undefined) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
       setIsComplete(true);
+      
+      // Update progress to completed if all questions have been answered
+      if (Object.keys(answers).length === totalQuestions && lectureId) {
+        updateProgress(lectureId, totalQuestions, totalQuestions);
+      }
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(currentQuestionIndex - 1);
     }
   };
 
@@ -228,6 +260,11 @@ export function useLecture(lectureId: string | undefined) {
     // Clear cache to ensure we fetch fresh data
     setQuestionCache({});
     fetchQuestionByIndex(0);
+    
+    // Update progress to zero
+    if (lectureId) {
+      updateProgress(lectureId, 0, totalQuestions);
+    }
   };
 
   const handleBackToSpecialty = () => {
@@ -243,6 +280,11 @@ export function useLecture(lectureId: string | undefined) {
     setAnswers({});
     setIsComplete(false);
     setQuestionCache({});
+    
+    // Update progress to zero
+    if (lectureId) {
+      updateProgress(lectureId, 0, totalQuestions);
+    }
   };
 
   const currentQuestion = questions[currentQuestionIndex];
@@ -268,6 +310,7 @@ export function useLecture(lectureId: string | undefined) {
     answeredCount,
     handleAnswerSubmit,
     handleNext,
+    handlePrevious,
     handleRestart,
     handleBackToSpecialty,
     clearSessionData,

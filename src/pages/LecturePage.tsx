@@ -18,6 +18,7 @@ import { useLecture } from '@/hooks/use-lecture';
 import { useVisibility } from '@/hooks/use-visibility';
 import { AnimatePresence } from 'framer-motion';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useLectureProgress, ProgressStatus } from '@/hooks/use-lecture-progress';
 
 export default function LecturePage() {
   const {
@@ -27,6 +28,7 @@ export default function LecturePage() {
   }>();
   
   const isVisible = useVisibility();
+  const { getLectureProgress } = useLectureProgress();
   
   const {
     lecture,
@@ -45,10 +47,15 @@ export default function LecturePage() {
     answeredCount,
     handleAnswerSubmit,
     handleNext,
+    handlePrevious,
     handleRestart,
     handleBackToSpecialty,
     fetchQuestionByIndex
   } = useLecture(lectureId);
+
+  // Get lecture progress from storage
+  const lectureProgress = lectureId ? getLectureProgress(lectureId) : null;
+  const status: ProgressStatus = lectureProgress?.status || 'not-started';
 
   // Log visibility state changes for debugging
   useEffect(() => {
@@ -59,13 +66,6 @@ export default function LecturePage() {
   const handleQuestionSelect = (index: number) => {
     if (index >= 0 && index < totalQuestions) {
       setCurrentQuestionIndex(index);
-    }
-  };
-
-  // Add handler for previous question
-  const handlePrevious = () => {
-    if (currentQuestionIndex > 0) {
-      handleQuestionSelect(currentQuestionIndex - 1);
     }
   };
 
@@ -119,7 +119,8 @@ export default function LecturePage() {
                 currentQuestionIndex={currentQuestionIndex} 
                 totalQuestions={totalQuestions} 
                 answeredCount={answeredCount}
-                progress={progress} 
+                progress={progress}
+                status={status}
               />
 
               {isComplete ? <LectureComplete onRestart={handleRestart} onBackToSpecialty={handleBackToSpecialty} /> : (
@@ -132,6 +133,8 @@ export default function LecturePage() {
                       question={currentQuestion} 
                       onSubmit={answer => handleAnswerSubmit(currentQuestion.id, answer)} 
                       onNext={handleNext} 
+                      onPrevious={handlePrevious}
+                      showPrevious={currentQuestionIndex > 0}
                     />
                   ) : (
                     <OpenQuestion 
@@ -139,6 +142,8 @@ export default function LecturePage() {
                       question={currentQuestion} 
                       onSubmit={answer => handleAnswerSubmit(currentQuestion.id, answer)} 
                       onNext={handleNext} 
+                      onPrevious={handlePrevious}
+                      showPrevious={currentQuestionIndex > 0}
                     />
                   )}
                 </AnimatePresence>
