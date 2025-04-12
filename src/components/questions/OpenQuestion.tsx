@@ -17,17 +17,9 @@ interface OpenQuestionProps {
   question: Question;
   onSubmit: (answer: string) => void;
   onNext: () => void;
-  onPrevious?: () => void;
-  showPrevious?: boolean;
 }
 
-export function OpenQuestion({ 
-  question, 
-  onSubmit, 
-  onNext,
-  onPrevious,
-  showPrevious = false 
-}: OpenQuestionProps) {
+export function OpenQuestion({ question, onSubmit, onNext }: OpenQuestionProps) {
   const [answer, setAnswer] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -114,8 +106,6 @@ export function OpenQuestion({
         canSubmit={!!answer.trim()}
         onSubmit={handleSubmit}
         onNext={onNext}
-        onPrevious={onPrevious}
-        showPrevious={showPrevious}
       />
       
       <QuestionEditDialog

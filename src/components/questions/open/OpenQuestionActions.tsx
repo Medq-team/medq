@@ -1,6 +1,6 @@
 
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 interface OpenQuestionActionsProps {
@@ -8,52 +8,31 @@ interface OpenQuestionActionsProps {
   canSubmit: boolean;
   onSubmit: () => void;
   onNext: () => void;
-  onPrevious?: () => void;
-  showPrevious?: boolean;
 }
 
-export function OpenQuestionActions({
-  isSubmitted,
-  canSubmit,
-  onSubmit,
-  onNext,
-  onPrevious,
-  showPrevious = false
+export function OpenQuestionActions({ 
+  isSubmitted, 
+  canSubmit, 
+  onSubmit, 
+  onNext 
 }: OpenQuestionActionsProps) {
   const { t } = useTranslation();
   
   return (
-    <div className="flex justify-between mt-6">
-      {showPrevious && onPrevious && (
-        <Button
-          variant="outline"
-          onClick={onPrevious}
-          className="flex items-center gap-1"
+    <div className="flex justify-end space-x-3 pt-4">
+      {!isSubmitted ? (
+        <Button 
+          onClick={onSubmit} 
+          disabled={!canSubmit}
         >
-          <ChevronLeft className="h-4 w-4" />
-          {t('common.previous')}
+          {t('questions.submitAnswer')}
+        </Button>
+      ) : (
+        <Button onClick={onNext} className="group">
+          {t('questions.nextQuestion')}
+          <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
         </Button>
       )}
-      
-      <div className={`flex gap-2 ${showPrevious ? 'ml-auto' : ''}`}>
-        {!isSubmitted ? (
-          <Button 
-            onClick={onSubmit} 
-            disabled={!canSubmit}
-            className="flex items-center gap-1"
-          >
-            {t('common.submit')}
-          </Button>
-        ) : (
-          <Button 
-            onClick={onNext}
-            className="flex items-center gap-1"
-          >
-            {t('common.next')}
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        )}
-      </div>
     </div>
   );
 }
