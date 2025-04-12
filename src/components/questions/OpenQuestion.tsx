@@ -41,7 +41,15 @@ export function OpenQuestion({ question, onSubmit, onNext }: OpenQuestionProps) 
   // Add keyboard shortcut for submitting answer
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === '1') {
+      // Don't process keyboard shortcuts when focus is on input elements
+      if (event.target instanceof HTMLInputElement || 
+          event.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+      
+      if (event.key === ' ' || event.key === 'Spacebar') {
+        event.preventDefault(); // Prevent page scrolling
+        
         // Only trigger if not already submitted and there's text in the answer
         if (!submitted && answer.trim()) {
           handleSubmit();
