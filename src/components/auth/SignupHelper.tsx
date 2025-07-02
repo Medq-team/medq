@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,7 +22,11 @@ export function SignupHelper() {
       const { user, error } = await signUp(email, password);
       
       if (error) {
-        setError(error.message);
+        setError(
+          typeof error === 'object' && error && 'message' in error
+            ? (error.message as string)
+            : 'An unexpected error occurred'
+        );
       } else if (user) {
         setMessage('User created successfully! You can now sign in.');
       }

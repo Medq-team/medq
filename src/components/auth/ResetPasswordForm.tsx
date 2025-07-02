@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { updatePassword } from '@/lib/supabase';
@@ -61,7 +60,11 @@ export function ResetPasswordForm() {
       
       if (error) {
         console.error('Password update failed:', error);
-        setError(error.message || t('auth.passwordResetFailed'));
+        setError(
+          typeof error === 'object' && error && 'message' in error
+            ? (error as { message: string }).message
+            : t('auth.passwordResetFailed')
+        );
       } else {
         console.log('Password updated successfully');
         // Redirect to dashboard after successful password reset

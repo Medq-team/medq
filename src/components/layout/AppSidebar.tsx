@@ -1,5 +1,4 @@
-
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -30,8 +29,17 @@ export function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { state, setOpen } = useSidebar();
-  const { theme, setTheme } = useTheme();
   const { t } = useTranslation();
+  const [mounted, setMounted] = useState(false);
+  
+  // Only use theme context after mounting
+  const themeContext = mounted ? useTheme() : null;
+  const theme = themeContext?.theme || 'light';
+  const setTheme = themeContext?.setTheme || (() => {});
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   
   useEffect(() => {
     const isDashboard = pathname === '/dashboard';
@@ -79,7 +87,9 @@ export function AppSidebar() {
   };
 
   const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
+    if (mounted && setTheme) {
+      setTheme(theme === 'dark' ? 'light' : 'dark');
+    }
   };
 
   return (
@@ -117,22 +127,24 @@ export function AppSidebar() {
                   </SidebarMenuItem>
                 ))}
                 
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    asChild
-                    tooltip={theme === 'dark' ? t('sidebar.lightMode') : t('sidebar.darkMode')}
-                    className="dark:hover:bg-gray-800/60"
-                  >
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start px-2 dark:hover:bg-gray-800/60"
-                      onClick={toggleTheme}
+                {mounted && (
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild
+                      tooltip={theme === 'dark' ? t('sidebar.lightMode') : t('sidebar.darkMode')}
+                      className="dark:hover:bg-gray-800/60"
                     >
-                      {theme === 'dark' ? <Sun className="text-gray-300" /> : <Moon />}
-                      <span className="dark:text-gray-300">{theme === 'dark' ? t('sidebar.lightMode') : t('sidebar.darkMode')}</span>
-                    </Button>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start px-2 dark:hover:bg-gray-800/60"
+                        onClick={toggleTheme}
+                      >
+                        {theme === 'dark' ? <Sun className="text-gray-300" /> : <Moon />}
+                        <span className="dark:text-gray-300">{theme === 'dark' ? t('sidebar.lightMode') : t('sidebar.darkMode')}</span>
+                      </Button>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )}
 
                 <SidebarMenuItem>
                   <SidebarMenuButton

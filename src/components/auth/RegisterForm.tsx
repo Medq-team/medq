@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { signUp, signInWithGoogle } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
@@ -34,7 +33,11 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
       const { user, error } = await signUp(email, password);
       
       if (error) {
-        setError(error.message);
+        setError(
+          typeof error === 'object' && error && 'message' in error
+            ? (error.message as string)
+            : t('auth.unexpectedError')
+        );
         return;
       }
       
@@ -57,7 +60,11 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
       const { error } = await signInWithGoogle();
       
       if (error) {
-        setError(error.message);
+        setError(
+          typeof error === 'object' && error && 'message' in error
+            ? (error.message as string)
+            : t('auth.unexpectedError')
+        );
       }
     } catch (err) {
       setError(t('auth.unexpectedError'));

@@ -86,7 +86,7 @@ export function useLecture(lectureId: string | undefined) {
   }, [lectureId, router, isAddQuestionOpen, currentQuestionIndex]);
 
   const handleAnswerSubmit = (questionId: string, answer: any) => {
-    setAnswers(prevAnswers => ({
+    setAnswers((prevAnswers: Record<string, any>) => ({
       ...prevAnswers,
       [questionId]: answer
     }));

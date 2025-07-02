@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn, signInWithGoogle } from '@/lib/supabase';
@@ -36,7 +35,7 @@ export function LoginForm({
       const { user, error } = await signIn(email, password);
       
       if (error) {
-        setError(error.message);
+        setError(typeof error === 'object' && error && 'message' in error ? (error.message as string) : t('auth.unexpectedError'));
         return;
       }
       
@@ -60,7 +59,13 @@ export function LoginForm({
       
       if (error) {
         console.error('Google sign-in error:', error);
-        if (error.message.includes('provider is not enabled')) {
+        if (
+          typeof error === 'object' &&
+          error &&
+          'message' in error &&
+          typeof error.message === 'string' &&
+          error.message.includes('provider is not enabled')
+        ) {
           setError(t('auth.googleAuthNotConfigured'));
           toast({
             title: t('auth.googleSignInError'),
@@ -68,7 +73,11 @@ export function LoginForm({
             variant: "destructive",
           });
         } else {
-          setError(error.message);
+          setError(
+            typeof error === 'object' && error && 'message' in error
+              ? (error.message as string)
+              : t('auth.unexpectedError')
+          );
         }
       }
     } catch (err) {
