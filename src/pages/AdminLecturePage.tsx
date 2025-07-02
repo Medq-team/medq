@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
@@ -12,10 +12,13 @@ import { QuestionForm } from '@/components/admin/QuestionForm';
 import { QuestionsList } from '@/components/admin/QuestionsList';
 import { LectureHeader } from '@/components/admin/LectureHeader';
 
-export default function AdminLecturePage() {
-  const { lectureId } = useParams<{ lectureId: string }>();
+interface AdminLecturePageProps {
+  lectureId: string;
+}
+
+export default function AdminLecturePage({ lectureId }: AdminLecturePageProps) {
+  const router = useRouter();
   const { isAdmin } = useAuth();
-  const navigate = useNavigate();
   const [lecture, setLecture] = useState<Lecture | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -24,7 +27,7 @@ export default function AdminLecturePage() {
 
   useEffect(() => {
     if (!isAdmin) {
-      navigate('/dashboard');
+      router.push('/dashboard');
       return;
     }
 
@@ -60,14 +63,14 @@ export default function AdminLecturePage() {
           description: "Failed to load lecture data. Please try again.",
           variant: "destructive",
         });
-        navigate('/admin');
+        router.push('/admin');
       } finally {
         setIsLoading(false);
       }
     }
 
     fetchLectureAndQuestions();
-  }, [lectureId, isAdmin, navigate]);
+  }, [lectureId, isAdmin, router]);
 
   const handleDeleteQuestion = async (questionId: string) => {
     try {
@@ -138,7 +141,7 @@ export default function AdminLecturePage() {
       <div className="space-y-6">
         <LectureHeader 
           lecture={lecture}
-          onBack={() => navigate('/admin')}
+          onBack={() => router.push('/admin')}
           onAddQuestion={handleAddQuestion}
         />
 

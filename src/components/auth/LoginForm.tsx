@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { signIn, signInWithGoogle } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,7 +18,7 @@ export function LoginForm({
   onToggleForm: () => void;
   onForgotPassword: () => void;
 }) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -41,7 +41,7 @@ export function LoginForm({
       }
       
       if (user) {
-        navigate('/dashboard');
+        router.push('/dashboard');
       }
     } catch (err) {
       setError(t('auth.unexpectedError'));

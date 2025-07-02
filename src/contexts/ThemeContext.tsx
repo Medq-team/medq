@@ -1,4 +1,4 @@
-
+'use client';
 /**
  * @file Theme context for managing dark/light mode
  * 

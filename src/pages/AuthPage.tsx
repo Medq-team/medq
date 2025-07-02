@@ -1,6 +1,6 @@
-
+'use client';
 import { useState, useEffect } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { LoginForm } from '@/components/auth/LoginForm';
 import { RegisterForm } from '@/components/auth/RegisterForm';
@@ -15,11 +15,12 @@ export default function AuthPage() {
   const { user } = useAuth();
   const [view, setView] = useState<AuthView>('login');
   const { t } = useTranslation();
-  const location = useLocation();
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   // Check for password reset parameter in URL
   useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
+    if (!searchParams) return;
     
     // Log URL parameters for debugging
     console.log('Auth page URL parameters:', {
@@ -34,15 +35,16 @@ export default function AuthPage() {
       console.log('Showing reset password form');
       setView('resetPassword');
     }
-  }, [location]);
+  }, [searchParams]);
 
   // If user is already logged in, redirect to dashboard
   if (user) {
-    return <Navigate to="/dashboard" replace />;
+    router.push('/dashboard');
+    return null;
   }
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center p-4 bg-gradient-to-b from-blue-50 to-white">
+    <div className="min-h-screen flex flex-col justify-center items-center p-4 bg-gradient-to-b from-background to-muted/20">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}

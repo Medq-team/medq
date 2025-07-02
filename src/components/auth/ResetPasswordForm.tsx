@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { updatePassword } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,7 +11,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useTranslation } from 'react-i18next';
 
 export function ResetPasswordForm() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -65,7 +65,7 @@ export function ResetPasswordForm() {
       } else {
         console.log('Password updated successfully');
         // Redirect to dashboard after successful password reset
-        navigate('/dashboard');
+        router.push('/dashboard');
       }
     } catch (err) {
       console.error('Password reset error:', err);

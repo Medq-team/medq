@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { QuestionType } from '@/types';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
@@ -39,7 +39,7 @@ export function QuestionFormSubmit({
   setIsLoading,
   children
 }: QuestionFormSubmitProps) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { user } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -107,7 +107,7 @@ export function QuestionFormSubmit({
       if (onComplete) {
         onComplete();
       } else {
-        navigate(`/admin/lecture/${lectureId}`);
+        router.push(`/admin/lecture/${lectureId}`);
       }
     } catch (error: any) {
       console.error('Error saving question:', error);

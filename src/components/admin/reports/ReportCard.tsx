@@ -1,5 +1,5 @@
 
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,10 +15,10 @@ interface ReportCardProps {
 
 export function ReportCard({ report, onUpdateStatus }: ReportCardProps) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const router = useRouter();
   
   const navigateToLecture = (lectureId: string) => {
-    navigate(`/lecture/${lectureId}`);
+    router.push(`/lecture/${lectureId}`);
   };
   
   return (

@@ -1,5 +1,5 @@
 
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Lecture } from '@/types';
@@ -12,11 +12,11 @@ interface LectureCardProps {
 }
 
 export function LectureCard({ lecture }: LectureCardProps) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { t } = useTranslation();
 
   const handleClick = () => {
-    navigate(`/lecture/${lecture.id}`);
+    router.push(`/lecture/${lecture.id}`);
   };
 
   return (

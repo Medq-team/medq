@@ -1,7 +1,7 @@
 
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { Specialty } from '@/types';
 import { SpecialtyItem } from './SpecialtyItem';
 import { useTranslation } from 'react-i18next';
@@ -17,7 +17,7 @@ export function SpecialtiesTab({
   isLoading, 
   onDeleteSpecialty 
 }: SpecialtiesTabProps) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { t } = useTranslation();
   
   return (
@@ -25,7 +25,7 @@ export function SpecialtiesTab({
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">{t('admin.manageSpecialties')}</h3>
         <Button 
-          onClick={() => navigate('/admin/specialty/new')}
+          onClick={() => router.push('/admin/specialty/new')}
           className="btn-hover"
         >
           <PlusCircle className="h-4 w-4 mr-2" />

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { Lecture, Question } from '@/types';
@@ -7,7 +7,7 @@ import { useLocalStorage } from './use-local-storage';
 import { ensureQuestionMediaBucket } from '@/lib/supabase';
 
 export function useLecture(lectureId: string | undefined) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [lecture, setLecture] = useState<Lecture | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   
@@ -76,14 +76,14 @@ export function useLecture(lectureId: string | undefined) {
           description: "Failed to load lecture information. Please try again.",
           variant: "destructive",
         });
-        navigate('/dashboard');
+        router.push('/dashboard');
       } finally {
         setIsLoading(false);
       }
     }
 
     fetchLectureAndQuestions();
-  }, [lectureId, navigate, isAddQuestionOpen, currentQuestionIndex]);
+  }, [lectureId, router, isAddQuestionOpen, currentQuestionIndex]);
 
   const handleAnswerSubmit = (questionId: string, answer: any) => {
     setAnswers(prevAnswers => ({
@@ -108,9 +108,9 @@ export function useLecture(lectureId: string | undefined) {
 
   const handleBackToSpecialty = () => {
     if (lecture && lecture.specialtyId) {
-      navigate(`/specialty/${lecture.specialtyId}`);
+      router.push(`/specialty/${lecture.specialtyId}`);
     } else {
-      navigate('/dashboard');
+      router.push('/dashboard');
     }
   };
 

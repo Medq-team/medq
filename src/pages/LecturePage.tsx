@@ -1,5 +1,4 @@
 
-import { useParams } from 'react-router-dom';
 import { useEffect } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { MCQQuestion } from '@/components/questions/MCQQuestion';
@@ -18,12 +17,11 @@ import { useVisibility } from '@/hooks/use-visibility';
 import { AnimatePresence } from 'framer-motion';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
-export default function LecturePage() {
-  const {
-    lectureId
-  } = useParams<{
-    lectureId: string;
-  }>();
+interface LecturePageProps {
+  lectureId: string;
+}
+
+export default function LecturePage({ lectureId }: LecturePageProps) {
   
   const isVisible = useVisibility();
   
@@ -98,7 +96,7 @@ export default function LecturePage() {
 
               {isComplete ? <LectureComplete onRestart={handleRestart} onBackToSpecialty={handleBackToSpecialty} /> : currentQuestion ? <AnimatePresence mode="wait">
                   <div className="border rounded-lg p-6 shadow-sm bg-inherit dark:bg-gray-800">
-                    {currentQuestion.type === 'mcq' ? <MCQQuestion key={currentQuestion.id} question={currentQuestion} onSubmit={answer => handleAnswerSubmit(currentQuestion.id, answer)} onNext={handleNext} /> : <OpenQuestion key={currentQuestion.id} question={currentQuestion} onSubmit={answer => handleAnswerSubmit(currentQuestion.id, answer)} onNext={handleNext} />}
+                    {currentQuestion.type === 'mcq' ? <MCQQuestion key={currentQuestion.id} question={currentQuestion} onSubmit={answer => handleAnswerSubmit(currentQuestion.id, answer)} onNext={handleNext} lectureId={lectureId} /> : <OpenQuestion key={currentQuestion.id} question={currentQuestion} onSubmit={answer => handleAnswerSubmit(currentQuestion.id, answer)} onNext={handleNext} lectureId={lectureId} />}
                   </div>
                 </AnimatePresence> : null}
             </> : <EmptyLectureState onAddQuestion={() => setIsAddQuestionOpen(true)} />}

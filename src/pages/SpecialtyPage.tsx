@@ -1,5 +1,4 @@
 
-import { useParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useSpecialty } from '@/hooks/use-specialty';
 import { SpecialtyHeader } from '@/components/specialties/SpecialtyHeader';
@@ -8,8 +7,11 @@ import { AddLectureDialog } from '@/components/specialties/AddLectureDialog';
 import { AddQuestionDialog } from '@/components/specialties/AddQuestionDialog';
 import { LecturesList } from '@/components/specialties/LecturesList';
 
-export default function SpecialtyPage() {
-  const { specialtyId } = useParams<{ specialtyId: string }>();
+interface SpecialtyPageProps {
+  specialtyId: string;
+}
+
+export default function SpecialtyPage({ specialtyId }: SpecialtyPageProps) {
   const {
     specialty,
     lectures,

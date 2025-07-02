@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { Specialty } from '@/types';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 
 interface SpecialtyHeaderProps {
   specialty: Specialty | null;
@@ -11,7 +11,7 @@ interface SpecialtyHeaderProps {
 }
 
 export function SpecialtyHeader({ specialty, isLoading }: SpecialtyHeaderProps) {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   if (isLoading) {
     return (
@@ -32,7 +32,7 @@ export function SpecialtyHeader({ specialty, isLoading }: SpecialtyHeaderProps) 
         <Button 
           variant="outline" 
           className="mt-4" 
-          onClick={() => navigate('/dashboard')}
+                      onClick={() => router.push('/dashboard')}
         >
           Back to Dashboard
         </Button>

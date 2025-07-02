@@ -1,4 +1,4 @@
-
+'use client';
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase, getCurrentUser, getUserRole } from '../lib/supabase';
 import { User } from '../types';
@@ -60,7 +60,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     // Only try to refresh user if we're not in a development environment with missing credentials
-    if (import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY) {
+    if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
       refreshUser();
 
       // Set up auth state change listener

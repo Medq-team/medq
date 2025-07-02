@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Specialty } from '@/types';
 import { motion } from 'framer-motion';
@@ -28,11 +28,11 @@ interface SpecialtyCardProps {
 }
 
 export function SpecialtyCard({ specialty }: SpecialtyCardProps) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [isHovered, setIsHovered] = useState(false);
 
   const handleClick = () => {
-    navigate(`/specialty/${specialty.id}`);
+    router.push(`/specialty/${specialty.id}`);
   };
 
   const getSpecialtyIcon = () => {

@@ -1,6 +1,6 @@
-
+'use client';
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -15,7 +15,7 @@ import { useTranslation } from 'react-i18next';
 
 export default function AdminPage() {
   const { isAdmin } = useAuth();
-  const navigate = useNavigate();
+  const router = useRouter();
   const [lectures, setLectures] = useState<Lecture[]>([]);
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [questionsCount, setQuestionsCount] = useState<number>(0);
@@ -26,7 +26,7 @@ export default function AdminPage() {
   
   useEffect(() => {
     if (!isAdmin) {
-      navigate('/dashboard');
+      router.push('/dashboard');
       return;
     }
 
@@ -80,7 +80,7 @@ export default function AdminPage() {
     }
 
     fetchData();
-  }, [isAdmin, navigate]);
+  }, [isAdmin, router]);
 
   const handleDeleteLecture = (id: string) => {
     setLectures(lectures.filter(lecture => lecture.id !== id));

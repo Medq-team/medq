@@ -1,5 +1,5 @@
 
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useQuestionForm } from '@/hooks/use-question-form';
 import { QuestionFormSubmit } from './QuestionFormSubmit';
@@ -18,7 +18,7 @@ interface QuestionFormProps {
 }
 
 export function QuestionForm({ lectureId, editQuestionId, onComplete }: QuestionFormProps) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const {
     isLoading,
     setIsLoading,
@@ -46,7 +46,7 @@ export function QuestionForm({ lectureId, editQuestionId, onComplete }: Question
     if (onComplete) {
       onComplete();
     } else {
-      navigate(`/admin/lecture/${lectureId}`);
+      router.push(`/admin/lecture/${lectureId}`);
     }
   };
 

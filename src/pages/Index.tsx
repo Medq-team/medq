@@ -1,21 +1,21 @@
-
+'use client';
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { SignupHelper } from "@/components/auth/SignupHelper";
 import { useTranslation } from 'react-i18next';
 
 const Index = () => {
   const { user, isLoading } = useAuth();
-  const navigate = useNavigate();
+  const router = useRouter();
   const { t } = useTranslation();
 
   useEffect(() => {
     // Only redirect if not loading and user is logged in
     if (!isLoading && user) {
-      navigate("/dashboard");
+      router.push("/dashboard");
     }
-  }, [user, navigate, isLoading]);
+  }, [user, router, isLoading]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">

@@ -1,6 +1,7 @@
 
 import React, { useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { signOut } from '@/lib/supabase';
 import {
@@ -26,19 +27,17 @@ import { toast } from '@/hooks/use-toast';
 
 export function AppSidebar() {
   const { user, isAdmin, refreshUser } = useAuth();
-  const location = useLocation();
-  const navigate = useNavigate();
+  const pathname = usePathname();
+  const router = useRouter();
   const { state, setOpen } = useSidebar();
   const { theme, setTheme } = useTheme();
   const { t } = useTranslation();
   
   useEffect(() => {
-    const isDashboard = location.pathname === '/dashboard';
+    const isDashboard = pathname === '/dashboard';
     // Don't force sidebar state change on route change - only on initial load
-    if (location.key === 'default') {
-      setOpen(isDashboard);
-    }
-  }, [location.pathname, location.key, setOpen]);
+    setOpen(isDashboard);
+  }, [pathname, setOpen]);
   
   const menuItems = [
     { label: t('sidebar.dashboard'), icon: LayoutDashboard, href: '/dashboard' },
@@ -58,7 +57,7 @@ export function AppSidebar() {
         console.error('Sign out error:', error);
         toast({
           title: t('auth.signOutError'),
-          description: error.message || t('auth.unexpectedError'),
+          description: (error as any)?.message || t('auth.unexpectedError'),
           variant: "destructive",
         });
         return;
@@ -68,7 +67,7 @@ export function AppSidebar() {
       await refreshUser();
       
       // Navigate to auth page after successful sign out
-      navigate('/auth');
+      router.push('/auth');
     } catch (err) {
       console.error('Unexpected sign out error:', err);
       toast({
@@ -106,11 +105,11 @@ export function AppSidebar() {
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton
                       asChild
-                      isActive={location.pathname === item.href}
+                      isActive={pathname === item.href}
                       tooltip={item.label}
                       className="dark:hover:bg-gray-800/60"
                     >
-                      <Link to={item.href} className="transition-colors dark:text-gray-300">
+                      <Link href={item.href} className="transition-colors dark:text-gray-300">
                         <item.icon className="text-foreground dark:text-gray-300" />
                         <span className="dark:text-gray-300">{item.label}</span>
                       </Link>

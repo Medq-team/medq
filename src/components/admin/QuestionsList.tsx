@@ -42,14 +42,6 @@ export function QuestionsList({
   // Render questions list
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex justify-end mb-4">
-        <Button onClick={onAddQuestion} className="btn-hover transition-all">
-          <PlusCircle className="h-4 w-4 mr-2" />
-          Add Question
-        </Button>
-      </div>
-      
-      <ScrollArea className="max-h-[calc(100vh-250px)]">
         <div className="grid grid-cols-1 gap-4 pr-4">
           {questions.map((question) => (
             <QuestionItem 
@@ -60,7 +52,6 @@ export function QuestionsList({
             />
           ))}
         </div>
-      </ScrollArea>
     </div>
   );
 }

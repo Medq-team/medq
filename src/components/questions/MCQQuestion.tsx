@@ -11,23 +11,23 @@ import { ReportQuestionDialog } from './ReportQuestionDialog';
 import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+
 import { QuestionMedia } from './QuestionMedia';
 
 interface MCQQuestionProps {
   question: Question;
   onSubmit: (selectedOptionIds: string[]) => void;
   onNext: () => void;
+  lectureId?: string;
 }
 
-export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
+export function MCQQuestion({ question, onSubmit, onNext, lectureId }: MCQQuestionProps) {
   const [selectedOptionIds, setSelectedOptionIds] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [expandedExplanations, setExpandedExplanations] = useState<string[]>([]);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const { t } = useTranslation();
-  const { lectureId } = useParams<{ lectureId: string }>();
 
   // Get correct answers array from question
   const correctAnswers = question.correctAnswers || question.correct_answers || [];

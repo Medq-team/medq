@@ -1,12 +1,12 @@
 
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { Specialty, Lecture } from '@/types';
 
 export function useSpecialty(specialtyId: string | undefined) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [specialty, setSpecialty] = useState<Specialty | null>(null);
   const [lectures, setLectures] = useState<Lecture[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -80,7 +80,7 @@ export function useSpecialty(specialtyId: string | undefined) {
       });
       // Only navigate away if we're on the specialty page
       if (window.location.pathname.includes('/specialty/')) {
-        navigate('/dashboard');
+        router.push('/dashboard');
       }
     } finally {
       setIsLoading(false);

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Edit, Trash } from 'lucide-react';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
@@ -27,7 +27,7 @@ interface LectureItemProps {
 
 export function LectureItem({ lecture, onDelete }: LectureItemProps) {
   const [isDeleting, setIsDeleting] = useState(false);
-  const navigate = useNavigate();
+  const router = useRouter();
   const { t } = useTranslation();
   
   const handleDelete = async () => {
@@ -80,7 +80,7 @@ export function LectureItem({ lecture, onDelete }: LectureItemProps) {
   
   return (
     <Card className="cursor-pointer hover:shadow-md transition-shadow">
-      <CardHeader className="pb-2" onClick={() => navigate(`/admin/lecture/${lecture.id}`)}>
+              <CardHeader className="pb-2" onClick={() => router.push(`/admin/lecture/${lecture.id}`)}>
         <CardTitle>{lecture.title}</CardTitle>
         <CardDescription className="line-clamp-2">
           {lecture.description || t('lectures.noDescription')}
@@ -90,7 +90,7 @@ export function LectureItem({ lecture, onDelete }: LectureItemProps) {
         <Button 
           variant="outline" 
           size="sm"
-          onClick={() => navigate(`/admin/lecture/${lecture.id}`)}
+                      onClick={() => router.push(`/admin/lecture/${lecture.id}`)}
         >
           <Edit className="h-4 w-4 mr-2" />
           {t('common.manage')}

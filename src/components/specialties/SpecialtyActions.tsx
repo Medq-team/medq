@@ -1,7 +1,7 @@
 
 import { Button } from '@/components/ui/button';
 import { PlusCircle, ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 
@@ -16,7 +16,7 @@ export function SpecialtyActions({
   onAddQuestionClick, 
   hasLectures 
 }: SpecialtyActionsProps) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { isAdmin, user } = useAuth();
   const { t } = useTranslation();
 
@@ -25,7 +25,7 @@ export function SpecialtyActions({
       <Button 
         variant="ghost" 
         className="group flex items-center" 
-        onClick={() => navigate('/dashboard')}
+        onClick={() => router.push('/dashboard')}
       >
         <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
         {t('sidebar.dashboard')}

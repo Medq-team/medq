@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Edit, Trash } from 'lucide-react';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import {
@@ -26,7 +26,7 @@ interface SpecialtyItemProps {
 
 export function SpecialtyItem({ specialty, onDelete }: SpecialtyItemProps) {
   const [isDeleting, setIsDeleting] = useState(false);
-  const navigate = useNavigate();
+  const router = useRouter();
   
   const handleDelete = async () => {
     try {
@@ -77,7 +77,7 @@ export function SpecialtyItem({ specialty, onDelete }: SpecialtyItemProps) {
   
   return (
     <Card className="cursor-pointer hover:shadow-md transition-shadow">
-      <CardHeader className="pb-2" onClick={() => navigate(`/admin/specialty/${specialty.id}`)}>
+              <CardHeader className="pb-2" onClick={() => router.push(`/admin/specialty/${specialty.id}`)}>
         <CardTitle>{specialty.name}</CardTitle>
         <CardDescription className="line-clamp-2">
           {specialty.description || 'No description available'}
@@ -87,7 +87,7 @@ export function SpecialtyItem({ specialty, onDelete }: SpecialtyItemProps) {
         <Button 
           variant="outline" 
           size="sm"
-          onClick={() => navigate(`/admin/specialty/${specialty.id}`)}
+                      onClick={() => router.push(`/admin/specialty/${specialty.id}`)}
         >
           <Edit className="h-4 w-4 mr-2" />
           Manage
