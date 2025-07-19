@@ -1,57 +1,40 @@
 
-import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
-import { toast } from '@/hooks/use-toast';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
+import { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 
 interface AddSpecialtyDialogProps {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
   onSpecialtyAdded: () => void;
-  userId: string | undefined;
 }
 
-export function AddSpecialtyDialog({ onSpecialtyAdded, userId }: AddSpecialtyDialogProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export function AddSpecialtyDialog({ 
+  isOpen, 
+  onOpenChange, 
+  onSpecialtyAdded 
+}: AddSpecialtyDialogProps) {
+  const { isAdmin, user } = useAuth();
   const [newSpecialty, setNewSpecialty] = useState({
     name: '',
     description: '',
     imageUrl: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { isAdmin, user } = useAuth();
   const { t } = useTranslation();
-  
-  useEffect(() => {
-    // For debugging
-    console.log('AddSpecialtyDialog - Current auth state:', { 
-      isAdmin, 
-      userId, 
-      userEmail: user?.email,
-      userRole: user?.role
-    });
-  }, [isAdmin, userId, user]);
 
   const handleAddSpecialty = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!userId) {
-      toast({
-        title: t('auth.signIn'),
-        description: t('auth.enterCredentials'),
-        variant: "destructive",
-      });
-      return;
-    }
-    
     if (!isAdmin) {
       toast({
-        title: t('specialties.adminOnly'),
-        description: t('specialties.adminOnly'),
+        title: t('auth.accessDenied'),
+        description: t('auth.adminRequired'),
         variant: "destructive",
       });
       return;
@@ -69,21 +52,22 @@ export function AddSpecialtyDialog({ onSpecialtyAdded, userId }: AddSpecialtyDia
     try {
       setIsSubmitting(true);
       
-      const { data, error } = await supabase
-        .from('specialties')
-        .insert([
-          {
-            name: newSpecialty.name,
-            description: newSpecialty.description || null,
-            imageurl: newSpecialty.imageUrl || null,
-            created_by: userId
-          }
-        ])
-        .select();
+      const response = await fetch('/api/specialties', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          name: newSpecialty.name.trim(),
+          description: newSpecialty.description.trim() || null,
+          imageUrl: newSpecialty.imageUrl.trim() || null
+        }),
+      });
       
-      if (error) {
-        console.error('Error details:', error);
-        throw error;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create specialty');
       }
       
       toast({
@@ -97,9 +81,9 @@ export function AddSpecialtyDialog({ onSpecialtyAdded, userId }: AddSpecialtyDia
         description: '',
         imageUrl: ''
       });
-      setIsOpen(false);
+      onOpenChange(false);
       
-      // Inform parent component to refresh the list
+      // Refresh the specialties list
       onSpecialtyAdded();
       
     } catch (error: any) {
@@ -120,19 +104,12 @@ export function AddSpecialtyDialog({ onSpecialtyAdded, userId }: AddSpecialtyDia
     }
   };
 
+  if (!isAdmin) {
+    return null;
+  }
+
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button className="relative" disabled={!isAdmin}>
-          {!isAdmin && (
-            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-md">
-              <span className="text-xs text-white">{t('specialties.adminOnly')}</span>
-            </div>
-          )}
-          <PlusCircle className="h-4 w-4 mr-2" />
-          {t('specialties.addSpecialty')}
-        </Button>
-      </DialogTrigger>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t('specialties.addSpecialty')}</DialogTitle>
@@ -145,7 +122,7 @@ export function AddSpecialtyDialog({ onSpecialtyAdded, userId }: AddSpecialtyDia
               id="name"
               value={newSpecialty.name}
               onChange={(e) => setNewSpecialty({...newSpecialty, name: e.target.value})}
-              placeholder={t('specialties.name')}
+              placeholder={t('specialties.namePlaceholder')}
               required
             />
           </div>
@@ -156,7 +133,7 @@ export function AddSpecialtyDialog({ onSpecialtyAdded, userId }: AddSpecialtyDia
               id="description"
               value={newSpecialty.description}
               onChange={(e) => setNewSpecialty({...newSpecialty, description: e.target.value})}
-              placeholder={t('specialties.description')}
+              placeholder={t('specialties.descriptionPlaceholder')}
             />
           </div>
           
@@ -166,11 +143,19 @@ export function AddSpecialtyDialog({ onSpecialtyAdded, userId }: AddSpecialtyDia
               id="imageUrl"
               value={newSpecialty.imageUrl}
               onChange={(e) => setNewSpecialty({...newSpecialty, imageUrl: e.target.value})}
-              placeholder="https://example.com/image.jpg"
+              placeholder={t('specialties.imageUrlPlaceholder')}
             />
           </div>
           
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-2">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => onOpenChange(false)}
+              disabled={isSubmitting}
+            >
+              {t('common.cancel')}
+            </Button>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? t('specialties.creating') : t('specialties.createSpecialty')}
             </Button>

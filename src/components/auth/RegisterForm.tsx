@@ -1,13 +1,15 @@
 import { useState } from 'react';
-import { signUp, signInWithGoogle } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { EyeIcon, EyeOffIcon, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { toast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
+  const { register } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -30,19 +32,16 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
     setIsLoading(true);
 
     try {
-      const { user, error } = await signUp(email, password);
+      const result = await register(email, password);
       
-      if (error) {
-        setError(
-          typeof error === 'object' && error && 'message' in error
-            ? (error.message as string)
-            : t('auth.unexpectedError')
-        );
-        return;
-      }
-      
-      if (user) {
+      if (result.success) {
         setSuccess(true);
+        toast({
+          title: t('auth.registrationSuccess'),
+          description: t('auth.checkEmail'),
+        });
+      } else {
+        setError(result.error || t('auth.registrationFailed'));
       }
     } catch (err) {
       setError(t('auth.unexpectedError'));
@@ -57,18 +56,15 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
     setIsGoogleLoading(true);
     
     try {
-      const { error } = await signInWithGoogle();
-      
-      if (error) {
-        setError(
-          typeof error === 'object' && error && 'message' in error
-            ? (error.message as string)
-            : t('auth.unexpectedError')
-        );
-      }
+      // For now, we'll show a message that Google auth is not implemented
+      toast({
+        title: t('auth.googleAuthNotAvailable'),
+        description: t('auth.pleaseUseEmail'),
+        variant: "destructive",
+      });
     } catch (err) {
+      console.error('Unexpected Google sign-in error:', err);
       setError(t('auth.unexpectedError'));
-      console.error(err);
     } finally {
       setIsGoogleLoading(false);
     }
@@ -129,7 +125,7 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
                 />
               </svg>
             )}
-            {isGoogleLoading ? t('auth.signingIn') : t('auth.signInWithGoogle')}
+            {isGoogleLoading ? t('auth.signingUp') : t('auth.signUpWithGoogle')}
           </Button>
           
           <div className="relative">

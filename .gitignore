@@ -142,3 +142,6 @@ Thumbs.db
 # Supabase
 .branches
 .temp
+
+/generated/prisma
+*sql

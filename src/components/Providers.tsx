@@ -7,23 +7,38 @@ import { I18nProvider } from '@/i18n/I18nProvider'
 import { Toaster } from '@/components/ui/toaster'
 import { Toaster as Sonner } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
+import { Suspense } from 'react'
 
 const queryClient = new QueryClient()
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <div className="text-center">
+        <div className="animate-pulse-subtle">
+          <div className="h-4 w-24 bg-muted rounded mx-auto"></div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <ThemeProvider>
-          <I18nProvider>
-            <TooltipProvider>
-              {children}
-              <Toaster />
-              <Sonner />
-            </TooltipProvider>
-          </I18nProvider>
-        </ThemeProvider>
-      </AuthProvider>
+      <Suspense fallback={<LoadingFallback />}>
+        <AuthProvider>
+          <ThemeProvider>
+            <I18nProvider>
+              <TooltipProvider>
+                {children}
+                <Toaster />
+                <Sonner />
+              </TooltipProvider>
+            </I18nProvider>
+          </ThemeProvider>
+        </AuthProvider>
+      </Suspense>
     </QueryClientProvider>
   )
 } 

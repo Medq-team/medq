@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { Specialty, Lecture } from '@/types';
 
@@ -25,17 +24,14 @@ export function useSpecialty(specialtyId: string | undefined) {
     try {
       console.log('Fetching specialty with ID:', specialtyId);
       
-      // Fetch specialty
-      const { data: specialtyData, error: specialtyError } = await supabase
-        .from('specialties')
-        .select('*')
-        .eq('id', specialtyId)
-        .maybeSingle();
-
-      if (specialtyError) {
-        console.error('Error fetching specialty:', specialtyError);
-        throw specialtyError;
+      // Fetch specialty using our new API
+      const specialtyResponse = await fetch(`/api/specialties/${specialtyId}`);
+      
+      if (!specialtyResponse.ok) {
+        throw new Error(`Failed to fetch specialty: ${specialtyResponse.statusText}`);
       }
+      
+      const specialtyData = await specialtyResponse.json();
       
       if (!specialtyData) {
         console.warn('No specialty found with ID:', specialtyId);
@@ -50,18 +46,15 @@ export function useSpecialty(specialtyId: string | undefined) {
         console.log('Successfully fetched specialty:', specialtyData);
         setSpecialty(specialtyData);
         
-        // Fetch lectures for this specialty
-        const { data: lecturesData, error: lecturesError } = await supabase
-          .from('lectures')
-          .select('*')
-          .eq('specialty_id', specialtyId)
-          .order('title');
-
-        if (lecturesError) {
-          console.error('Error fetching lectures:', lecturesError);
+        // Fetch lectures for this specialty using our new API
+        const lecturesResponse = await fetch(`/api/lectures?specialtyId=${specialtyId}`);
+        
+        if (!lecturesResponse.ok) {
+          console.error('Error fetching lectures:', lecturesResponse.statusText);
           // Don't throw for lectures error, just set empty array
           setLectures([]);
         } else {
+          const lecturesData = await lecturesResponse.json();
           console.log('Successfully fetched lectures:', lecturesData?.length || 0);
           setLectures(lecturesData || []);
           

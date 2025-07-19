@@ -4,7 +4,7 @@ import { Question } from '@/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ChevronLeft, ChevronRight, CheckCircle, Circle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CheckCircle, Circle, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 
@@ -12,6 +12,7 @@ interface QuestionControlPanelProps {
   questions: Question[];
   currentQuestionIndex: number;
   answers: Record<string, any>;
+  answerResults?: Record<string, boolean>;
   onQuestionSelect: (index: number) => void;
   onPrevious: () => void;
   onNext: () => void;
@@ -22,6 +23,7 @@ export function QuestionControlPanel({
   questions,
   currentQuestionIndex,
   answers,
+  answerResults = {},
   onQuestionSelect,
   onPrevious,
   onNext,
@@ -70,6 +72,7 @@ export function QuestionControlPanel({
       {questions.map((question, index) => {
         const isAnswered = answers[question.id] !== undefined;
         const isCurrent = index === currentQuestionIndex && !isComplete;
+        const isCorrect = answerResults[question.id];
         
         return (
           <Button
@@ -88,7 +91,11 @@ export function QuestionControlPanel({
             <div className="flex items-center w-full">
               <span className="mr-2">Q{question.number || index + 1}</span>
               {isAnswered ? (
-                <CheckCircle className="h-4 w-4 text-primary ml-auto" />
+                isCorrect ? (
+                  <CheckCircle className="h-4 w-4 text-green-600 ml-auto" />
+                ) : (
+                  <XCircle className="h-4 w-4 text-red-600 ml-auto" />
+                )
               ) : (
                 <Circle className="h-4 w-4 text-muted-foreground ml-auto" />
               )}

@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Edit, Trash } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 import {
@@ -35,30 +34,31 @@ export function LectureItem({ lecture, onDelete }: LectureItemProps) {
       setIsDeleting(true);
       
       // Check if lecture has questions associated with it
-      const { data: questions, error: checkError } = await supabase
-        .from('questions')
-        .select('id')
-        .eq('lecture_id', lecture.id);
-        
-      if (checkError) throw checkError;
+      const questionsResponse = await fetch(`/api/questions?lectureId=${lecture.id}`);
+      if (!questionsResponse.ok) throw new Error('Failed to check questions');
+      const questions = await questionsResponse.json();
       
       if (questions && questions.length > 0) {
         // First delete all the questions associated with this lecture
-        const { error: deleteQuestionsError } = await supabase
-          .from('questions')
-          .delete()
-          .eq('lecture_id', lecture.id);
-          
-        if (deleteQuestionsError) throw deleteQuestionsError;
+        for (const question of questions) {
+          const deleteQuestionResponse = await fetch(`/api/questions/${question.id}`, {
+            method: 'DELETE',
+          });
+          if (!deleteQuestionResponse.ok) {
+            throw new Error('Failed to delete question');
+          }
+        }
       }
       
       // Delete the lecture
-      const { error } = await supabase
-        .from('lectures')
-        .delete()
-        .eq('id', lecture.id);
-        
-      if (error) throw error;
+      const deleteResponse = await fetch(`/api/lectures/${lecture.id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!deleteResponse.ok) {
+        const errorData = await deleteResponse.json();
+        throw new Error(errorData.error || 'Failed to delete lecture');
+      }
       
       toast({
         title: t('lectures.deleteLecture'),

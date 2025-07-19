@@ -10,6 +10,7 @@ import { AutoParseInput } from './AutoParseInput';
 import { FormActionButtons } from './FormActionButtons';
 import { MediaUpload } from './MediaUpload';
 import { Separator } from '@/components/ui/separator';
+import { toast } from '@/hooks/use-toast';
 
 interface QuestionFormProps {
   lectureId: string;
@@ -58,21 +59,68 @@ export function QuestionForm({ lectureId, editQuestionId, onComplete }: Question
         </CardHeader>
       )}
       <CardContent>
-        <QuestionFormSubmit
-          lectureId={lectureId}
-          editQuestionId={editQuestionId}
-          onComplete={onComplete}
-          questionType={questionType}
-          questionText={questionText}
-          courseReminder={courseReminder}
-          questionNumber={questionNumber}
-          session={session}
-          options={options}
-          correctAnswers={correctAnswers}
-          mediaUrl={mediaUrl}
-          mediaType={mediaType}
-          setIsLoading={setIsLoading}
-        >
+        <form onSubmit={async (e) => {
+          e.preventDefault();
+          
+          if (!questionText.trim()) {
+            toast({
+              title: "Validation Error",
+              description: "Question text is required",
+              variant: "destructive",
+            });
+            return;
+          }
+          
+          setIsLoading(true);
+          
+          try {
+            const questionData = {
+              type: questionType,
+              text: questionText,
+              courseReminder,
+              questionNumber,
+              session,
+              options: questionType === 'mcq' ? options : undefined,
+              correctAnswers: questionType === 'mcq' ? correctAnswers : undefined,
+              mediaUrl,
+              mediaType
+            };
+            
+            const response = await fetch('/api/questions', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              credentials: 'include',
+              body: JSON.stringify({
+                ...questionData,
+                lectureId: lectureId
+              }),
+            });
+            
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(errorData.error || 'Failed to create question');
+            }
+            
+            toast({
+              title: "Success",
+              description: "Question created successfully",
+            });
+            
+            onComplete?.();
+            
+          } catch (error: any) {
+            console.error('Error creating question:', error);
+            toast({
+              title: "Error",
+              description: error.message || "Failed to create question",
+              variant: "destructive",
+            });
+          } finally {
+            setIsLoading(false);
+          }
+        }}>
           <QuestionTypeSelect 
             questionType={questionType} 
             setQuestionType={setQuestionType} 
@@ -119,7 +167,7 @@ export function QuestionForm({ lectureId, editQuestionId, onComplete }: Question
             onCancel={handleCancel} 
             isEdit={!!editQuestionId} 
           />
-        </QuestionFormSubmit>
+        </form>
       </CardContent>
     </Card>
   );

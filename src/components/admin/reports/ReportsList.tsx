@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ReportCard } from './ReportCard';
 import { Report } from './types';
-import { fetchReports, updateReportStatus } from '@/lib/supabase';
 
 export function ReportsList() {
   const [reports, setReports] = useState<Report[]>([]);
@@ -20,13 +19,13 @@ export function ReportsList() {
     setIsLoading(true);
     try {
       console.log('Fetching reports from the database...');
-      const { data, error } = await fetchReports();
+      const response = await fetch('/api/reports');
         
-      if (error) {
-        console.error('Error fetching reports:', error);
-        throw error;
+      if (!response.ok) {
+        throw new Error('Failed to fetch reports');
       }
       
+      const data = await response.json();
       console.log('Reports fetched:', data);
       setReports(data || []);
     } catch (error) {
@@ -44,11 +43,17 @@ export function ReportsList() {
   const handleUpdateStatus = async (reportId: string, newStatus: 'pending' | 'reviewed' | 'dismissed') => {
     try {
       console.log(`Updating report ${reportId} status to ${newStatus}`);
-      const { error } = await updateReportStatus(reportId, newStatus);
+      const response = await fetch(`/api/reports/${reportId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
         
-      if (error) {
-        console.error('Error updating report status:', error);
-        throw error;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update report status');
       }
       
       // Update the local state

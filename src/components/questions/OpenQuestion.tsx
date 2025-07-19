@@ -25,6 +25,7 @@ export function OpenQuestion({ question, onSubmit, onNext, lectureId }: OpenQues
   const [answer, setAnswer] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const { t } = useTranslation();
 
   const handleSubmit = () => {
@@ -85,7 +86,13 @@ export function OpenQuestion({ question, onSubmit, onNext, lectureId }: OpenQues
             {t('common.edit')}
           </Button>
           
-          {lectureId && <ReportQuestionDialog question={question} lectureId={lectureId} />}
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setIsReportDialogOpen(true)}
+          >
+            {t('questions.report')}
+          </Button>
         </div>
       </div>
       
@@ -117,6 +124,12 @@ export function OpenQuestion({ question, onSubmit, onNext, lectureId }: OpenQues
         isOpen={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
         onQuestionUpdated={handleQuestionUpdated}
+      />
+      
+      <ReportQuestionDialog
+        question={question}
+        isOpen={isReportDialogOpen}
+        onOpenChange={setIsReportDialogOpen}
       />
     </motion.div>
   );

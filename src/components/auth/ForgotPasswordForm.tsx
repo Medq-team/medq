@@ -1,12 +1,12 @@
 
 import { useState } from 'react';
-import { resetPassword } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, ArrowLeftIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { toast } from '@/hooks/use-toast';
 
 export function ForgotPasswordForm({ onBack }: { onBack: () => void }) {
   const [email, setEmail] = useState('');
@@ -19,11 +19,35 @@ export function ForgotPasswordForm({ onBack }: { onBack: () => void }) {
     setIsLoading(true);
 
     try {
-      const { error } = await resetPassword(email);
-      
-      if (!error) {
+      const response = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
         setIsSubmitted(true);
+        toast({
+          title: t('auth.resetEmailSent'),
+          description: t('auth.checkEmail'),
+        });
+      } else {
+        toast({
+          title: t('auth.resetError'),
+          description: data.error,
+          variant: "destructive",
+        });
       }
+    } catch (error) {
+      toast({
+        title: t('auth.resetError'),
+        description: t('auth.unexpectedError'),
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }

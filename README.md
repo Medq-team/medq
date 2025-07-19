@@ -1,69 +1,149 @@
-# Welcome to your Lovable project
+# MedQ - Medical Education Platform
 
-## Project info
+A comprehensive medical education platform built with Next.js, featuring custom JWT authentication, role-based access control, and interactive learning modules.
 
-**URL**: https://lovable.dev/projects/46859f89-d1a6-4975-bb42-fb5254201a96
+## Features
 
-## How can I edit this code?
+- 🔐 **Custom JWT Authentication** - Secure, HTTP-only cookie-based authentication
+- 👥 **Role-Based Access Control** - Student and Admin roles with appropriate permissions
+- 📚 **Interactive Learning** - MCQ and Open-ended questions with progress tracking
+- 🎯 **Specialty Management** - Organize content by medical specialties
+- 📊 **Progress Tracking** - Monitor learning progress and completion rates
+- 🎨 **Modern UI** - Built with shadcn/ui and Tailwind CSS
+- 🌍 **Internationalization** - Multi-language support
+- 📱 **Responsive Design** - Works on desktop and mobile devices
 
-There are several ways of editing your application.
+## Tech Stack
 
-**Use Lovable**
+- **Framework**: Next.js 15 with App Router
+- **Database**: PostgreSQL with Prisma ORM
+- **Authentication**: Custom JWT with HTTP-only cookies
+- **Styling**: Tailwind CSS with shadcn/ui components
+- **State Management**: React Context + TanStack Query
+- **Internationalization**: i18next
+- **Type Safety**: TypeScript
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/46859f89-d1a6-4975-bb42-fb5254201a96) and start prompting.
+## Getting Started
 
-Changes made via Lovable will be committed automatically to this repo.
+### Prerequisites
 
-**Use your preferred IDE**
+- Node.js 18+ 
+- PostgreSQL database
+- npm or yarn
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Installation
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+1. **Clone the repository**
+   ```bash
+   git clone <your-repo-url>
+   cd medq
+   ```
 
-Follow these steps:
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+3. **Set up environment variables**
+   Create a `.env.local` file in the root directory:
+   ```env
+   # Database
+   DATABASE_URL="postgresql://username:password@localhost:5432/medq"
+   
+   # JWT Secret (generate with: openssl rand -base64 32)
+   JWT_SECRET="your-secret-key-here"
+   
+   # Next.js
+   NEXTAUTH_URL="http://localhost:3000"
+   ```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+4. **Set up the database**
+   ```bash
+   # Push the schema to your database
+   npx prisma db push
+   
+   # Generate Prisma client
+   npx prisma generate
+   ```
 
-# Step 3: Install the necessary dependencies.
-npm i
+5. **Start the development server**
+   ```bash
+   npm run dev
+   ```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+6. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
+
+## Project Structure
+
+```
+src/
+├── app/                    # Next.js App Router pages
+│   ├── api/               # API routes
+│   ├── auth/              # Authentication pages
+│   ├── admin/             # Admin dashboard
+│   └── dashboard/         # Student dashboard
+├── components/            # React components
+│   ├── ui/               # shadcn/ui components
+│   ├── auth/             # Authentication components
+│   └── admin/            # Admin-specific components
+├── contexts/             # React contexts
+├── hooks/                # Custom React hooks
+├── lib/                  # Utility functions and configurations
+└── types/                # TypeScript type definitions
 ```
 
-**Edit a file directly in GitHub**
+## Authentication System
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+The platform uses a custom JWT-based authentication system with the following security features:
 
-**Use GitHub Codespaces**
+- **HTTP-only cookies** for token storage (prevents XSS attacks)
+- **bcrypt** for password hashing
+- **Role-based access control** with middleware protection
+- **Automatic token expiration** (7 days)
+- **CSRF protection** via SameSite cookies
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## API Endpoints
 
-## What technologies are used for this project?
+### Authentication
+- `POST /api/auth/register` - User registration
+- `POST /api/auth/login` - User login
+- `POST /api/auth/logout` - User logout
+- `GET /api/auth/me` - Get current user
 
-This project is built with .
+### User Management
+- `GET /api/user/profile` - Get user profile
+- `PUT /api/user/profile` - Update user profile
+- `PUT /api/user/password` - Change password
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Content Management
+- `GET /api/specialties` - List specialties
+- `GET /api/lectures` - List lectures
+- `GET /api/questions` - List questions
+- `POST /api/questions` - Create question (admin only)
 
-## How can I deploy this project?
+## Deployment
 
-Simply open [Lovable](https://lovable.dev/projects/46859f89-d1a6-4975-bb42-fb5254201a96) and click on Share -> Publish.
+### Vercel (Recommended)
+1. Connect your GitHub repository to Vercel
+2. Set up environment variables in Vercel dashboard
+3. Deploy automatically on push to main branch
 
-## I want to use a custom domain - is that possible?
+### Other Platforms
+The application can be deployed to any platform that supports Next.js:
+- Netlify
+- Railway
+- DigitalOcean App Platform
+- AWS Amplify
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License.

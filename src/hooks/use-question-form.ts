@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from 'react';
 import { QuestionType, Option } from '@/types';
-import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 
 interface UseQuestionFormProps {
@@ -33,26 +32,25 @@ export function useQuestionForm({ lectureId, editQuestionId, onComplete }: UseQu
 
   const fetchQuestionData = async () => {
     try {
-      const { data, error } = await supabase
-        .from('questions')
-        .select('*')
-        .eq('id', editQuestionId)
-        .single();
-
-      if (error) throw error;
+      const response = await fetch(`/api/questions/${editQuestionId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch question');
+      }
+      
+      const data = await response.json();
       
       if (data) {
         setQuestionType(data.type);
         setQuestionText(data.text);
-        setCourseReminder(data.course_reminder || data.explanation || '');
+        setCourseReminder(data.courseReminder || data.explanation || '');
         setQuestionNumber(data.number);
         setSession(data.session || '');
-        setMediaUrl(data.media_url);
-        setMediaType(data.media_type);
+        setMediaUrl(data.mediaUrl);
+        setMediaType(data.mediaType);
         
         if (data.type === 'mcq' && data.options) {
           setOptions(data.options);
-          setCorrectAnswers(data.correct_answers || []);
+          setCorrectAnswers(data.correctAnswers || []);
         }
       }
     } catch (error) {

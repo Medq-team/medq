@@ -1,24 +1,27 @@
 'use client';
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { supabase, getCurrentUser, getUserRole } from '../lib/supabase';
-import { User } from '../types';
+import { User } from '@/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
 type AuthContextType = {
   user: User | null;
   isLoading: boolean;
   isAdmin: boolean;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  register: (email: string, password: string, name?: string) => Promise<{ success: boolean; error?: string }>;
+  logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 };
 
-const AuthContext = createContext<AuthContextType>({
-  user: null,
-  isLoading: true,
-  isAdmin: false,
-  refreshUser: async () => {},
-});
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
   children 
@@ -26,31 +29,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isClient, setIsClient] = useState(false);
 
-  const refreshUser = async () => {
+  const checkAuth = async () => {
+    // Only check auth on the client side
+    if (typeof window === 'undefined') {
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      setIsLoading(true);
-      const authUser = await getCurrentUser();
-      
-      if (!authUser) {
-        setUser(null);
-        setIsAdmin(false);
-        return;
-      }
-      
-      const role = await getUserRole();
-      console.log('User role from database:', role);
-      
-      setUser({
-        id: authUser.id,
-        email: authUser.email || '',
-        role: role as 'student' | 'admin',
+      const response = await fetch('/api/auth/me', {
+        credentials: 'include', // Include cookies
       });
       
-      setIsAdmin(role === 'admin');
-      console.log('Is admin set to:', role === 'admin', 'for user:', authUser.email);
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data.user);
+        setIsAdmin(data.user.role === 'admin');
+      } else {
+        setUser(null);
+        setIsAdmin(false);
+      }
     } catch (error) {
-      console.error('Error refreshing user:', error);
+      console.error('Auth check error:', error);
       setUser(null);
       setIsAdmin(false);
     } finally {
@@ -58,51 +60,96 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  useEffect(() => {
-    // Only try to refresh user if we're not in a development environment with missing credentials
-    if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-      refreshUser();
-
-      // Set up auth state change listener
-      const { data } = supabase.auth.onAuthStateChange((_event, session) => {
-        if (session?.user) {
-          refreshUser();
-        } else {
-          setUser(null);
-          setIsAdmin(false);
-          setIsLoading(false);
-        }
+  const login = async (email: string, password: string) => {
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ email, password }),
       });
-
-      return () => {
-        data.subscription.unsubscribe();
-      };
-    } else {
-      // If we don't have Supabase credentials, just set loading to false
-      setIsLoading(false);
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        setUser(data.user);
+        setIsAdmin(data.user.role === 'admin');
+        return { success: true };
+      } else {
+        return { success: false, error: data.error };
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      return { success: false, error: 'An unexpected error occurred' };
     }
+  };
+
+  const register = async (email: string, password: string, name?: string) => {
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password, name }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        return { success: true };
+      } else {
+        return { success: false, error: data.error };
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      return { success: false, error: 'An unexpected error occurred' };
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      
+      setUser(null);
+      setIsAdmin(false);
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
+  const refreshUser = async () => {
+    await checkAuth();
+  };
+
+  useEffect(() => {
+    setIsClient(true);
   }, []);
 
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="w-full max-w-md space-y-4 p-6">
-          <Skeleton className="h-8 w-3/4 rounded-md" />
-          <Skeleton className="h-32 w-full rounded-md" />
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-full rounded-md" />
-            <Skeleton className="h-4 w-5/6 rounded-md" />
-            <Skeleton className="h-4 w-4/6 rounded-md" />
-          </div>
-          <Skeleton className="h-10 w-full rounded-md" />
-        </div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (isClient) {
+      checkAuth();
+    }
+  }, [isClient]);
+
+  const value = {
+    user,
+    isLoading,
+    isAdmin,
+    login,
+    register,
+    logout,
+    refreshUser,
+  };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, isAdmin, refreshUser }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
-};
+}; 

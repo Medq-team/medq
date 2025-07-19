@@ -16,12 +16,12 @@ export function AppLayout({ children }: AppLayoutProps) {
   return (
     <AppSidebarProvider>
       <AppSidebar />
-      <SidebarInset className="bg-background/95 backdrop-blur-sm">
+      <SidebarInset>
         <AppHeader />
-        <ScrollArea className="h-[calc(100vh-64px)]">
-          <main className="px-4 py-6 md:px-6 max-w-7xl mx-auto transition-all duration-300 animate-fade-in">
+        <ScrollArea className="flex-1">
+          <div className="px-4 py-6 md:px-6 max-w-7xl mx-auto transition-all duration-300 animate-fade-in">
             {children}
-          </main>
+          </div>
         </ScrollArea>
       </SidebarInset>
     </AppSidebarProvider>

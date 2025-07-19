@@ -1,7 +1,6 @@
 
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { signOut } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   DropdownMenu,
@@ -15,28 +14,13 @@ import { useTranslation } from 'react-i18next';
 import { toast } from '@/hooks/use-toast';
 
 export function AppHeader() {
-  const { user, isAdmin, refreshUser } = useAuth();
+  const { user, isAdmin, logout } = useAuth();
   const router = useRouter();
   const { t } = useTranslation();
 
   const handleSignOut = async () => {
     try {
-      const { error } = await signOut();
-      
-      if (error) {
-        console.error('Sign out error:', error);
-        toast({
-          title: t('auth.signOutError'),
-          description: (error as any)?.message || t('auth.unexpectedError'),
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      // Force refresh the user state to ensure UI updates
-      await refreshUser();
-      
-      // Navigate to auth page after successful sign out
+      await logout();
       router.push('/auth');
     } catch (err) {
       console.error('Unexpected sign out error:', err);

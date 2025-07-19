@@ -3,6 +3,8 @@ export type User = {
   id: string;
   email: string;
   role: 'student' | 'admin';
+  name?: string;
+  image?: string;
 };
 
 export type Specialty = {

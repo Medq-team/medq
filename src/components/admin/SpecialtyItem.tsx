@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Edit, Trash } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import {
   AlertDialog,
@@ -33,12 +32,9 @@ export function SpecialtyItem({ specialty, onDelete }: SpecialtyItemProps) {
       setIsDeleting(true);
       
       // Check if specialty has lectures associated with it
-      const { data: lectures, error: checkError } = await supabase
-        .from('lectures')
-        .select('id')
-        .eq('specialty_id', specialty.id);
-        
-      if (checkError) throw checkError;
+      const lecturesResponse = await fetch(`/api/lectures?specialtyId=${specialty.id}`);
+      if (!lecturesResponse.ok) throw new Error('Failed to check lectures');
+      const lectures = await lecturesResponse.json();
       
       if (lectures && lectures.length > 0) {
         toast({
@@ -50,12 +46,14 @@ export function SpecialtyItem({ specialty, onDelete }: SpecialtyItemProps) {
       }
       
       // Delete the specialty
-      const { error } = await supabase
-        .from('specialties')
-        .delete()
-        .eq('id', specialty.id);
-        
-      if (error) throw error;
+      const deleteResponse = await fetch(`/api/specialties/${specialty.id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!deleteResponse.ok) {
+        const errorData = await deleteResponse.json();
+        throw new Error(errorData.error || 'Failed to delete specialty');
+      }
       
       toast({
         title: "Specialty deleted",

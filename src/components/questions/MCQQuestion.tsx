@@ -16,7 +16,7 @@ import { QuestionMedia } from './QuestionMedia';
 
 interface MCQQuestionProps {
   question: Question;
-  onSubmit: (selectedOptionIds: string[]) => void;
+  onSubmit: (selectedOptionIds: string[], isCorrect: boolean) => void;
   onNext: () => void;
   lectureId?: string;
 }
@@ -27,6 +27,7 @@ export function MCQQuestion({ question, onSubmit, onNext, lectureId }: MCQQuesti
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [expandedExplanations, setExpandedExplanations] = useState<string[]>([]);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const { t } = useTranslation();
 
   // Get correct answers array from question
@@ -81,7 +82,9 @@ export function MCQQuestion({ question, onSubmit, onNext, lectureId }: MCQQuesti
     
     setExpandedExplanations(autoExpandIds);
     
-    onSubmit(selectedOptionIds);
+    const isCorrect = allCorrectSelected && noIncorrectSelected;
+    onSubmit(selectedOptionIds, isCorrect);
+    // Don't automatically move to next question - let user see the result first
   }, [correctAnswers, onSubmit, selectedOptionIds, submitted]);
 
   const handleQuestionUpdated = () => {
@@ -153,7 +156,13 @@ export function MCQQuestion({ question, onSubmit, onNext, lectureId }: MCQQuesti
             {t('common.edit')}
           </Button>
           
-          {lectureId && <ReportQuestionDialog question={question} lectureId={lectureId} />}
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setIsReportDialogOpen(true)}
+          >
+            {t('questions.report')}
+          </Button>
         </div>
       </div>
       
@@ -197,6 +206,12 @@ export function MCQQuestion({ question, onSubmit, onNext, lectureId }: MCQQuesti
         isOpen={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
         onQuestionUpdated={handleQuestionUpdated}
+      />
+      
+      <ReportQuestionDialog
+        question={question}
+        isOpen={isReportDialogOpen}
+        onOpenChange={setIsReportDialogOpen}
       />
     </motion.div>
   );

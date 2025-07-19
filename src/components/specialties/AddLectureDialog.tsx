@@ -1,6 +1,5 @@
 
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
@@ -45,20 +44,21 @@ export function AddLectureDialog({
     try {
       setIsSubmitting(true);
       
-      const { data, error } = await supabase
-        .from('lectures')
-        .insert([
-          {
-            title: newLecture.title,
-            description: newLecture.description || null,
-            specialty_id: specialtyId
-          }
-        ])
-        .select();
+      const response = await fetch('/api/lectures', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: newLecture.title,
+          description: newLecture.description || null,
+          specialtyId: specialtyId
+        }),
+      });
       
-      if (error) {
-        console.error('Error details:', error);
-        throw error;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create lecture');
       }
       
       toast({
