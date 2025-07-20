@@ -1,140 +1,113 @@
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { QuestionType } from '@/types';
-import { supabase } from '@/lib/supabase';
-import { toast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { Question } from '@/types';
+import { toast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 interface QuestionFormSubmitProps {
+  questionData: Partial<Question>;
   lectureId: string;
-  editQuestionId?: string;
-  onComplete?: () => void;
-  questionType: QuestionType;
-  questionText: string;
-  courseReminder: string;
-  questionNumber: number | undefined;
-  session: string;
-  options: { id: string; text: string; explanation?: string }[];
-  correctAnswers: string[];
-  mediaUrl?: string;
-  mediaType?: 'image' | 'video';
-  setIsLoading: (loading: boolean) => void;
-  children: React.ReactNode;
+  onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
-export function QuestionFormSubmit({
-  lectureId,
-  editQuestionId,
-  onComplete,
-  questionType,
-  questionText,
-  courseReminder,
-  questionNumber,
-  session,
-  options,
-  correctAnswers,
-  mediaUrl,
-  mediaType,
-  setIsLoading,
-  children
+export function QuestionFormSubmit({ 
+  questionData, 
+  lectureId, 
+  onSuccess,
+  onCancel 
 }: QuestionFormSubmitProps) {
-  const navigate = useNavigate();
   const { user } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { t } = useTranslation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Check if user is authenticated
     if (!user) {
       toast({
-        title: "Authentication required",
-        description: "You must be logged in to create or edit questions.",
+        title: t('auth.notAuthenticated'),
+        description: t('auth.pleaseSignIn'),
         variant: "destructive",
       });
       return;
     }
     
-    if (questionType === 'mcq' && correctAnswers.length === 0) {
+    if (!questionData.text?.trim()) {
       toast({
-        title: "Validation Error",
-        description: "Please select at least one correct answer",
+        title: t('questions.validationError'),
+        description: t('questions.textRequired'),
         variant: "destructive",
       });
       return;
     }
-    
-    setIsLoading(true);
     
     try {
-      const questionData = {
-        lecture_id: lectureId,
-        type: questionType,
-        text: questionText,
-        options: questionType === 'mcq' ? options : [],
-        correct_answers: questionType === 'mcq' ? correctAnswers : [],
-        course_reminder: courseReminder,
-        explanation: null, // Set old field to null when migrating to new field
-        number: questionNumber,
-        session: session,
-        media_url: mediaUrl,
-        media_type: mediaType
-      };
+      setIsSubmitting(true);
       
-      let result;
+      const response = await fetch('/api/questions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          ...questionData,
+          lectureId: lectureId
+        }),
+      });
       
-      if (editQuestionId) {
-        result = await supabase
-          .from('questions')
-          .update(questionData)
-          .eq('id', editQuestionId);
-      } else {
-        result = await supabase
-          .from('questions')
-          .insert(questionData);
-      }
-      
-      if (result.error) {
-        console.error('Error details:', result.error);
-        throw result.error;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create question');
       }
       
       toast({
-        title: `Question ${editQuestionId ? 'updated' : 'created'} successfully`,
-        description: "The question has been saved to the database",
+        title: t('questions.success'),
+        description: t('questions.questionCreated'),
       });
       
-      if (onComplete) {
-        onComplete();
-      } else {
-        navigate(`/admin/lecture/${lectureId}`);
-      }
-    } catch (error: any) {
-      console.error('Error saving question:', error);
-      let errorMessage = "An unexpected error occurred. Please try again.";
+      onSuccess?.();
       
-      // Handle specific error cases
-      if (error.code === 'PGRST116') {
-        errorMessage = "You don't have permission to perform this action. Make sure you're logged in.";
-      } else if (error.code === '42501') {
-        errorMessage = "Permission denied. You might not have the right access level.";
-      } else if (error.message) {
+    } catch (error: any) {
+      console.error('Error creating question:', error);
+      let errorMessage = t('common.tryAgain');
+      
+      if (error.message) {
         errorMessage = error.message;
       }
       
       toast({
-        title: "Error saving question",
+        title: t('common.error'),
         description: errorMessage,
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {children}
-    </form>
+    <div className="flex justify-end gap-2 mt-6">
+      {onCancel && (
+        <Button 
+          type="button" 
+          variant="outline" 
+          onClick={onCancel}
+          disabled={isSubmitting}
+        >
+          {t('common.cancel')}
+        </Button>
+      )}
+      <Button 
+        type="submit" 
+        onClick={handleSubmit}
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? t('questions.creating') : t('questions.createQuestion')}
+      </Button>
+    </div>
   );
 }

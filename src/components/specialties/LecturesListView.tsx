@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { FileText, ExternalLink } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslation } from 'react-i18next';
 
@@ -20,7 +20,7 @@ interface LecturesListViewProps {
 }
 
 export function LecturesListView({ lectures, isLoading }: LecturesListViewProps) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { t } = useTranslation();
   
   if (isLoading) {
@@ -59,7 +59,7 @@ export function LecturesListView({ lectures, isLoading }: LecturesListViewProps)
             <TableRow 
               key={lecture.id}
               className="cursor-pointer hover:bg-muted/80"
-              onClick={() => navigate(`/lecture/${lecture.id}`)}
+              onClick={() => router.push(`/lecture/${lecture.id}`)}
             >
               <TableCell className="font-medium">
                 <div className="flex items-center">
@@ -79,7 +79,7 @@ export function LecturesListView({ lectures, isLoading }: LecturesListViewProps)
                   className="h-8 w-8 p-0"
                   onClick={(e) => {
                     e.stopPropagation();
-                    navigate(`/lecture/${lecture.id}`);
+                    router.push(`/lecture/${lecture.id}`);
                   }}
                 >
                   <ExternalLink className="h-4 w-4" />

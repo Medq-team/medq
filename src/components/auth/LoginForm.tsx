@@ -1,7 +1,5 @@
-
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { signIn, signInWithGoogle } from '@/lib/supabase';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,6 +8,7 @@ import { EyeIcon, EyeOffIcon, Loader2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function LoginForm({ 
   onToggleForm, 
@@ -18,7 +17,8 @@ export function LoginForm({
   onToggleForm: () => void;
   onForgotPassword: () => void;
 }) {
-  const navigate = useNavigate();
+  const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -33,15 +33,16 @@ export function LoginForm({
     setIsLoading(true);
 
     try {
-      const { user, error } = await signIn(email, password);
+      const result = await login(email, password);
       
-      if (error) {
-        setError(error.message);
-        return;
-      }
-      
-      if (user) {
-        navigate('/dashboard');
+      if (result.success) {
+        toast({
+          title: t('auth.loginSuccess'),
+          description: t('auth.welcomeBack'),
+        });
+        router.push('/dashboard');
+      } else {
+        setError(result.error || t('auth.loginFailed'));
       }
     } catch (err) {
       setError(t('auth.unexpectedError'));
@@ -56,21 +57,12 @@ export function LoginForm({
     setIsGoogleLoading(true);
     
     try {
-      const { data, error } = await signInWithGoogle();
-      
-      if (error) {
-        console.error('Google sign-in error:', error);
-        if (error.message.includes('provider is not enabled')) {
-          setError(t('auth.googleAuthNotConfigured'));
-          toast({
-            title: t('auth.googleSignInError'),
-            description: t('auth.googleAuthNotConfigured'),
-            variant: "destructive",
-          });
-        } else {
-          setError(error.message);
-        }
-      }
+      // For now, we'll show a message that Google auth is not implemented
+      toast({
+        title: t('auth.googleAuthNotAvailable'),
+        description: t('auth.pleaseUseEmail'),
+        variant: "destructive",
+      });
     } catch (err) {
       console.error('Unexpected Google sign-in error:', err);
       setError(t('auth.unexpectedError'));

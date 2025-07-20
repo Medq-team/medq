@@ -4,8 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Edit, Trash } from 'lucide-react';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/lib/supabase';
+import { useRouter } from 'next/navigation';
 import { toast } from '@/hooks/use-toast';
 import {
   AlertDialog,
@@ -26,19 +25,16 @@ interface SpecialtyItemProps {
 
 export function SpecialtyItem({ specialty, onDelete }: SpecialtyItemProps) {
   const [isDeleting, setIsDeleting] = useState(false);
-  const navigate = useNavigate();
+  const router = useRouter();
   
   const handleDelete = async () => {
     try {
       setIsDeleting(true);
       
       // Check if specialty has lectures associated with it
-      const { data: lectures, error: checkError } = await supabase
-        .from('lectures')
-        .select('id')
-        .eq('specialty_id', specialty.id);
-        
-      if (checkError) throw checkError;
+      const lecturesResponse = await fetch(`/api/lectures?specialtyId=${specialty.id}`);
+      if (!lecturesResponse.ok) throw new Error('Failed to check lectures');
+      const lectures = await lecturesResponse.json();
       
       if (lectures && lectures.length > 0) {
         toast({
@@ -50,12 +46,14 @@ export function SpecialtyItem({ specialty, onDelete }: SpecialtyItemProps) {
       }
       
       // Delete the specialty
-      const { error } = await supabase
-        .from('specialties')
-        .delete()
-        .eq('id', specialty.id);
-        
-      if (error) throw error;
+      const deleteResponse = await fetch(`/api/specialties/${specialty.id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!deleteResponse.ok) {
+        const errorData = await deleteResponse.json();
+        throw new Error(errorData.error || 'Failed to delete specialty');
+      }
       
       toast({
         title: "Specialty deleted",
@@ -77,7 +75,7 @@ export function SpecialtyItem({ specialty, onDelete }: SpecialtyItemProps) {
   
   return (
     <Card className="cursor-pointer hover:shadow-md transition-shadow">
-      <CardHeader className="pb-2" onClick={() => navigate(`/admin/specialty/${specialty.id}`)}>
+              <CardHeader className="pb-2" onClick={() => router.push(`/admin/specialty/${specialty.id}`)}>
         <CardTitle>{specialty.name}</CardTitle>
         <CardDescription className="line-clamp-2">
           {specialty.description || 'No description available'}
@@ -87,7 +85,7 @@ export function SpecialtyItem({ specialty, onDelete }: SpecialtyItemProps) {
         <Button 
           variant="outline" 
           size="sm"
-          onClick={() => navigate(`/admin/specialty/${specialty.id}`)}
+                      onClick={() => router.push(`/admin/specialty/${specialty.id}`)}
         >
           <Edit className="h-4 w-4 mr-2" />
           Manage

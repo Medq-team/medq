@@ -1,7 +1,6 @@
 
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { signOut } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   DropdownMenu,
@@ -15,29 +14,14 @@ import { useTranslation } from 'react-i18next';
 import { toast } from '@/hooks/use-toast';
 
 export function AppHeader() {
-  const { user, isAdmin, refreshUser } = useAuth();
-  const navigate = useNavigate();
+  const { user, isAdmin, logout } = useAuth();
+  const router = useRouter();
   const { t } = useTranslation();
 
   const handleSignOut = async () => {
     try {
-      const { error } = await signOut();
-      
-      if (error) {
-        console.error('Sign out error:', error);
-        toast({
-          title: t('auth.signOutError'),
-          description: error.message || t('auth.unexpectedError'),
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      // Force refresh the user state to ensure UI updates
-      await refreshUser();
-      
-      // Navigate to auth page after successful sign out
-      navigate('/auth');
+      await logout();
+      router.push('/auth');
     } catch (err) {
       console.error('Unexpected sign out error:', err);
       toast({
@@ -52,7 +36,7 @@ export function AppHeader() {
     <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between py-4">
         <div className="flex items-center gap-2">
-          <Button variant="link" className="font-bold text-xl p-0 flex items-center" onClick={() => navigate('/dashboard')}>
+          <Button variant="link" className="font-bold text-xl p-0 flex items-center" onClick={() => router.push('/dashboard')}>
             <span className="flex items-center justify-center bg-primary text-primary-foreground rounded-md w-8 h-8 mr-2">
               <Stethoscope className="h-5 w-5" />
             </span>
@@ -67,7 +51,7 @@ export function AppHeader() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => navigate('/admin')}
+                  onClick={() => router.push('/admin')}
                   className="font-medium text-primary/90 hover:text-primary"
                 >
                   {t('admin.adminPanel')}
@@ -89,11 +73,11 @@ export function AppHeader() {
                     </p>
                   </div>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate('/profile')}>
+                  <DropdownMenuItem onClick={() => router.push('/profile')}>
                     <User className="mr-2 h-4 w-4" />
                     <span>{t('profile.profile')}</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/settings')}>
+                  <DropdownMenuItem onClick={() => router.push('/settings')}>
                     <Settings className="mr-2 h-4 w-4" />
                     <span>{t('sidebar.settings')}</span>
                   </DropdownMenuItem>

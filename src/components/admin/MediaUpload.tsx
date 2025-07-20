@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Image, Video, X, UploadCloud } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 
@@ -48,31 +47,18 @@ export function MediaUpload({ mediaUrl, mediaType, onMediaChange }: MediaUploadP
     setIsUploading(true);
     
     try {
-      // Create a unique file name based on timestamp and random string
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-      const filePath = `question-media/${fileName}`;
+      // For now, create a local file URL (in production, you'd upload to a cloud storage service)
+      const fileUrl = URL.createObjectURL(file);
       
-      // Upload to Supabase Storage
-      const { error: uploadError } = await supabase.storage
-        .from('question-media')
-        .upload(filePath, file);
-        
-      if (uploadError) throw uploadError;
+      // Simulate upload delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Get public URL
-      const { data } = supabase.storage
-        .from('question-media')
-        .getPublicUrl(filePath);
-        
-      if (data && data.publicUrl) {
-        onMediaChange(data.publicUrl, fileType as 'image' | 'video');
-        
-        toast({
-          title: t('admin.mediaUploaded'),
-          description: t('admin.mediaUploadSuccess'),
-        });
-      }
+      onMediaChange(fileUrl, fileType as 'image' | 'video');
+      
+      toast({
+        title: t('admin.mediaUploaded'),
+        description: t('admin.mediaUploadSuccess'),
+      });
     } catch (error: any) {
       console.error('Error uploading file:', error);
       toast({

@@ -1,102 +1,118 @@
 
 import { useState, useEffect } from 'react';
-import { Question } from '@/types';
-import { supabase } from '@/lib/supabase';
-import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { Question } from '@/types';
+import { toast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 interface UseQuestionEditProps {
-  question: Question | null;
-  onOpenChange: (open: boolean) => void;
-  onQuestionUpdated: () => void;
+  questionId?: string;
+  question?: Question | null;
+  onSave?: () => void;
+  onOpenChange?: (open: boolean) => void;
+  onQuestionUpdated?: () => void;
 }
 
-export function useQuestionEdit({
-  question,
+export function useQuestionEdit({ 
+  questionId, 
+  question: propQuestion, 
+  onSave, 
   onOpenChange,
-  onQuestionUpdated
+  onQuestionUpdated 
 }: UseQuestionEditProps) {
   const { user } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
-  const [questionText, setQuestionText] = useState('');
-  const [courseReminder, setCourseReminder] = useState('');
-  const [questionNumber, setQuestionNumber] = useState<number | undefined>(undefined);
-  const [session, setSession] = useState('');
-  const [options, setOptions] = useState<{ id: string; text: string; explanation?: string }[]>([]);
-  const [correctAnswers, setCorrectAnswers] = useState<string[]>([]);
-  const [answerText, setAnswerText] = useState('');
-  const [mediaUrl, setMediaUrl] = useState<string | undefined>(undefined);
-  const [mediaType, setMediaType] = useState<'image' | 'video' | undefined>(undefined);
+  const { t } = useTranslation();
+  const [question, setQuestion] = useState<Question | null>(propQuestion || null);
+  const [isLoading, setIsLoading] = useState(!propQuestion);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // State for editing
+  const [questionText, setQuestionText] = useState(propQuestion?.text || '');
+  const [courseReminder, setCourseReminder] = useState(propQuestion?.course_reminder || '');
+  const [questionNumber, setQuestionNumber] = useState<number | undefined>(propQuestion?.number);
+  const [session, setSession] = useState(propQuestion?.session || '');
+  const [options, setOptions] = useState(
+    propQuestion?.options?.map((opt, index) => ({
+      id: opt.id || `option-${index}`,
+      text: opt.text || '',
+      explanation: opt.explanation || ''
+    })) || []
+  );
+  const [correctAnswers, setCorrectAnswers] = useState<string[]>(
+    propQuestion?.correct_answers || propQuestion?.correctAnswers || []
+  );
+  const [mediaUrl, setMediaUrl] = useState(propQuestion?.media_url || '');
+  const [mediaType, setMediaType] = useState<'image' | 'video' | undefined>(
+    propQuestion?.media_url ? (propQuestion.media_url.includes('image') ? 'image' : 'video') : undefined
+  );
 
   useEffect(() => {
-    if (question) {
-      setQuestionText(question.text || '');
-      setCourseReminder(question.course_reminder || question.explanation || '');
-      setQuestionNumber(question.number);
-      setSession(question.session || '');
-      setMediaUrl(question.media_url);
-      setMediaType(question.media_type);
-      
-      if (question.type === 'mcq' && question.options) {
-        setOptions(question.options);
-        setCorrectAnswers(question.correct_answers || []);
-      } else {
-        setAnswerText('');
-      }
+    if (questionId && !propQuestion) {
+      fetchQuestion();
     }
-  }, [question]);
+  }, [questionId, propQuestion]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "You must be logged in to update questions.",
-        variant: "destructive",
-      });
-      return;
+  useEffect(() => {
+    if (propQuestion) {
+      setQuestion(propQuestion);
+      setQuestionText(propQuestion.text || '');
+      setCourseReminder(propQuestion.course_reminder || '');
+      setQuestionNumber(propQuestion.number);
+      setSession(propQuestion.session || '');
+      setOptions(
+        propQuestion.options?.map((opt, index) => ({
+          id: opt.id || `option-${index}`,
+          text: opt.text || '',
+          explanation: opt.explanation || ''
+        })) || []
+      );
+      setCorrectAnswers(
+        propQuestion.correct_answers || propQuestion.correctAnswers || []
+      );
+      setMediaUrl(propQuestion.media_url || '');
+      setMediaType(
+        propQuestion.media_url ? (propQuestion.media_url.includes('image') ? 'image' : 'video') : undefined
+      );
+      setIsLoading(false);
     }
-    
-    if (!question) return;
-    
-    setIsLoading(true);
+  }, [propQuestion]);
+
+  const fetchQuestion = async () => {
+    if (!questionId) return;
     
     try {
-      let updateData: any = {
-        text: questionText,
-        course_reminder: courseReminder,
-        number: questionNumber,
-        session: session,
-        media_url: mediaUrl,
-        media_type: mediaType
-      };
+      setIsLoading(true);
+      const response = await fetch(`/api/questions/${questionId}`);
       
-      if (question.type === 'mcq') {
-        updateData.options = options;
-        updateData.correct_answers = correctAnswers;
+      if (!response.ok) {
+        throw new Error('Failed to fetch question');
       }
       
-      const { error } = await supabase
-        .from('questions')
-        .update(updateData)
-        .eq('id', question.id);
-      
-      if (error) throw error;
-      
+      const data = await response.json();
+      setQuestion(data);
+      setQuestionText(data.text || '');
+      setCourseReminder(data.course_reminder || '');
+      setQuestionNumber(data.number);
+      setSession(data.session || '');
+      setOptions(
+        data.options?.map((opt: any, index: number) => ({
+          id: opt.id || `option-${index}`,
+          text: opt.text || '',
+          explanation: opt.explanation || ''
+        })) || []
+      );
+      setCorrectAnswers(
+        data.options?.filter((opt: any) => opt.is_correct).map((opt: any) => opt.id) || []
+      );
+      setMediaUrl(data.media_url || '');
+      setMediaType(
+        data.media_url ? (data.media_url.includes('image') ? 'image' : 'video') : undefined
+      );
+    } catch (error) {
+      console.error('Error fetching question:', error);
       toast({
-        title: "Success",
-        description: "Question has been updated successfully.",
-      });
-      
-      onOpenChange(false);
-      onQuestionUpdated();
-      
-    } catch (error: any) {
-      console.error('Error updating question:', error);
-      toast({
-        title: "Error updating question",
-        description: error.message || "An unexpected error occurred. Please try again.",
+        title: t('common.error'),
+        description: t('common.tryAgain'),
         variant: "destructive",
       });
     } finally {
@@ -104,33 +120,118 @@ export function useQuestionEdit({
     }
   };
 
-  const updateOptionText = (id: string, text: string) => {
-    setOptions(options.map(option => 
-      option.id === id ? { ...option, text } : option
-    ));
-  };
+  const saveQuestion = async (updatedQuestion: Partial<Question>) => {
+    if (!user) {
+      toast({
+        title: t('auth.notAuthenticated'),
+        description: t('auth.pleaseSignIn'),
+        variant: "destructive",
+      });
+      return;
+    }
 
-  const updateOptionExplanation = (id: string, explanation: string) => {
-    setOptions(options.map(option => 
-      option.id === id ? { ...option, explanation } : option
-    ));
-  };
+    const questionIdToUse = questionId || question?.id;
+    if (!questionIdToUse) {
+      toast({
+        title: t('common.error'),
+        description: 'No question ID available',
+        variant: "destructive",
+      });
+      return;
+    }
 
-  const toggleCorrectAnswer = (id: string) => {
-    if (correctAnswers.includes(id)) {
-      setCorrectAnswers(correctAnswers.filter(answerId => answerId !== id));
-    } else {
-      setCorrectAnswers([...correctAnswers, id]);
+    try {
+      setIsSaving(true);
+      const response = await fetch(`/api/questions/${questionIdToUse}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(updatedQuestion),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update question');
+      }
+      
+      const data = await response.json();
+      setQuestion(data);
+      
+      toast({
+        title: t('common.success'),
+        description: t('questions.updatedSuccessfully'),
+      });
+      
+      onSave?.();
+      onQuestionUpdated?.();
+      onOpenChange?.(false);
+    } catch (error: any) {
+      console.error('Error updating question:', error);
+      let errorMessage = t('common.tryAgain');
+      
+      if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      toast({
+        title: t('common.error'),
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
     }
   };
 
+  const updateOptionText = (id: string, text: string) => {
+    setOptions(prev => prev.map(opt => opt.id === id ? { ...opt, text } : opt));
+  };
+
+  const updateOptionExplanation = (id: string, explanation: string) => {
+    setOptions(prev => prev.map(opt => opt.id === id ? { ...opt, explanation } : opt));
+  };
+
+  const toggleCorrectAnswer = (id: string) => {
+    setCorrectAnswers(prev => 
+      prev.includes(id) 
+        ? prev.filter(answerId => answerId !== id)
+        : [...prev, id]
+    );
+  };
+
   const handleMediaChange = (url: string | undefined, type: 'image' | 'video' | undefined) => {
-    setMediaUrl(url);
+    setMediaUrl(url || '');
     setMediaType(type);
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!question) return;
+
+    const updatedQuestion: Partial<Question> = {
+      text: questionText,
+      course_reminder: courseReminder,
+      number: questionNumber,
+      session,
+      media_url: mediaUrl,
+      options: question.type === 'mcq' ? options.map(opt => ({
+        id: opt.id,
+        text: opt.text,
+        explanation: opt.explanation,
+        is_correct: correctAnswers.includes(opt.id)
+      })) : undefined
+    };
+
+    await saveQuestion(updatedQuestion);
+  };
+
   return {
+    question,
     isLoading,
+    isSaving,
     questionText,
     setQuestionText,
     courseReminder,
@@ -147,6 +248,8 @@ export function useQuestionEdit({
     updateOptionText,
     updateOptionExplanation,
     toggleCorrectAnswer,
-    handleSubmit
+    handleSubmit,
+    saveQuestion,
+    fetchQuestion,
   };
 }

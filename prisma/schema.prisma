@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email     String   @unique(map: "profiles_email_idx")
+  role      String   @default("student")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  password  String?
+  name      String?
+  image     String?
+  google_id String?  @unique(map: "profiles_google_id_idx")
+
+  // Relations
+  reports Report[]
+
+  @@map("profiles")
+}
+
+model Specialty {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String
+  description String?
+  imageUrl    String?   @map("imageurl")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  lectures    Lecture[]
+
+  @@map("specialties")
+}
+
+model Lecture {
+  id          String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  specialtyId String     @map("specialty_id") @db.Uuid
+  title       String
+  description String?
+  createdAt   DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  specialty   Specialty  @relation(fields: [specialtyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  questions   Question[]
+  reports     Report[]
+
+  @@map("lectures")
+}
+
+model Question {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  lectureId      String   @map("lecture_id") @db.Uuid
+  type           String
+  text           String
+  options        Json?
+  correctAnswers String[] @map("correct_answers")
+  explanation    String?
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  courseReminder String?  @map("course_reminder")
+  number         Int?
+  session        String?
+  mediaUrl       String?  @map("media_url")
+  mediaType      String?  @map("media_type")
+  lecture        Lecture  @relation(fields: [lectureId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  reports        Report[]
+
+  @@index([number], map: "idx_questions_number")
+  @@map("questions")
+}
+
+model Report {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  questionId String   @map("question_id") @db.Uuid
+  lectureId  String   @map("lecture_id") @db.Uuid
+  message    String
+  userId     String?  @map("user_id") @db.Uuid
+  status     String   @default("pending")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  lecture    Lecture  @relation(fields: [lectureId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  question   Question @relation(fields: [questionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("reports")
+}

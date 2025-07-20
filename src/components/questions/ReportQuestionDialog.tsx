@@ -1,137 +1,133 @@
 
 import { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Flag } from 'lucide-react';
-import { Question } from '@/types';
-import { useTranslation } from 'react-i18next';
-import { supabase } from '@/lib/supabase';
+import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
+import { Question } from '@/types';
 import { toast } from '@/hooks/use-toast';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogTrigger,
-  DialogFooter,
-  DialogClose,
-} from '@/components/ui/dialog';
+import { useTranslation } from 'react-i18next';
 
 interface ReportQuestionDialogProps {
   question: Question;
-  lectureId: string;
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export function ReportQuestionDialog({ question, lectureId }: ReportQuestionDialogProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [reportMessage, setReportMessage] = useState('');
+export function ReportQuestionDialog({ 
+  question, 
+  isOpen, 
+  onOpenChange 
+}: ReportQuestionDialogProps) {
+  const { user } = useAuth();
+  const [reason, setReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { t } = useTranslation();
-  const { user } = useAuth();
-  
-  const handleSubmitReport = async () => {
-    if (!reportMessage.trim()) return;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     
-    setIsSubmitting(true);
+    if (!user) {
+      toast({
+        title: t('auth.notAuthenticated'),
+        description: t('auth.pleaseSignIn'),
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!reason.trim()) {
+      toast({
+        title: t('reports.validationError'),
+        description: t('reports.reasonRequired'),
+        variant: "destructive",
+      });
+      return;
+    }
     
     try {
-      console.log('Submitting report for question:', question.id);
-      console.log('Report data:', {
-        question_id: question.id,
-        lecture_id: lectureId,
-        message: reportMessage,
-        user_id: user?.id || null,
-        status: 'pending'
+      setIsSubmitting(true);
+      
+      const response = await fetch('/api/reports', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          questionId: question.id,
+          reason: reason.trim(),
+          status: 'pending'
+        }),
       });
       
-      const { error } = await supabase
-        .from('reports')
-        .insert({
-          question_id: question.id,
-          lecture_id: lectureId,
-          message: reportMessage,
-          user_id: user?.id || null,
-          status: 'pending'
-        });
-        
-      if (error) {
-        console.error('Error submitting report:', error);
-        throw error;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to submit report');
       }
       
-      console.log('Report submitted successfully');
       toast({
-        title: t('reports.reportSubmitted'),
-        description: t('reports.thankYouForReport'),
+        title: t('reports.success'),
+        description: t('reports.reportSubmitted'),
       });
       
-      setIsOpen(false);
-      setReportMessage('');
-    } catch (error) {
+      // Reset form and close dialog
+      setReason('');
+      onOpenChange(false);
+      
+    } catch (error: any) {
       console.error('Error submitting report:', error);
+      let errorMessage = t('common.tryAgain');
+      
+      if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: t('common.error'),
-        description: t('reports.errorSubmittingReport'),
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
       setIsSubmitting(false);
     }
   };
-  
+
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button 
-          variant="outline" 
-          size="sm"
-          className="flex items-center gap-1"
-        >
-          <Flag className="h-3.5 w-3.5" />
-          {t('reports.report')}
-        </Button>
-      </DialogTrigger>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t('reports.reportQuestion')}</DialogTitle>
-          <DialogDescription>
-            {t('reports.reportDescription')}
-          </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-4 py-4">
-          <div className="text-sm font-medium">
-            <h3 className="mb-2">{t('reports.questionText')}:</h3>
-            <p className="text-muted-foreground">{question.text}</p>
-          </div>
-          
+        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           <div className="space-y-2">
-            <label htmlFor="report-message" className="text-sm font-medium">
-              {t('reports.reportMessage')}:
-            </label>
-            <Textarea
-              id="report-message"
-              placeholder={t('reports.reportPlaceholder')}
-              value={reportMessage}
-              onChange={(e) => setReportMessage(e.target.value)}
-              rows={5}
+            <Label htmlFor="reason">{t('reports.reason')}</Label>
+            <Textarea 
+              id="reason"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder={t('reports.reasonPlaceholder')}
+              required
+              rows={4}
             />
           </div>
-        </div>
-        
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="outline">{t('common.cancel')}</Button>
-          </DialogClose>
-          <Button 
-            onClick={handleSubmitReport}
-            disabled={!reportMessage.trim() || isSubmitting}
-          >
-            {isSubmitting ? t('common.submitting') : t('reports.submitReport')}
-          </Button>
-        </DialogFooter>
+          
+          <div className="flex justify-end gap-2">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => onOpenChange(false)}
+              disabled={isSubmitting}
+            >
+              {t('common.cancel')}
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? t('reports.submitting') : t('reports.submit')}
+            </Button>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   );

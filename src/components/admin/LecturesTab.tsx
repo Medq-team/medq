@@ -1,7 +1,7 @@
 
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { Lecture } from '@/types';
 import { LectureItem } from './LectureItem';
 import { useTranslation } from 'react-i18next';
@@ -17,7 +17,7 @@ export function LecturesTab({
   isLoading, 
   onDeleteLecture 
 }: LecturesTabProps) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { t } = useTranslation();
   
   return (
@@ -25,7 +25,7 @@ export function LecturesTab({
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">{t('admin.manageLectures')}</h3>
         <Button 
-          onClick={() => navigate('/admin/lecture/new')}
+          onClick={() => router.push('/admin/lecture/new')}
           className="btn-hover"
         >
           <PlusCircle className="h-4 w-4 mr-2" />

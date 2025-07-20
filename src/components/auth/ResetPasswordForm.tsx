@@ -1,7 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { updatePassword } from '@/lib/supabase';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,9 +7,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { EyeIcon, EyeOffIcon, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useTranslation } from 'react-i18next';
+import { toast } from '@/hooks/use-toast';
 
 export function ResetPasswordForm() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -57,19 +56,44 @@ export function ResetPasswordForm() {
 
     try {
       console.log('Submitting password reset');
-      const { error } = await updatePassword(password);
+      const response = await fetch('/api/user/password', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          currentPassword: '', // For reset, we don't have current password
+          newPassword: password,
+        }),
+      });
       
-      if (error) {
-        console.error('Password update failed:', error);
-        setError(error.message || t('auth.passwordResetFailed'));
+      const data = await response.json();
+      
+      if (!response.ok) {
+        console.error('Password update failed:', data.error);
+        setError(data.error || t('auth.passwordResetFailed'));
+        toast({
+          title: t('auth.passwordResetFailed'),
+          description: data.error || t('auth.passwordResetFailed'),
+          variant: "destructive",
+        });
       } else {
         console.log('Password updated successfully');
+        toast({
+          title: t('auth.passwordUpdated'),
+          description: t('auth.passwordUpdatedSuccess'),
+        });
         // Redirect to dashboard after successful password reset
-        navigate('/dashboard');
+        router.push('/dashboard');
       }
     } catch (err) {
       console.error('Password reset error:', err);
       setError(t('auth.passwordResetFailed'));
+      toast({
+        title: t('auth.passwordResetFailed'),
+        description: t('auth.unexpectedError'),
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }

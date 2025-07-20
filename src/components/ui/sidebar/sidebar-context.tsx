@@ -13,7 +13,7 @@
 
 import * as React from "react"
 import { useIsMobile } from "@/hooks/use-mobile"
-import { useLocation } from "react-router-dom"
+import { usePathname } from "next/navigation"
 
 const SIDEBAR_COOKIE_NAME = "sidebar:state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7  // 7 days
@@ -86,13 +86,13 @@ export const SidebarProvider = React.forwardRef<
     ref
   ) => {
     const isMobile = useIsMobile()
-    const location = useLocation()
+    const pathname = usePathname()
     const [openMobile, setOpenMobile] = React.useState(false)
 
     // Get the default open state based on the current route
     const routeBasedDefaultOpen = React.useMemo(() => {
-      return defaultOpen !== undefined ? defaultOpen : getDefaultOpenState(location.pathname)
-    }, [location.pathname, defaultOpen])
+      return defaultOpen !== undefined ? defaultOpen : getDefaultOpenState(pathname || '/')
+    }, [pathname, defaultOpen])
 
     // This is the internal state of the sidebar.
     // We use openProp and setOpenProp for control from outside the component.
@@ -139,9 +139,9 @@ export const SidebarProvider = React.forwardRef<
     // Update sidebar state when route changes
     React.useEffect(() => {
       if (openProp === undefined) {
-        _setOpen(getDefaultOpenState(location.pathname))
+        _setOpen(getDefaultOpenState(pathname || '/'))
       }
-    }, [location.pathname, openProp])
+    }, [pathname, openProp])
 
     // We add a state so that we can do data-state="expanded" or "collapsed".
     // This makes it easier to style the sidebar with Tailwind classes.

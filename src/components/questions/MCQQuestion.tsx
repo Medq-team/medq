@@ -11,23 +11,24 @@ import { ReportQuestionDialog } from './ReportQuestionDialog';
 import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+
 import { QuestionMedia } from './QuestionMedia';
 
 interface MCQQuestionProps {
   question: Question;
-  onSubmit: (selectedOptionIds: string[]) => void;
+  onSubmit: (selectedOptionIds: string[], isCorrect: boolean) => void;
   onNext: () => void;
+  lectureId?: string;
 }
 
-export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
+export function MCQQuestion({ question, onSubmit, onNext, lectureId }: MCQQuestionProps) {
   const [selectedOptionIds, setSelectedOptionIds] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [expandedExplanations, setExpandedExplanations] = useState<string[]>([]);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const { t } = useTranslation();
-  const { lectureId } = useParams<{ lectureId: string }>();
 
   // Get correct answers array from question
   const correctAnswers = question.correctAnswers || question.correct_answers || [];
@@ -81,7 +82,9 @@ export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
     
     setExpandedExplanations(autoExpandIds);
     
-    onSubmit(selectedOptionIds);
+    const isCorrect = allCorrectSelected && noIncorrectSelected;
+    onSubmit(selectedOptionIds, isCorrect);
+    // Don't automatically move to next question - let user see the result first
   }, [correctAnswers, onSubmit, selectedOptionIds, submitted]);
 
   const handleQuestionUpdated = () => {
@@ -153,7 +156,13 @@ export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
             {t('common.edit')}
           </Button>
           
-          {lectureId && <ReportQuestionDialog question={question} lectureId={lectureId} />}
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setIsReportDialogOpen(true)}
+          >
+            {t('questions.report')}
+          </Button>
         </div>
       </div>
       
@@ -197,6 +206,12 @@ export function MCQQuestion({ question, onSubmit, onNext }: MCQQuestionProps) {
         isOpen={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
         onQuestionUpdated={handleQuestionUpdated}
+      />
+      
+      <ReportQuestionDialog
+        question={question}
+        isOpen={isReportDialogOpen}
+        onOpenChange={setIsReportDialogOpen}
       />
     </motion.div>
   );

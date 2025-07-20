@@ -11,21 +11,22 @@ import { ReportQuestionDialog } from './ReportQuestionDialog';
 import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+
 import { QuestionMedia } from './QuestionMedia';
 
 interface OpenQuestionProps {
   question: Question;
   onSubmit: (answer: string) => void;
   onNext: () => void;
+  lectureId?: string;
 }
 
-export function OpenQuestion({ question, onSubmit, onNext }: OpenQuestionProps) {
+export function OpenQuestion({ question, onSubmit, onNext, lectureId }: OpenQuestionProps) {
   const [answer, setAnswer] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const { t } = useTranslation();
-  const { lectureId } = useParams<{ lectureId: string }>();
 
   const handleSubmit = () => {
     if (!answer.trim() || submitted) return;
@@ -85,7 +86,13 @@ export function OpenQuestion({ question, onSubmit, onNext }: OpenQuestionProps) 
             {t('common.edit')}
           </Button>
           
-          {lectureId && <ReportQuestionDialog question={question} lectureId={lectureId} />}
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setIsReportDialogOpen(true)}
+          >
+            {t('questions.report')}
+          </Button>
         </div>
       </div>
       
@@ -117,6 +124,12 @@ export function OpenQuestion({ question, onSubmit, onNext }: OpenQuestionProps) 
         isOpen={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
         onQuestionUpdated={handleQuestionUpdated}
+      />
+      
+      <ReportQuestionDialog
+        question={question}
+        isOpen={isReportDialogOpen}
+        onOpenChange={setIsReportDialogOpen}
       />
     </motion.div>
   );

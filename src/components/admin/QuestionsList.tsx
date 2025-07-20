@@ -1,26 +1,81 @@
 
+import { useEffect, useState } from 'react';
 import { Question } from '@/types';
 import { QuestionItem } from './QuestionItem';
 import { EmptyQuestionsState } from './EmptyQuestionsState';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { toast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
-interface QuestionsListProps {
-  questions: Question[];
-  isLoading: boolean;
-  onEdit: (questionId: string) => void;
-  onDelete: (questionId: string) => void;
-  onAddQuestion: () => void;
-}
+export function QuestionsList() {
+  const { t } = useTranslation();
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-export function QuestionsList({ 
-  questions, 
-  isLoading, 
-  onEdit, 
-  onDelete, 
-  onAddQuestion 
-}: QuestionsListProps) {
+  useEffect(() => {
+    fetchQuestions();
+  }, []);
+
+  const fetchQuestions = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch('/api/questions');
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch questions');
+      }
+      
+      const data = await response.json();
+      setQuestions(data || []);
+    } catch (error) {
+      console.error('Error fetching questions:', error);
+      toast({
+        title: t('common.error'),
+        description: t('common.tryAgain'),
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleEdit = (questionId: string) => {
+    // Handle edit - could open a modal or navigate to edit page
+    console.log('Edit question:', questionId);
+  };
+
+  const handleDelete = async (questionId: string) => {
+    try {
+      const response = await fetch(`/api/questions/${questionId}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete question');
+      }
+      
+      setQuestions(questions.filter(q => q.id !== questionId));
+      toast({
+        title: t('common.success'),
+        description: t('admin.questionDeleted'),
+      });
+    } catch (error) {
+      console.error('Error deleting question:', error);
+      toast({
+        title: t('common.error'),
+        description: t('common.tryAgain'),
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleAddQuestion = () => {
+    // Handle add question - could open a modal or navigate to add page
+    console.log('Add question');
+  };
+
   // Show loading state if data is being fetched
   if (isLoading) {
     return (
@@ -36,31 +91,22 @@ export function QuestionsList({
 
   // Show empty state if no questions available
   if (questions.length === 0) {
-    return <EmptyQuestionsState onAddQuestion={onAddQuestion} />;
+    return <EmptyQuestionsState onAddQuestion={handleAddQuestion} />;
   }
 
   // Render questions list
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex justify-end mb-4">
-        <Button onClick={onAddQuestion} className="btn-hover transition-all">
-          <PlusCircle className="h-4 w-4 mr-2" />
-          Add Question
-        </Button>
-      </div>
-      
-      <ScrollArea className="max-h-[calc(100vh-250px)]">
         <div className="grid grid-cols-1 gap-4 pr-4">
           {questions.map((question) => (
             <QuestionItem 
               key={question.id}
               question={question}
-              onEdit={onEdit}
-              onDelete={onDelete}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
             />
           ))}
         </div>
-      </ScrollArea>
     </div>
   );
 }

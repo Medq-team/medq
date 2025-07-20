@@ -4,8 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Edit, Trash } from 'lucide-react';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/lib/supabase';
+import { useRouter } from 'next/navigation';
 import { toast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 import {
@@ -27,7 +26,7 @@ interface LectureItemProps {
 
 export function LectureItem({ lecture, onDelete }: LectureItemProps) {
   const [isDeleting, setIsDeleting] = useState(false);
-  const navigate = useNavigate();
+  const router = useRouter();
   const { t } = useTranslation();
   
   const handleDelete = async () => {
@@ -35,30 +34,31 @@ export function LectureItem({ lecture, onDelete }: LectureItemProps) {
       setIsDeleting(true);
       
       // Check if lecture has questions associated with it
-      const { data: questions, error: checkError } = await supabase
-        .from('questions')
-        .select('id')
-        .eq('lecture_id', lecture.id);
-        
-      if (checkError) throw checkError;
+      const questionsResponse = await fetch(`/api/questions?lectureId=${lecture.id}`);
+      if (!questionsResponse.ok) throw new Error('Failed to check questions');
+      const questions = await questionsResponse.json();
       
       if (questions && questions.length > 0) {
         // First delete all the questions associated with this lecture
-        const { error: deleteQuestionsError } = await supabase
-          .from('questions')
-          .delete()
-          .eq('lecture_id', lecture.id);
-          
-        if (deleteQuestionsError) throw deleteQuestionsError;
+        for (const question of questions) {
+          const deleteQuestionResponse = await fetch(`/api/questions/${question.id}`, {
+            method: 'DELETE',
+          });
+          if (!deleteQuestionResponse.ok) {
+            throw new Error('Failed to delete question');
+          }
+        }
       }
       
       // Delete the lecture
-      const { error } = await supabase
-        .from('lectures')
-        .delete()
-        .eq('id', lecture.id);
-        
-      if (error) throw error;
+      const deleteResponse = await fetch(`/api/lectures/${lecture.id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!deleteResponse.ok) {
+        const errorData = await deleteResponse.json();
+        throw new Error(errorData.error || 'Failed to delete lecture');
+      }
       
       toast({
         title: t('lectures.deleteLecture'),
@@ -80,7 +80,7 @@ export function LectureItem({ lecture, onDelete }: LectureItemProps) {
   
   return (
     <Card className="cursor-pointer hover:shadow-md transition-shadow">
-      <CardHeader className="pb-2" onClick={() => navigate(`/admin/lecture/${lecture.id}`)}>
+              <CardHeader className="pb-2" onClick={() => router.push(`/admin/lecture/${lecture.id}`)}>
         <CardTitle>{lecture.title}</CardTitle>
         <CardDescription className="line-clamp-2">
           {lecture.description || t('lectures.noDescription')}
@@ -90,7 +90,7 @@ export function LectureItem({ lecture, onDelete }: LectureItemProps) {
         <Button 
           variant="outline" 
           size="sm"
-          onClick={() => navigate(`/admin/lecture/${lecture.id}`)}
+                      onClick={() => router.push(`/admin/lecture/${lecture.id}`)}
         >
           <Edit className="h-4 w-4 mr-2" />
           {t('common.manage')}
