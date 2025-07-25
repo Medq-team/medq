@@ -231,10 +231,12 @@
     "filter": "Filtrer",
     "sort": "Trier",
     "manage": "Gérer",
-    "noResultsFound": "Aucun résultat trouvé"
+    "noResultsFound": "Aucun résultat trouvé",
+    "noNotifications": "Il n'y a pas de notifications"
   },
   "sidebar": {
     "dashboard": "Tableau de bord",
+    "exercices": "Exercices",
     "profile": "Profil",
     "settings": "Paramètres",
     "admin": "Admin",

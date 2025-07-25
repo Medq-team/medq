@@ -18,9 +18,8 @@ import {
   useSidebar
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, UserCircle, Settings, Users, Moon, Sun, LogOut, X, Menu } from 'lucide-react';
+import { LayoutDashboard, UserCircle, Settings, Users, LogOut, X, Menu, BookOpen } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useTheme } from '@/contexts/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { toast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -32,11 +31,11 @@ export function AppSidebar() {
   const router = useRouter();
   const { state, setOpen, setOpenMobile, isMobile: sidebarIsMobile, open, openMobile, toggleSidebar } = useSidebar();
   const { t } = useTranslation();
-  const { theme, setTheme } = useTheme();
   const isMobile = useIsMobile();
   
   const menuItems = [
     { label: t('sidebar.dashboard'), icon: LayoutDashboard, href: '/dashboard' },
+    { label: t('sidebar.exercices'), icon: BookOpen, href: '/exercices' },
     { label: t('sidebar.profile'), icon: UserCircle, href: '/profile' },
     { label: t('sidebar.settings'), icon: Settings, href: '/settings' },
   ];
@@ -122,32 +121,6 @@ export function AppSidebar() {
         </SidebarContent>
         <SidebarFooter className="border-t p-1">
           <div className="space-y-2">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start"
-                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                  title={theme === 'dark' ? t('theme.light') : t('theme.dark')}
-                >
-                  {theme === 'dark' ? (
-                    <>
-                      <Sun className="h-4 w-4" />
-                      {state === "expanded" && <span className="ml-2">{t('theme.light')}</span>}
-                    </>
-                  ) : (
-                    <>
-                      <Moon className="h-4 w-4" />
-                      {state === "expanded" && <span className="ml-2">{t('theme.dark')}</span>}
-                    </>
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="right" align="center">
-                <p>{theme === 'dark' ? t('theme.light') : t('theme.dark')}</p>
-              </TooltipContent>
-            </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
