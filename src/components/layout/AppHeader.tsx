@@ -9,14 +9,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { LogOut, Settings, User, Heart, Stethoscope } from 'lucide-react';
+import { LogOut, Settings, User, Heart, Stethoscope, Menu } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from '@/hooks/use-toast';
+import { useSidebar } from '@/components/ui/sidebar';
 
 export function AppHeader() {
   const { user, isAdmin, logout } = useAuth();
   const router = useRouter();
   const { t } = useTranslation();
+  const { setOpen, setOpenMobile, isMobile, open, openMobile } = useSidebar();
 
   const handleSignOut = async () => {
     try {
@@ -32,10 +34,27 @@ export function AppHeader() {
     }
   };
 
+  const handleSidebarToggle = () => {
+    if (isMobile) {
+      setOpenMobile(!openMobile);
+    } else {
+      setOpen(!open);
+    }
+  };
+
   return (
     <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between py-4">
         <div className="flex items-center gap-2">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="md:hidden"
+            onClick={handleSidebarToggle}
+          >
+            <Menu className="h-5 w-5" />
+            <span className="sr-only">Toggle sidebar</span>
+          </Button>
           <Button variant="link" className="font-bold text-xl p-0 flex items-center" onClick={() => router.push('/dashboard')}>
             <span className="flex items-center justify-center bg-primary text-primary-foreground rounded-md w-8 h-8 mr-2">
               <Stethoscope className="h-5 w-5" />
