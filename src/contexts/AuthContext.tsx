@@ -109,6 +109,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+
+
   const logout = async () => {
     try {
       await fetch('/api/auth/logout', {

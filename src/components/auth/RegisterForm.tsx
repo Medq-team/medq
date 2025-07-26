@@ -56,16 +56,30 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
     setIsGoogleLoading(true);
     
     try {
-      // For now, we'll show a message that Google auth is not implemented
-      toast({
-        title: t('auth.googleAuthNotAvailable'),
-        description: t('auth.pleaseUseEmail'),
-        variant: "destructive",
-      });
+      const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+      if (!clientId) {
+        throw new Error('Google Client ID not configured');
+      }
+
+      // Redirect to Google OAuth page
+      const redirectUri = encodeURIComponent(`${window.location.origin}/auth/callback`);
+      const scope = encodeURIComponent('openid email profile');
+      const responseType = 'code';
+      const accessType = 'offline';
+      
+      const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+        `client_id=${clientId}&` +
+        `redirect_uri=${redirectUri}&` +
+        `response_type=${responseType}&` +
+        `scope=${scope}&` +
+        `access_type=${accessType}&` +
+        `prompt=select_account`;
+
+      window.location.href = googleAuthUrl;
+
     } catch (err) {
       console.error('Unexpected Google sign-in error:', err);
-      setError(t('auth.unexpectedError'));
-    } finally {
+      setError(t('auth.googleAuthNotConfigured'));
       setIsGoogleLoading(false);
     }
   };
