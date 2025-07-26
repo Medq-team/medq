@@ -48,7 +48,6 @@ This will show you:
 1. **Missing foreign key relationship** between `profiles` and `auth.users`
 2. **No automatic profile creation** when users sign up
 3. **Manual profile creation conflicts** with SupabaseAdapter
-4. **Inconsistent user ID handling** between NextAuth and Supabase
 
 ## Testing
 After running the migration:

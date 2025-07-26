@@ -52,9 +52,6 @@ A comprehensive medical education platform built with Next.js, featuring custom 
    
    # JWT Secret (generate with: openssl rand -base64 32)
    JWT_SECRET="your-secret-key-here"
-   
-   # Next.js
-   NEXTAUTH_URL="http://localhost:3000"
    ```
 
 4. **Set up the database**
