@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { EyeIcon, EyeOffIcon, Loader2 } from 'lucide-react';
+import { EyeIcon, EyeOffIcon, Loader2, Facebook } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,6 +16,7 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isFacebookLoading, setIsFacebookLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const { t } = useTranslation();
@@ -84,6 +85,37 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
     }
   };
 
+  const handleFacebookSignIn = async () => {
+    setError('');
+    setIsFacebookLoading(true);
+    
+    try {
+      const clientId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
+      if (!clientId) {
+        throw new Error('Facebook App ID not configured');
+      }
+
+      // Redirect to Facebook OAuth page
+      const redirectUri = encodeURIComponent(`${window.location.origin}/auth/callback`);
+      const scope = encodeURIComponent('email public_profile');
+      const responseType = 'code';
+      
+      const facebookAuthUrl = `https://www.facebook.com/v18.0/dialog/oauth?` +
+        `client_id=${clientId}&` +
+        `redirect_uri=${redirectUri}&` +
+        `response_type=${responseType}&` +
+        `scope=${scope}&` +
+        `state=facebook`;
+
+      window.location.href = facebookAuthUrl;
+
+    } catch (err) {
+      console.error('Unexpected Facebook sign-in error:', err);
+      setError(t('auth.facebookAuthNotConfigured'));
+      setIsFacebookLoading(false);
+    }
+  };
+
   if (success) {
     return (
       <Card className="w-full max-w-md mx-auto animate-fade-in shadow-lg">
@@ -140,6 +172,21 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
               </svg>
             )}
             {isGoogleLoading ? t('auth.signingUp') : t('auth.signUpWithGoogle')}
+          </Button>
+
+          <Button 
+            type="button" 
+            variant="outline" 
+            className="w-full flex items-center justify-center gap-2 bg-[#1877F2] text-white hover:bg-[#166FE5] hover:text-white border-[#1877F2]"
+            onClick={handleFacebookSignIn}
+            disabled={isFacebookLoading}
+          >
+            {isFacebookLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Facebook className="h-5 w-5" />
+            )}
+            {isFacebookLoading ? t('auth.signingUp') : t('auth.signUpWithFacebook')}
           </Button>
           
           <div className="relative">

@@ -34,8 +34,13 @@ export default function AuthCallback() {
           return;
         }
 
+        // Determine which OAuth provider to use based on the state parameter
+        const state = searchParams.get('state');
+        const isFacebook = state === 'facebook';
+        
         // Exchange code for tokens and user info
-        const response = await fetch('/api/auth/google/callback', {
+        const endpoint = isFacebook ? '/api/auth/facebook/callback' : '/api/auth/google/callback';
+        const response = await fetch(endpoint, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
