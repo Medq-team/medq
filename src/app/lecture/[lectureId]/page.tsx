@@ -100,14 +100,16 @@ export default function LecturePageRoute() {
     <AppLayout>
       <div className="flex gap-6">
         <div className="flex-1 space-y-6">
-          <div className="flex items-center justify-between">
+          <div className="space-y-4">
             <LectureProgress
               lecture={lecture}
               currentQuestionIndex={currentQuestionIndex}
               totalQuestions={questions.length}
               progress={progress}
             />
-            <LectureTimer lectureId={lectureId} />
+            <div className="flex justify-end">
+              <LectureTimer lectureId={lectureId} />
+            </div>
           </div>
 
           {currentQuestion && (

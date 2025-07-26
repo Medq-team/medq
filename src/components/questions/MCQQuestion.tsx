@@ -11,6 +11,7 @@ import { ReportQuestionDialog } from './ReportQuestionDialog';
 import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useProgress } from '@/hooks/use-progress';
 
 import { QuestionMedia } from './QuestionMedia';
 
@@ -29,6 +30,7 @@ export function MCQQuestion({ question, onSubmit, onNext, lectureId }: MCQQuesti
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const { t } = useTranslation();
+  const { trackQuestionProgress } = useProgress();
 
   // Get correct answers array from question
   const correctAnswers = question.correctAnswers || question.correct_answers || [];
@@ -53,7 +55,7 @@ export function MCQQuestion({ question, onSubmit, onNext, lectureId }: MCQQuesti
     );
   };
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = useCallback(async () => {
     if (selectedOptionIds.length === 0 || submitted) return;
     
     setSubmitted(true);
@@ -61,7 +63,8 @@ export function MCQQuestion({ question, onSubmit, onNext, lectureId }: MCQQuesti
     // Check if answer is completely correct (all correct options selected and no incorrect ones)
     const allCorrectSelected = correctAnswers.every(id => selectedOptionIds.includes(id));
     const noIncorrectSelected = selectedOptionIds.every(id => correctAnswers.includes(id));
-    setIsCorrect(allCorrectSelected && noIncorrectSelected);
+    const isAnswerCorrect = allCorrectSelected && noIncorrectSelected;
+    setIsCorrect(isAnswerCorrect);
     
     // Auto-expand explanations for incorrect answers and correct answers that weren't selected
     const autoExpandIds: string[] = [];
@@ -82,10 +85,14 @@ export function MCQQuestion({ question, onSubmit, onNext, lectureId }: MCQQuesti
     
     setExpandedExplanations(autoExpandIds);
     
-    const isCorrect = allCorrectSelected && noIncorrectSelected;
-    onSubmit(selectedOptionIds, isCorrect);
+    // Track progress if lectureId is provided
+    if (lectureId) {
+      await trackQuestionProgress(lectureId, question.id, isAnswerCorrect);
+    }
+    
+    onSubmit(selectedOptionIds, isAnswerCorrect);
     // Don't automatically move to next question - let user see the result first
-  }, [correctAnswers, onSubmit, selectedOptionIds, submitted]);
+  }, [correctAnswers, onSubmit, selectedOptionIds, submitted, lectureId, question.id, trackQuestionProgress]);
 
   const handleQuestionUpdated = () => {
     // Reload the page to refresh the question data
