@@ -84,6 +84,8 @@
     "deleteConfirmation": "Êtes-vous sûr de vouloir supprimer ce cours? Cette action supprimera également toutes les questions associées et ne peut pas être annulée."
   },
   "questions": {
+    "questions": "Questions",
+    "navigator": "Navigateur",
     "multipleChoice": "Choix multiple",
     "openQuestion": "Question ouverte",
     "questionNumber": "Numéro de question",
@@ -221,6 +223,7 @@
     "delete": "Supprimer",
     "cancel": "Annuler",
     "back": "Retour",
+    "previous": "Précédent",
     "next": "Suivant",
     "of": "de",
     "complete": "Terminé",
@@ -233,6 +236,17 @@
     "manage": "Gérer",
     "noResultsFound": "Aucun résultat trouvé",
     "noNotifications": "Il n'y a pas de notifications"
+  },
+  "progress": {
+    "correct": "Correct",
+    "partial": "Partiel",
+    "wrong": "Incorrect",
+    "left": "Restant",
+    "incomplete": "Incomplet",
+    "overallProgress": "Progrès global",
+    "completed": "terminé",
+    "questions": "questions",
+    "lectures": "cours"
   },
   "sidebar": {
     "dashboard": "Tableau de bord",

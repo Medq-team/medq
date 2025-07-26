@@ -23,7 +23,7 @@ export function MCQHeader({ questionText, isSubmitted, questionNumber, session }
           {session}
         </div>
       )}
-      <h3 className="text-xl font-semibold text-foreground dark:text-gray-200">{questionText}</h3>
+      <h3 className="text-lg sm:text-xl font-semibold text-foreground dark:text-gray-200 break-words">{questionText}</h3>
       <p className="text-sm text-muted-foreground dark:text-gray-300">
         {isSubmitted ? t('questions.reviewAnswers') : t('questions.selectAllCorrect')}
       </p>

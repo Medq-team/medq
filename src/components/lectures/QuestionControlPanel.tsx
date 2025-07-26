@@ -7,6 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { ChevronLeft, ChevronRight, CheckCircle, Circle, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
+import { useTranslation } from 'react-i18next';
 
 interface QuestionControlPanelProps {
   questions: Question[];
@@ -29,23 +30,24 @@ export function QuestionControlPanel({
   onNext,
   isComplete
 }: QuestionControlPanelProps) {
+  const { t } = useTranslation();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   // Only show on mobile devices using a drawer
   const MobileDrawer = () => (
     <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
       <DrawerTrigger asChild>
-        <Button variant="outline" className="fixed bottom-4 right-4 md:hidden z-10 gap-2">
-          <span>Questions</span>
+        <Button variant="outline" className="fixed bottom-4 right-4 lg:hidden z-50 gap-2 shadow-lg">
+          <span>{t('questions.questions')}</span>
           <span className="text-xs bg-primary text-primary-foreground rounded-full px-2 py-0.5">
             {questions.length}
           </span>
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="h-[70vh]">
+      <DrawerContent className="h-[80vh]">
         <div className="p-4">
-          <h3 className="font-medium text-lg mb-4">Questions Navigator</h3>
-          <ScrollArea className="h-[calc(70vh-120px)]">
+          <h3 className="font-medium text-lg mb-4">{t('questions.questions')}</h3>
+          <ScrollArea className="h-[calc(80vh-140px)]">
             {renderQuestionsList()}
           </ScrollArea>
           {renderNavigationButtons()}
@@ -56,9 +58,9 @@ export function QuestionControlPanel({
 
   // Desktop panel
   const DesktopPanel = () => (
-    <Card className="hidden md:block sticky top-4 h-fit max-h-[calc(100vh-8rem)]">
+    <Card className="hidden lg:block sticky top-4 h-fit max-h-[calc(100vh-8rem)]">
       <CardContent className="p-4">
-        <h3 className="font-medium text-base mb-4">Questions Navigator</h3>
+        <h3 className="font-medium text-base mb-4">{t('questions.questions')} {t('questions.navigator')}</h3>
         <ScrollArea className="h-[calc(100vh-16rem)]">
           {renderQuestionsList()}
         </ScrollArea>
@@ -89,7 +91,14 @@ export function QuestionControlPanel({
             }}
           >
             <div className="flex items-center w-full">
-              <span className="mr-2">Q{question.number || index + 1}</span>
+              <div className="flex items-center mr-2">
+                <span>{t('questions.mcq')} {index + 1}</span>
+                {question.session && (
+                  <span className="text-xs text-muted-foreground ml-1">
+                    ({question.session})
+                  </span>
+                )}
+              </div>
               {isAnswered ? (
                 isCorrect ? (
                   <CheckCircle className="h-4 w-4 text-green-600 ml-auto" />
@@ -108,27 +117,27 @@ export function QuestionControlPanel({
 
   const renderNavigationButtons = () => (
     <div className="flex justify-between mt-4">
-      <Button
-        variant="outline"
-        onClick={() => {
-          onPrevious();
-          setIsDrawerOpen(false);
-        }}
-        disabled={currentQuestionIndex === 0 || isComplete}
-      >
-        <ChevronLeft className="h-4 w-4 mr-2" />
-        Previous
-      </Button>
-      <Button
-        onClick={() => {
-          onNext();
-          setIsDrawerOpen(false);
-        }}
-        disabled={isComplete}
-      >
-        Next
-        <ChevronRight className="h-4 w-4 ml-2" />
-      </Button>
+              <Button
+          variant="outline"
+          onClick={() => {
+            onPrevious();
+            setIsDrawerOpen(false);
+          }}
+          disabled={currentQuestionIndex === 0 || isComplete}
+        >
+          <ChevronLeft className="h-4 w-4 mr-2" />
+          {t('common.previous')}
+        </Button>
+        <Button
+          onClick={() => {
+            onNext();
+            setIsDrawerOpen(false);
+          }}
+          disabled={isComplete}
+        >
+          {t('common.next')}
+          <ChevronRight className="h-4 w-4 ml-2" />
+        </Button>
     </div>
   );
 

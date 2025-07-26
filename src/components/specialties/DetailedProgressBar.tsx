@@ -1,6 +1,7 @@
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle, XCircle, Clock, Minus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface DetailedProgressData {
   totalQuestions: number;
@@ -23,6 +24,7 @@ export function DetailedProgressBar({
   showIcons = true, 
   compact = false 
 }: DetailedProgressBarProps) {
+  const { t } = useTranslation();
   const { totalQuestions, correct, incorrect, partial, incomplete } = data;
   
   // Calculate percentages
@@ -41,7 +43,7 @@ export function DetailedProgressBar({
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium">{title}</span>
           <span className="text-sm text-muted-foreground">
-            {totalCompleted}/{totalQuestions} completed
+            {totalCompleted}/{totalQuestions} {t('progress.completed')}
           </span>
         </div>
         
@@ -93,22 +95,22 @@ export function DetailedProgressBar({
         <div className="grid grid-cols-4 gap-2 text-xs">
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 bg-green-500 rounded"></div>
-            <span className="text-muted-foreground">Correct</span>
+            <span className="text-muted-foreground">{t('progress.correct')}</span>
             <span className="font-medium">{correct}</span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 bg-yellow-500 rounded"></div>
-            <span className="text-muted-foreground">Partial</span>
+            <span className="text-muted-foreground">{t('progress.partial')}</span>
             <span className="font-medium">{partial}</span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 bg-red-500 rounded"></div>
-            <span className="text-muted-foreground">Wrong</span>
+            <span className="text-muted-foreground">{t('progress.wrong')}</span>
             <span className="font-medium">{incorrect}</span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 bg-gray-400 rounded"></div>
-            <span className="text-muted-foreground">Left</span>
+            <span className="text-muted-foreground">{t('progress.left')}</span>
             <span className="font-medium">{incomplete}</span>
           </div>
         </div>
@@ -122,7 +124,7 @@ export function DetailedProgressBar({
         <CardTitle className="text-lg flex items-center gap-2">
           {title}
           <span className="text-sm font-normal text-muted-foreground">
-            ({totalCompleted}/{totalQuestions} completed)
+            ({totalCompleted}/{totalQuestions} {t('progress.completed')})
           </span>
         </CardTitle>
       </CardHeader>
@@ -130,7 +132,7 @@ export function DetailedProgressBar({
         {/* Main Progress Bar */}
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Overall Progress</span>
+            <span className="text-muted-foreground">{t('progress.overallProgress')}</span>
             <span className="font-medium">{Math.round(totalCompletedPercent)}%</span>
           </div>
           <div className="relative h-3 bg-gray-200 rounded-full overflow-hidden">
@@ -181,25 +183,25 @@ export function DetailedProgressBar({
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 bg-green-500 rounded"></div>
-            <span>Correct</span>
+            <span>{t('progress.correct')}</span>
             {showIcons && <CheckCircle className="w-4 h-4 text-green-500" />}
             <span className="ml-auto font-medium">{correct}</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 bg-yellow-500 rounded"></div>
-            <span>Partial</span>
+            <span>{t('progress.partial')}</span>
             {showIcons && <Clock className="w-4 h-4 text-yellow-500" />}
             <span className="ml-auto font-medium">{partial}</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 bg-red-500 rounded"></div>
-            <span>Incorrect</span>
+            <span>{t('progress.wrong')}</span>
             {showIcons && <XCircle className="w-4 h-4 text-red-500" />}
             <span className="ml-auto font-medium">{incorrect}</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 bg-gray-400 rounded"></div>
-            <span>Incomplete</span>
+            <span>{t('progress.incomplete')}</span>
             {showIcons && <Minus className="w-4 h-4 text-gray-400" />}
             <span className="ml-auto font-medium">{incomplete}</span>
           </div>

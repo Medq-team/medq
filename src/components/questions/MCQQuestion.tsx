@@ -142,17 +142,19 @@ export function MCQQuestion({ question, onSubmit, onNext, lectureId }: MCQQuesti
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.4 }}
-      className="space-y-6"
+      className="space-y-6 w-full max-w-full"
     >
-      <div className="flex justify-between items-start">
-        <MCQHeader 
-          questionText={question.text}
-          isSubmitted={submitted}
-          questionNumber={question.number}
-          session={question.session}
-        />
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+        <div className="flex-1 min-w-0">
+          <MCQHeader 
+            questionText={question.text}
+            isSubmitted={submitted}
+            questionNumber={question.number}
+            session={question.session}
+          />
+        </div>
         
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-shrink-0">
           <Button 
             variant="outline" 
             size="sm"
@@ -160,7 +162,7 @@ export function MCQQuestion({ question, onSubmit, onNext, lectureId }: MCQQuesti
             className="flex items-center gap-1"
           >
             <Pencil className="h-3.5 w-3.5" />
-            {t('common.edit')}
+            <span className="hidden sm:inline">{t('common.edit')}</span>
           </Button>
           
           <Button 
@@ -168,7 +170,7 @@ export function MCQQuestion({ question, onSubmit, onNext, lectureId }: MCQQuesti
             size="sm"
             onClick={() => setIsReportDialogOpen(true)}
           >
-            {t('questions.report')}
+            <span className="hidden sm:inline">{t('questions.report')}</span>
           </Button>
         </div>
       </div>

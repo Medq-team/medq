@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Specialty } from '@/types';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { 
   Heart, 
   Brain, 
@@ -30,6 +31,7 @@ interface SpecialtyCardProps {
 
 export function SpecialtyCard({ specialty }: SpecialtyCardProps) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [isHovered, setIsHovered] = useState(false);
 
   const handleClick = () => {
@@ -75,7 +77,7 @@ export function SpecialtyCard({ specialty }: SpecialtyCardProps) {
     return (
       <div className="space-y-2">
         <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">Progress</span>
+          <span className="text-muted-foreground">{t('progress.overallProgress')}</span>
           <span className="font-medium">{specialty.progress.percentage}%</span>
         </div>
         <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -121,8 +123,8 @@ export function SpecialtyCard({ specialty }: SpecialtyCardProps) {
           )}
         </div>
         <div className="flex justify-between text-xs text-muted-foreground">
-          <span>{specialty.progress.completedQuestions} / {specialty.progress.totalQuestions} questions</span>
-          <span>{specialty.progress.completedLectures} / {specialty.progress.totalLectures} lectures</span>
+          <span>{specialty.progress.completedQuestions} / {specialty.progress.totalQuestions} {t('progress.questions')}</span>
+          <span>{specialty.progress.completedLectures} / {specialty.progress.totalLectures} {t('progress.lectures')}</span>
         </div>
       </div>
     );
