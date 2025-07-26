@@ -14,32 +14,28 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
-  SidebarTrigger,
+  SidebarRail,
   useSidebar
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, UserCircle, Settings, Users, Moon, Sun, LogOut, Stethoscope } from 'lucide-react';
+import { LayoutDashboard, UserCircle, Settings, Users, LogOut, X, Menu, BookOpen } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useTheme } from '@/contexts/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { toast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 export function AppSidebar() {
   const { user, isAdmin, logout } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
-  const { state, setOpen } = useSidebar();
+  const { state, setOpen, setOpenMobile, isMobile: sidebarIsMobile, open, openMobile, toggleSidebar } = useSidebar();
   const { t } = useTranslation();
-  const { theme, setTheme } = useTheme();
-  
-  useEffect(() => {
-    const isDashboard = pathname === '/dashboard';
-    // Don't force sidebar state change on route change - only on initial load
-    setOpen(isDashboard);
-  }, [pathname, setOpen]);
+  const isMobile = useIsMobile();
   
   const menuItems = [
     { label: t('sidebar.dashboard'), icon: LayoutDashboard, href: '/dashboard' },
+    { label: t('sidebar.exercices'), icon: BookOpen, href: '/exercices' },
     { label: t('sidebar.profile'), icon: UserCircle, href: '/profile' },
     { label: t('sidebar.settings'), icon: Settings, href: '/settings' },
   ];
@@ -62,13 +58,45 @@ export function AppSidebar() {
     }
   };
 
+  const handleCloseSidebar = () => {
+    if (sidebarIsMobile) {
+      setOpenMobile(false);
+    } else {
+      setOpen(false);
+    }
+  };
+
+  const handleToggleSidebar = () => {
+    toggleSidebar();
+  };
+
   return (
     <>
-      <Sidebar className="border-r">
-        <SidebarHeader className="border-b p-4">
-          <div className="flex items-center gap-2">
-            <Stethoscope className="h-6 w-6" />
-            <span className="font-semibold">{t('app.name')}</span>
+      <Sidebar className="border-r" collapsible="icon">
+        <SidebarHeader className="border-b p-3">
+          <div className="flex items-center">
+            {!isMobile && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleToggleSidebar}
+                className="hidden md:flex"
+              >
+                <Menu className="h-4 w-4" />
+                <span className="sr-only">Toggle sidebar</span>
+              </Button>
+            )}
+            {isMobile && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleCloseSidebar}
+                className="md:hidden"
+              >
+                <X className="h-4 w-4" />
+                <span className="sr-only">Close sidebar</span>
+              </Button>
+            )}
           </div>
         </SidebarHeader>
         <SidebarContent>
@@ -78,7 +106,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                   {menuItems.map((item) => (
                     <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton asChild>
+                      <SidebarMenuButton asChild tooltip={item.label}>
                         <Link href={item.href} className="flex items-center gap-2">
                           <item.icon className="h-4 w-4" />
                           {item.label}
@@ -91,39 +119,29 @@ export function AppSidebar() {
             </SidebarGroup>
           </ScrollArea>
         </SidebarContent>
-        <SidebarFooter className="border-t p-4">
+        <SidebarFooter className="border-t p-1">
           <div className="space-y-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full justify-start"
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            >
-              {theme === 'dark' ? (
-                <>
-                  <Sun className="mr-2 h-4 w-4" />
-                  {t('theme.light')}
-                </>
-              ) : (
-                <>
-                  <Moon className="mr-2 h-4 w-4" />
-                  {t('theme.dark')}
-                </>
-              )}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full justify-start text-destructive hover:text-destructive"
-              onClick={handleSignOut}
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              {t('auth.signOut')}
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start text-destructive hover:text-destructive"
+                  onClick={handleSignOut}
+                  title={t('auth.signOut')}
+                >
+                  <LogOut className="h-4 w-4" />
+                  {state === "expanded" && <span className="ml-2">{t('auth.signOut')}</span>}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right" align="center">
+                <p>{t('auth.signOut')}</p>
+              </TooltipContent>
+            </Tooltip>
           </div>
         </SidebarFooter>
       </Sidebar>
-      <SidebarTrigger />
+      <SidebarRail />
     </>
   );
 }

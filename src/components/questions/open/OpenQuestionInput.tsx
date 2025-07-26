@@ -18,7 +18,7 @@ export function OpenQuestionInput({ answer, setAnswer, isSubmitted }: OpenQuesti
   };
   
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 w-full">
       <Textarea
         placeholder={t('questions.answerText')}
         value={answer}
@@ -26,7 +26,7 @@ export function OpenQuestionInput({ answer, setAnswer, isSubmitted }: OpenQuesti
         rows={6}
         disabled={isSubmitted}
         className={`
-          resize-none transition-all duration-200
+          resize-none transition-all duration-200 w-full max-w-full
           ${isSubmitted ? 'bg-muted' : ''}
         `}
       />

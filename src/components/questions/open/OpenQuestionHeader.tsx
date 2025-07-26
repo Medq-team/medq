@@ -22,7 +22,7 @@ export function OpenQuestionHeader({ questionText, questionNumber, session }: Op
           {session}
         </div>
       )}
-      <h3 className="text-xl font-semibold text-foreground dark:text-gray-200">{questionText}</h3>
+      <h3 className="text-lg sm:text-xl font-semibold text-foreground dark:text-gray-200 break-words">{questionText}</h3>
     </div>
   );
 }

@@ -11,6 +11,7 @@ import { ReportQuestionDialog } from './ReportQuestionDialog';
 import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useProgress } from '@/hooks/use-progress';
 
 import { QuestionMedia } from './QuestionMedia';
 
@@ -27,11 +28,20 @@ export function OpenQuestion({ question, onSubmit, onNext, lectureId }: OpenQues
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const { t } = useTranslation();
+  const { trackQuestionProgress } = useProgress();
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!answer.trim() || submitted) return;
     
     setSubmitted(true);
+    
+    // Track progress if lectureId is provided
+    if (lectureId) {
+      // For open questions, we mark them as completed regardless of correctness
+      // since there's no automatic way to determine correctness
+      await trackQuestionProgress(lectureId, question.id, true);
+    }
+    
     onSubmit(answer);
   };
 
@@ -66,16 +76,18 @@ export function OpenQuestion({ question, onSubmit, onNext, lectureId }: OpenQues
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.4 }}
-      className="space-y-6"
+      className="space-y-6 w-full max-w-full"
     >
-      <div className="flex justify-between items-start">
-        <OpenQuestionHeader 
-          questionText={question.text} 
-          questionNumber={question.number}
-          session={question.session}
-        />
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+        <div className="flex-1 min-w-0">
+          <OpenQuestionHeader 
+            questionText={question.text} 
+            questionNumber={question.number}
+            session={question.session}
+          />
+        </div>
         
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-shrink-0">
           <Button 
             variant="outline" 
             size="sm"
@@ -83,7 +95,7 @@ export function OpenQuestion({ question, onSubmit, onNext, lectureId }: OpenQues
             className="flex items-center gap-1"
           >
             <Pencil className="h-3.5 w-3.5" />
-            {t('common.edit')}
+            <span className="hidden sm:inline">{t('common.edit')}</span>
           </Button>
           
           <Button 
@@ -91,7 +103,7 @@ export function OpenQuestion({ question, onSubmit, onNext, lectureId }: OpenQues
             size="sm"
             onClick={() => setIsReportDialogOpen(true)}
           >
-            {t('questions.report')}
+            <span className="hidden sm:inline">{t('questions.report')}</span>
           </Button>
         </div>
       </div>
@@ -99,7 +111,7 @@ export function OpenQuestion({ question, onSubmit, onNext, lectureId }: OpenQues
       {/* Question Media */}
       <QuestionMedia question={question} className="mb-4" />
 
-      <OpenQuestionInput 
+      <OpenQuestionInput
         answer={answer}
         setAnswer={setAnswer}
         isSubmitted={submitted}
@@ -107,14 +119,14 @@ export function OpenQuestion({ question, onSubmit, onNext, lectureId }: OpenQues
 
       {submitted && (
         <OpenQuestionExplanation
-          explanation={question.explanation}
           courseReminder={question.course_reminder}
+          explanation={question.explanation}
         />
       )}
 
-      <OpenQuestionActions 
+      <OpenQuestionActions
         isSubmitted={submitted}
-        canSubmit={!!answer.trim()}
+        canSubmit={answer.trim().length > 0}
         onSubmit={handleSubmit}
         onNext={onNext}
       />

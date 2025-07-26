@@ -8,18 +8,20 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email     String   @unique(map: "profiles_email_idx")
-  role      String   @default("student")
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  password  String?
-  name      String?
-  image     String?
-  google_id String?  @unique(map: "profiles_google_id_idx")
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email       String   @unique(map: "profiles_email_idx")
+  role        String   @default("student")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  password    String?
+  name        String?
+  image       String?
+  google_id   String?  @unique(map: "profiles_google_id_idx")
+  facebook_id String?  @unique(map: "profiles_facebook_id_idx")
 
   // Relations
-  reports Report[]
+  reports  Report[]
+  progress UserProgress[]
 
   @@map("profiles")
 }
@@ -36,14 +38,15 @@ model Specialty {
 }
 
 model Lecture {
-  id          String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  specialtyId String     @map("specialty_id") @db.Uuid
+  id          String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  specialtyId String         @map("specialty_id") @db.Uuid
   title       String
   description String?
-  createdAt   DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
-  specialty   Specialty  @relation(fields: [specialtyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  createdAt   DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  specialty   Specialty      @relation(fields: [specialtyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   questions   Question[]
   reports     Report[]
+  progress    UserProgress[]
 
   @@map("lectures")
 }
@@ -67,6 +70,24 @@ model Question {
 
   @@index([number], map: "idx_questions_number")
   @@map("questions")
+}
+
+model UserProgress {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  lectureId    String   @map("lecture_id") @db.Uuid
+  questionId   String?  @map("question_id") @db.Uuid
+  completed    Boolean  @default(false)
+  score        Float?
+  lastAccessed DateTime @default(now()) @map("last_accessed") @db.Timestamptz(6)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lecture Lecture @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lectureId, questionId], map: "unique_user_lecture_question")
+  @@map("user_progress")
 }
 
 model Report {

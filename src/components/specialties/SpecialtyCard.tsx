@@ -2,8 +2,10 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import { Specialty } from '@/types';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { 
   Heart, 
   Brain, 
@@ -29,6 +31,7 @@ interface SpecialtyCardProps {
 
 export function SpecialtyCard({ specialty }: SpecialtyCardProps) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [isHovered, setIsHovered] = useState(false);
 
   const handleClick = () => {
@@ -59,6 +62,74 @@ export function SpecialtyCard({ specialty }: SpecialtyCardProps) {
     return <Stethoscope className="h-10 w-10 text-slate-700" />;
   };
 
+  const renderDetailedProgressBar = () => {
+    if (!specialty.progress) return null;
+
+    const { totalQuestions, correctQuestions, incorrectQuestions, partialQuestions, incompleteQuestions } = specialty.progress;
+    
+    if (totalQuestions === 0) return null;
+
+    const correctPercent = (correctQuestions / totalQuestions) * 100;
+    const partialPercent = (partialQuestions / totalQuestions) * 100;
+    const incorrectPercent = (incorrectQuestions / totalQuestions) * 100;
+    const incompletePercent = (incompleteQuestions / totalQuestions) * 100;
+
+    return (
+      <div className="space-y-2">
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-muted-foreground">{t('progress.overallProgress')}</span>
+          <span className="font-medium">{specialty.progress.percentage}%</span>
+        </div>
+        <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden">
+          {/* Correct (Green) */}
+          {correctPercent > 0 && (
+            <div 
+              className="absolute h-full bg-green-500 transition-all duration-300"
+              style={{ 
+                left: '0%', 
+                width: `${correctPercent}%` 
+              }}
+            />
+          )}
+          {/* Partial (Yellow) */}
+          {partialPercent > 0 && (
+            <div 
+              className="absolute h-full bg-yellow-500 transition-all duration-300"
+              style={{ 
+                left: `${correctPercent}%`, 
+                width: `${partialPercent}%` 
+              }}
+            />
+          )}
+          {/* Incorrect (Red) */}
+          {incorrectPercent > 0 && (
+            <div 
+              className="absolute h-full bg-red-500 transition-all duration-300"
+              style={{ 
+                left: `${correctPercent + partialPercent}%`, 
+                width: `${incorrectPercent}%` 
+              }}
+            />
+          )}
+          {/* Incomplete (Gray) */}
+          {incompletePercent > 0 && (
+            <div 
+              className="absolute h-full bg-gray-400 transition-all duration-300"
+              style={{ 
+                left: `${correctPercent + partialPercent + incorrectPercent}%`, 
+                width: `${incompletePercent}%` 
+              }}
+            />
+          )}
+        </div>
+        <div className="flex justify-between text-xs text-muted-foreground">
+          <span>{specialty.progress.completedQuestions} / {specialty.progress.totalQuestions} {t('progress.questions')}</span>
+          <span>{specialty.progress.completedLectures} / {specialty.progress.totalLectures} {t('progress.lectures')}</span>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <motion.div
       whileHover={{ y: -5 }}
@@ -83,9 +154,12 @@ export function SpecialtyCard({ specialty }: SpecialtyCardProps) {
           </h3>
         </div>
         <CardContent className="p-4">
-          <p className="text-muted-foreground text-sm line-clamp-2">
+          <p className="text-muted-foreground text-sm line-clamp-2 mb-3">
             {specialty.description || `Explore lectures and questions in ${specialty.name}`}
           </p>
+          
+          {/* Detailed Progress Section */}
+          {renderDetailedProgressBar()}
         </CardContent>
       </Card>
     </motion.div>

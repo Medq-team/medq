@@ -3,7 +3,6 @@
 import { useParams } from 'next/navigation'
 import { useLecture } from '@/hooks/use-lecture'
 import { AppLayout } from '@/components/layout/AppLayout'
-import { LectureProgress } from '@/components/lectures/LectureProgress'
 import { LectureTimer } from '@/components/lectures/LectureTimer'
 import { LectureComplete } from '@/components/lectures/LectureComplete'
 import { LectureLoadingState } from '@/components/lectures/LectureLoadingState'
@@ -98,15 +97,9 @@ export default function LecturePageRoute() {
 
   return (
     <AppLayout>
-      <div className="flex gap-6">
-        <div className="flex-1 space-y-6">
-          <div className="flex items-center justify-between">
-            <LectureProgress
-              lecture={lecture}
-              currentQuestionIndex={currentQuestionIndex}
-              totalQuestions={questions.length}
-              progress={progress}
-            />
+      <div className="flex flex-col lg:flex-row gap-4 pb-12 lg:pb-0">
+        <div className="flex-1 space-y-6 min-w-0 w-full max-w-full">
+          <div className="flex justify-end">
             <LectureTimer lectureId={lectureId} />
           </div>
 
@@ -131,6 +124,22 @@ export default function LecturePageRoute() {
           )}
         </div>
 
+        <div className="hidden lg:block lg:w-80 lg:flex-shrink-0">
+          <QuestionControlPanel
+            questions={questions}
+            currentQuestionIndex={currentQuestionIndex}
+            answers={answers}
+            answerResults={answerResults}
+            onQuestionSelect={handleQuestionSelect}
+            onPrevious={handlePrevious}
+            onNext={handleNext}
+            isComplete={isComplete}
+          />
+        </div>
+      </div>
+      
+      {/* Mobile Control Panel - rendered separately to avoid layout issues */}
+      <div className="lg:hidden">
         <QuestionControlPanel
           questions={questions}
           currentQuestionIndex={currentQuestionIndex}

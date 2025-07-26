@@ -16,19 +16,19 @@ export function OpenQuestionExplanation({ explanation, courseReminder }: OpenQue
     <motion.div 
       initial={{ opacity: 0, height: 0 }}
       animate={{ opacity: 1, height: 'auto' }}
-      className="space-y-4"
+      className="space-y-4 w-full max-w-full"
     >
       {explanation && (
-        <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-950/30 text-purple-800 dark:text-purple-300">
+        <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-950/30 text-purple-800 dark:text-purple-300 w-full">
           <h4 className="font-medium mb-1">{t('questions.referenceAnswer')}</h4>
-          <p className="text-purple-700 dark:text-purple-300">{explanation}</p>
+          <p className="text-purple-700 dark:text-purple-300 break-words">{explanation}</p>
         </div>
       )}
       
       {courseReminder && (
-        <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-950/30 text-purple-800 dark:text-purple-300">
+        <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-950/30 text-purple-800 dark:text-purple-300 w-full">
           <h4 className="font-medium mb-1">{t('questions.additionalInfo')}</h4>
-          <p className="text-purple-700 dark:text-purple-300">{courseReminder}</p>
+          <p className="text-purple-700 dark:text-purple-300 break-words">{courseReminder}</p>
         </div>
       )}
     </motion.div>

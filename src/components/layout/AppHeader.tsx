@@ -1,7 +1,9 @@
 
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,14 +11,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { LogOut, Settings, User, Heart, Stethoscope } from 'lucide-react';
+import { LogOut, Settings, User, Heart, Stethoscope, Menu, Search, Bell, Moon, Sun } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from '@/hooks/use-toast';
+import { useSidebar } from '@/components/ui/sidebar';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 export function AppHeader() {
   const { user, isAdmin, logout } = useAuth();
+  const { theme, setTheme } = useTheme();
   const router = useRouter();
   const { t } = useTranslation();
+  const { setOpen, setOpenMobile, isMobile, open, openMobile } = useSidebar();
 
   const handleSignOut = async () => {
     try {
@@ -32,10 +38,27 @@ export function AppHeader() {
     }
   };
 
+  const handleSidebarToggle = () => {
+    if (isMobile) {
+      setOpenMobile(!openMobile);
+    } else {
+      setOpen(!open);
+    }
+  };
+
   return (
     <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between py-4">
         <div className="flex items-center gap-2">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="md:hidden"
+            onClick={handleSidebarToggle}
+          >
+            <Menu className="h-5 w-5" />
+            <span className="sr-only">Toggle sidebar</span>
+          </Button>
           <Button variant="link" className="font-bold text-xl p-0 flex items-center" onClick={() => router.push('/dashboard')}>
             <span className="flex items-center justify-center bg-primary text-primary-foreground rounded-md w-8 h-8 mr-2">
               <Stethoscope className="h-5 w-5" />
@@ -47,6 +70,51 @@ export function AppHeader() {
         <div className="flex items-center gap-4">
           {user && (
             <>
+              {/* Search Input */}
+              <div className="relative hidden md:block">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Rechercher..."
+                  className="pl-10 w-64"
+                />
+              </div>
+
+              {/* Notifications Icon */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="relative">
+                    <Bell className="h-5 w-5" />
+                    <span className="sr-only">Notifications</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-80">
+                  <div className="flex items-center justify-center p-4 text-muted-foreground">
+                    <p>{t('common.noNotifications')}</p>
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Theme Toggle */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                  >
+                    {theme === 'dark' ? (
+                      <Sun className="h-5 w-5" />
+                    ) : (
+                      <Moon className="h-5 w-5" />
+                    )}
+                    <span className="sr-only">Toggle theme</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" align="center">
+                  <p>{theme === 'dark' ? t('settings.light') : t('settings.dark')}</p>
+                </TooltipContent>
+              </Tooltip>
+
               {isAdmin && (
                 <Button
                   variant="ghost"

@@ -60,18 +60,18 @@ export function MCQOptionItem({
   
   return (
     <div 
-      className={`rounded-lg border ${borderColorClass} p-4 ${bgColorClass} transition-colors duration-200`}
+      className={`rounded-lg border ${borderColorClass} p-4 ${bgColorClass} transition-colors duration-200 w-full max-w-full`}
       onClick={() => !isSubmitted && onSelect(option.id)}
     >
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-3 w-full">
         <div className={`flex-shrink-0 h-6 w-6 rounded-full flex items-center justify-center 
           ${isSelected ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}
         >
           {optionLetter}
         </div>
         
-        <div className="flex-grow">
-          <p className={`${textColorClass}`}>{option.text}</p>
+        <div className="flex-grow min-w-0">
+          <p className={`${textColorClass} break-words`}>{option.text}</p>
           
           {isSubmitted && option.explanation && (
             <div className="mt-3">

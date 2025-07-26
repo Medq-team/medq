@@ -4,6 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import { Specialty } from '@/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
+import { DetailedProgressBar } from './DetailedProgressBar';
 
 interface SpecialtyHeaderProps {
   specialty: Specialty | null;
@@ -15,9 +16,12 @@ export function SpecialtyHeader({ specialty, isLoading }: SpecialtyHeaderProps) 
 
   if (isLoading) {
     return (
-      <div className="space-y-2">
-        <Skeleton className="h-8 w-1/3 rounded" />
-        <Skeleton className="h-5 w-2/3 rounded" />
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-1/3 rounded" />
+          <Skeleton className="h-5 w-2/3 rounded" />
+        </div>
+        <Skeleton className="h-32 w-full rounded" />
       </div>
     );
   }
@@ -32,7 +36,7 @@ export function SpecialtyHeader({ specialty, isLoading }: SpecialtyHeaderProps) 
         <Button 
           variant="outline" 
           className="mt-4" 
-                      onClick={() => router.push('/dashboard')}
+          onClick={() => router.push('/dashboard')}
         >
           Back to Dashboard
         </Button>
@@ -41,11 +45,27 @@ export function SpecialtyHeader({ specialty, isLoading }: SpecialtyHeaderProps) 
   }
 
   return (
-    <div>
-      <h2 className="text-3xl font-bold tracking-tight">{specialty.name}</h2>
-      <p className="text-muted-foreground mt-2">
-        {specialty.description || `Select a lecture to view questions and start learning`}
-      </p>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-3xl font-bold tracking-tight">{specialty.name}</h2>
+        <p className="text-muted-foreground mt-2">
+          {specialty.description || `Select a lecture to view questions and start learning`}
+        </p>
+      </div>
+
+      {/* Detailed Progress Bar */}
+      {specialty.progress && (
+        <DetailedProgressBar
+          data={{
+            totalQuestions: specialty.progress.totalQuestions,
+            correct: specialty.progress.correctQuestions,
+            incorrect: specialty.progress.incorrectQuestions,
+            partial: specialty.progress.partialQuestions,
+            incomplete: specialty.progress.incompleteQuestions
+          }}
+          title={`${specialty.name} Progress`}
+        />
+      )}
     </div>
   );
 }

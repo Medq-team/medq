@@ -12,6 +12,19 @@ export type Specialty = {
   name: string;
   imageUrl?: string;
   description?: string;
+  progress?: SpecialtyProgress;
+};
+
+export type SpecialtyProgress = {
+  totalLectures: number;
+  completedLectures: number;
+  totalQuestions: number;
+  completedQuestions: number;
+  correctQuestions: number;
+  incorrectQuestions: number;
+  partialQuestions: number;
+  incompleteQuestions: number;
+  percentage: number;
 };
 
 export type Lecture = {
@@ -19,6 +32,14 @@ export type Lecture = {
   specialtyId: string;
   title: string;
   description?: string;
+  progress?: LectureProgress;
+};
+
+export type LectureProgress = {
+  totalQuestions: number;
+  completedQuestions: number;
+  percentage: number;
+  lastAccessed?: Date;
 };
 
 export type QuestionType = 'mcq' | 'open';
@@ -55,10 +76,14 @@ export type Answer = {
   isCorrect?: boolean;
 };
 
-export type Progress = {
+export type UserProgress = {
+  id: string;
   userId: string;
   lectureId: string;
+  questionId?: string;
   completed: boolean;
   score?: number;
   lastAccessed: Date;
+  createdAt: Date;
+  updatedAt: Date;
 };

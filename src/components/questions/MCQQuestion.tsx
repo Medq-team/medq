@@ -11,6 +11,7 @@ import { ReportQuestionDialog } from './ReportQuestionDialog';
 import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useProgress } from '@/hooks/use-progress';
 
 import { QuestionMedia } from './QuestionMedia';
 
@@ -29,6 +30,7 @@ export function MCQQuestion({ question, onSubmit, onNext, lectureId }: MCQQuesti
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const { t } = useTranslation();
+  const { trackQuestionProgress } = useProgress();
 
   // Get correct answers array from question
   const correctAnswers = question.correctAnswers || question.correct_answers || [];
@@ -53,7 +55,7 @@ export function MCQQuestion({ question, onSubmit, onNext, lectureId }: MCQQuesti
     );
   };
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = useCallback(async () => {
     if (selectedOptionIds.length === 0 || submitted) return;
     
     setSubmitted(true);
@@ -61,7 +63,8 @@ export function MCQQuestion({ question, onSubmit, onNext, lectureId }: MCQQuesti
     // Check if answer is completely correct (all correct options selected and no incorrect ones)
     const allCorrectSelected = correctAnswers.every(id => selectedOptionIds.includes(id));
     const noIncorrectSelected = selectedOptionIds.every(id => correctAnswers.includes(id));
-    setIsCorrect(allCorrectSelected && noIncorrectSelected);
+    const isAnswerCorrect = allCorrectSelected && noIncorrectSelected;
+    setIsCorrect(isAnswerCorrect);
     
     // Auto-expand explanations for incorrect answers and correct answers that weren't selected
     const autoExpandIds: string[] = [];
@@ -82,10 +85,14 @@ export function MCQQuestion({ question, onSubmit, onNext, lectureId }: MCQQuesti
     
     setExpandedExplanations(autoExpandIds);
     
-    const isCorrect = allCorrectSelected && noIncorrectSelected;
-    onSubmit(selectedOptionIds, isCorrect);
+    // Track progress if lectureId is provided
+    if (lectureId) {
+      await trackQuestionProgress(lectureId, question.id, isAnswerCorrect);
+    }
+    
+    onSubmit(selectedOptionIds, isAnswerCorrect);
     // Don't automatically move to next question - let user see the result first
-  }, [correctAnswers, onSubmit, selectedOptionIds, submitted]);
+  }, [correctAnswers, onSubmit, selectedOptionIds, submitted, lectureId, question.id, trackQuestionProgress]);
 
   const handleQuestionUpdated = () => {
     // Reload the page to refresh the question data
@@ -135,17 +142,19 @@ export function MCQQuestion({ question, onSubmit, onNext, lectureId }: MCQQuesti
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.4 }}
-      className="space-y-6"
+      className="space-y-6 w-full max-w-full"
     >
-      <div className="flex justify-between items-start">
-        <MCQHeader 
-          questionText={question.text}
-          isSubmitted={submitted}
-          questionNumber={question.number}
-          session={question.session}
-        />
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+        <div className="flex-1 min-w-0">
+          <MCQHeader 
+            questionText={question.text}
+            isSubmitted={submitted}
+            questionNumber={question.number}
+            session={question.session}
+          />
+        </div>
         
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-shrink-0">
           <Button 
             variant="outline" 
             size="sm"
@@ -153,7 +162,7 @@ export function MCQQuestion({ question, onSubmit, onNext, lectureId }: MCQQuesti
             className="flex items-center gap-1"
           >
             <Pencil className="h-3.5 w-3.5" />
-            {t('common.edit')}
+            <span className="hidden sm:inline">{t('common.edit')}</span>
           </Button>
           
           <Button 
@@ -161,7 +170,7 @@ export function MCQQuestion({ question, onSubmit, onNext, lectureId }: MCQQuesti
             size="sm"
             onClick={() => setIsReportDialogOpen(true)}
           >
-            {t('questions.report')}
+            <span className="hidden sm:inline">{t('questions.report')}</span>
           </Button>
         </div>
       </div>

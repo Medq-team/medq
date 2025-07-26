@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { EyeIcon, EyeOffIcon, Loader2 } from 'lucide-react';
+import { EyeIcon, EyeOffIcon, Loader2, Facebook } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,6 +16,7 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isFacebookLoading, setIsFacebookLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const { t } = useTranslation();
@@ -56,17 +57,62 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
     setIsGoogleLoading(true);
     
     try {
-      // For now, we'll show a message that Google auth is not implemented
-      toast({
-        title: t('auth.googleAuthNotAvailable'),
-        description: t('auth.pleaseUseEmail'),
-        variant: "destructive",
-      });
+      const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+      if (!clientId) {
+        throw new Error('Google Client ID not configured');
+      }
+
+      // Redirect to Google OAuth page
+      const redirectUri = encodeURIComponent(`${window.location.origin}/auth/callback`);
+      const scope = encodeURIComponent('openid email profile');
+      const responseType = 'code';
+      const accessType = 'offline';
+      
+      const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+        `client_id=${clientId}&` +
+        `redirect_uri=${redirectUri}&` +
+        `response_type=${responseType}&` +
+        `scope=${scope}&` +
+        `access_type=${accessType}&` +
+        `prompt=select_account`;
+
+      window.location.href = googleAuthUrl;
+
     } catch (err) {
       console.error('Unexpected Google sign-in error:', err);
-      setError(t('auth.unexpectedError'));
-    } finally {
+      setError(t('auth.googleAuthNotConfigured'));
       setIsGoogleLoading(false);
+    }
+  };
+
+  const handleFacebookSignIn = async () => {
+    setError('');
+    setIsFacebookLoading(true);
+    
+    try {
+      const clientId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
+      if (!clientId) {
+        throw new Error('Facebook App ID not configured');
+      }
+
+      // Redirect to Facebook OAuth page
+      const redirectUri = encodeURIComponent(`${window.location.origin}/auth/callback`);
+      const scope = encodeURIComponent('email public_profile');
+      const responseType = 'code';
+      
+      const facebookAuthUrl = `https://www.facebook.com/v18.0/dialog/oauth?` +
+        `client_id=${clientId}&` +
+        `redirect_uri=${redirectUri}&` +
+        `response_type=${responseType}&` +
+        `scope=${scope}&` +
+        `state=facebook`;
+
+      window.location.href = facebookAuthUrl;
+
+    } catch (err) {
+      console.error('Unexpected Facebook sign-in error:', err);
+      setError(t('auth.facebookAuthNotConfigured'));
+      setIsFacebookLoading(false);
     }
   };
 
@@ -126,6 +172,21 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
               </svg>
             )}
             {isGoogleLoading ? t('auth.signingUp') : t('auth.signUpWithGoogle')}
+          </Button>
+
+          <Button 
+            type="button" 
+            variant="outline" 
+            className="w-full flex items-center justify-center gap-2 bg-[#1877F2] text-white hover:bg-[#166FE5] hover:text-white border-[#1877F2]"
+            onClick={handleFacebookSignIn}
+            disabled={isFacebookLoading}
+          >
+            {isFacebookLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Facebook className="h-5 w-5" />
+            )}
+            {isFacebookLoading ? t('auth.signingUp') : t('auth.signUpWithFacebook')}
           </Button>
           
           <div className="relative">
