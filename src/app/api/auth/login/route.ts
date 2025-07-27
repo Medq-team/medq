@@ -29,6 +29,17 @@ export async function POST(request: NextRequest) {
       );
     }
     
+    // Check if email is verified (only for users with passwords, not OAuth users)
+    if (user.password && user.status !== 'verified') {
+      return NextResponse.json(
+        { 
+          error: 'Please verify your email address before logging in. Check your inbox for a verification link.',
+          needsVerification: true
+        },
+        { status: 401 }
+      );
+    }
+    
     // Verify password
     const isValidPassword = await bcrypt.compare(password, user.password || '');
     

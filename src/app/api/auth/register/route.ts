@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '../../../../lib/prisma';
 import bcrypt from 'bcryptjs';
+import { sendVerificationEmail } from '../../../../lib/email';
+import { generateToken } from '../../../../lib/tokens';
+import { validatePassword } from '../../../../lib/password-validation';
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,6 +13,15 @@ export async function POST(request: NextRequest) {
     if (!email || !password) {
       return NextResponse.json(
         { error: 'Email and password are required' },
+        { status: 400 }
+      );
+    }
+
+    // Validate password
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      return NextResponse.json(
+        { error: passwordValidation.errors[0] },
         { status: 400 }
       );
     }
@@ -29,22 +41,45 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
     
+    // Generate verification token
+    const verificationToken = generateToken();
+    
     // Create user
     const user = await prisma.user.create({
       data: {
         email,
         password: hashedPassword,
         name: name || null,
-        role: 'student' // Default role
+        role: 'student', // Default role
+        status: 'pending',
+        verificationToken,
+        passwordUpdatedAt: new Date()
       }
     });
     
-    // Return user data (without password)
-    const { password: _, ...userWithoutPassword } = user;
+    // Send verification email
+    let emailSent = false;
+    let emailError: Error | null = null;
+    
+    try {
+      await sendVerificationEmail(email, verificationToken, name);
+      emailSent = true;
+    } catch (error) {
+      console.error('Error sending verification email:', error);
+      emailError = error as Error;
+      // Don't fail registration if email fails, but log it
+    }
+    
+    // Return user data (without password and token)
+    const { password: _, verificationToken: __, ...userWithoutSensitiveData } = user;
     
     return NextResponse.json({
-      user: userWithoutPassword,
-      message: 'User registered successfully'
+      user: userWithoutSensitiveData,
+      message: emailSent 
+        ? 'User registered successfully. Please check your email to verify your account.'
+        : 'User registered successfully, but there was an issue sending the verification email. Please contact support.',
+      emailSent,
+      emailError: emailError ? emailError.message : null
     }, { status: 201 });
     
   } catch (error) {

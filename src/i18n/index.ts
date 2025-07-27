@@ -17,8 +17,12 @@ i18n
     lng: 'fr', // Set French as default language
     fallbackLng: 'fr',
     interpolation: {
-      escapeValue: false // React already safes from XSS
-    }
+      escapeValue: false, // React already safes from XSS
+    },
+    react: {
+      useSuspense: false
+    },
+
   });
 
 export default i18n;

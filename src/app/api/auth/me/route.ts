@@ -12,6 +12,8 @@ async function handler(request: AuthenticatedRequest) {
         name: true,
         role: true,
         image: true,
+        password: true,
+        passwordUpdatedAt: true,
         createdAt: true,
         updatedAt: true
       }

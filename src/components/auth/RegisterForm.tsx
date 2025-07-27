@@ -8,6 +8,8 @@ import { useTranslation } from 'react-i18next';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useOAuthLoading } from '@/hooks/use-oauth-loading';
+import { validatePassword } from '@/lib/password-validation';
+import { PasswordStrength } from '@/components/ui/password-strength';
 
 export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
   const { register } = useAuth();
@@ -18,6 +20,7 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [passwordValidation, setPasswordValidation] = useState<any>(null);
   const { t } = useTranslation();
   
   const {
@@ -31,12 +34,31 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
 
 
 
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newPassword = e.target.value;
+    setPassword(newPassword);
+    
+    if (newPassword) {
+      const validation = validatePassword(newPassword);
+      setPasswordValidation(validation);
+    } else {
+      setPasswordValidation(null);
+    }
+  };
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     
     if (password !== confirmPassword) {
       setError(t('auth.passwordsNotMatch'));
+      return;
+    }
+
+    // Validate password
+    const validation = validatePassword(password);
+    if (!validation.isValid) {
+      setError(t(validation.errors[0]));
       return;
     }
     
@@ -232,10 +254,11 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={handlePasswordChange}
                   required
                   autoComplete="new-password"
                   className="pr-10"
+                  minLength={8}
                 />
                 <Button
                   type="button"
@@ -251,6 +274,11 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
                   )}
                 </Button>
               </div>
+              {passwordValidation && (
+                <PasswordStrength 
+                  password={password}
+                />
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">{t('auth.confirmPassword')}</Label>

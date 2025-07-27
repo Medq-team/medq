@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,14 +12,19 @@ export function ForgotPasswordForm({ onBack }: { onBack: () => void }) {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+
+  // Force re-render when language changes
+  useEffect(() => {
+    // This will force the component to re-render when i18n is ready
+  }, [i18n.language, i18n.isInitialized]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/reset-password', {
+      const response = await fetch('/api/auth/forgot-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -32,7 +37,7 @@ export function ForgotPasswordForm({ onBack }: { onBack: () => void }) {
       if (response.ok) {
         setIsSubmitted(true);
         toast({
-          title: t('auth.resetEmailSent'),
+          title: t('auth.resetEmailSent', { email }),
           description: t('auth.checkEmail'),
         });
       } else {

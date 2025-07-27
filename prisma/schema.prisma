@@ -8,16 +8,22 @@ datasource db {
 }
 
 model User {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email       String   @unique(map: "profiles_email_idx")
-  role        String   @default("student")
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  password    String?
-  name        String?
-  image       String?
-  google_id   String?  @unique(map: "profiles_google_id_idx")
-  facebook_id String?  @unique(map: "profiles_facebook_id_idx")
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email                String    @unique(map: "profiles_email_idx")
+  role                 String    @default("student")
+  status               String    @default("pending") // pending, verified, suspended
+  emailVerified        DateTime? @map("email_verified")
+  verificationToken    String?   @map("verification_token")
+  passwordResetToken   String?   @map("password_reset_token")
+  passwordResetExpires DateTime? @map("password_reset_expires")
+  passwordUpdatedAt    DateTime? @map("password_updated_at") @db.Timestamptz(6)
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  password             String?
+  name                 String?
+  image                String?
+  google_id            String?   @unique(map: "profiles_google_id_idx")
+  facebook_id          String?   @unique(map: "profiles_facebook_id_idx")
 
   // Relations
   reports  Report[]

@@ -8,6 +8,8 @@ import { EyeIcon, EyeOffIcon, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useTranslation } from 'react-i18next';
 import { toast } from '@/hooks/use-toast';
+import { validatePassword } from '@/lib/password-validation';
+import { PasswordStrength } from '@/components/ui/password-strength';
 
 export function ResetPasswordForm() {
   const router = useRouter();
@@ -16,6 +18,7 @@ export function ResetPasswordForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [passwordValidation, setPasswordValidation] = useState<any>(null);
   const { t } = useTranslation();
 
   // Check if we have a valid reset token by looking at the URL
@@ -38,6 +41,18 @@ export function ResetPasswordForm() {
     }
   }, []);
 
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newPassword = e.target.value;
+    setPassword(newPassword);
+    
+    if (newPassword) {
+      const validation = validatePassword(newPassword);
+      setPasswordValidation(validation);
+    } else {
+      setPasswordValidation(null);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -47,8 +62,10 @@ export function ResetPasswordForm() {
       return;
     }
 
-    if (password.length < 6) {
-      setError(t('auth.passwordTooShort'));
+    // Validate password
+    const validation = validatePassword(password);
+    if (!validation.isValid) {
+      setError(t(validation.errors[0]));
       return;
     }
 
@@ -118,10 +135,10 @@ export function ResetPasswordForm() {
                 id="password"
                 type={showPassword ? "text" : "password"}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={handlePasswordChange}
                 required
                 className="pr-10"
-                minLength={6}
+                minLength={8}
               />
               <Button
                 type="button"
@@ -137,6 +154,11 @@ export function ResetPasswordForm() {
                 )}
               </Button>
             </div>
+            {passwordValidation && (
+              <PasswordStrength 
+                password={password}
+              />
+            )}
           </div>
           
           <div className="space-y-2">
@@ -147,7 +169,7 @@ export function ResetPasswordForm() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
-              minLength={6}
+              minLength={8}
             />
           </div>
 

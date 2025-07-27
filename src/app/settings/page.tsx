@@ -8,9 +8,11 @@ import { useTheme } from '@/contexts/ThemeContext'
 import { useTranslation } from 'react-i18next'
 import { Moon, Sun, Settings as SettingsIcon, LogOut } from 'lucide-react'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
+import { PasswordChangeForm } from '@/components/settings/PasswordChangeForm'
+import { PasswordInfo } from '@/components/settings/PasswordInfo'
 
 export default function SettingsPageRoute() {
-  const { logout } = useAuth()
+  const { logout, user } = useAuth()
   const { theme, setTheme } = useTheme()
   const { t } = useTranslation()
 
@@ -68,6 +70,13 @@ export default function SettingsPageRoute() {
               </div>
             </CardContent>
           </Card>
+
+          <PasswordInfo 
+            passwordUpdatedAt={user?.passwordUpdatedAt}
+            hasPassword={!!user?.password}
+          />
+
+          <PasswordChangeForm />
 
           <Card>
             <CardHeader>

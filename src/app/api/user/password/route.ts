@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth, AuthenticatedRequest } from '../../../../lib/auth-middleware';
 import { prisma } from '../../../../lib/prisma';
 import bcrypt from 'bcryptjs';
+import { validatePassword } from '../../../../lib/password-validation';
 
 async function putHandler(request: AuthenticatedRequest) {
   try {
@@ -10,6 +11,15 @@ async function putHandler(request: AuthenticatedRequest) {
     if (!newPassword) {
       return NextResponse.json(
         { error: 'New password is required' },
+        { status: 400 }
+      );
+    }
+
+    // Validate new password
+    const passwordValidation = validatePassword(newPassword);
+    if (!passwordValidation.isValid) {
+      return NextResponse.json(
+        { error: passwordValidation.errors[0] },
         { status: 400 }
       );
     }
@@ -44,7 +54,10 @@ async function putHandler(request: AuthenticatedRequest) {
     // Update password
     await prisma.user.update({
       where: { id: request.user!.userId },
-      data: { password: hashedPassword }
+      data: { 
+        password: hashedPassword,
+        passwordUpdatedAt: new Date()
+      }
     });
     
     return NextResponse.json({ 

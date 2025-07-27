@@ -5,6 +5,8 @@ export type User = {
   role: 'student' | 'admin';
   name?: string;
   image?: string;
+  password?: string;
+  passwordUpdatedAt?: string;
 };
 
 export type Specialty = {
