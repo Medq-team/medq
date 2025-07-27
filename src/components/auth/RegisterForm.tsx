@@ -7,6 +7,7 @@ import { EyeIcon, EyeOffIcon, Loader2, Facebook } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useOAuthLoading } from '@/hooks/use-oauth-loading';
 
 export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
   const { register } = useAuth();
@@ -15,11 +16,20 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  const [isFacebookLoading, setIsFacebookLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const { t } = useTranslation();
+  
+  const {
+    isGoogleLoading,
+    isFacebookLoading,
+    startGoogleLoading,
+    stopGoogleLoading,
+    startFacebookLoading,
+    stopFacebookLoading,
+  } = useOAuthLoading();
+
+
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,7 +64,7 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
 
   const handleGoogleSignIn = async () => {
     setError('');
-    setIsGoogleLoading(true);
+    startGoogleLoading();
     
     try {
       const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
@@ -81,13 +91,13 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
     } catch (err) {
       console.error('Unexpected Google sign-in error:', err);
       setError(t('auth.googleAuthNotConfigured'));
-      setIsGoogleLoading(false);
+      stopGoogleLoading();
     }
   };
 
   const handleFacebookSignIn = async () => {
     setError('');
-    setIsFacebookLoading(true);
+    startFacebookLoading();
     
     try {
       const clientId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
@@ -112,7 +122,7 @@ export function RegisterForm({ onToggleForm }: { onToggleForm: () => void }) {
     } catch (err) {
       console.error('Unexpected Facebook sign-in error:', err);
       setError(t('auth.facebookAuthNotConfigured'));
-      setIsFacebookLoading(false);
+      stopFacebookLoading();
     }
   };
 

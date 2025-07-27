@@ -9,6 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { toast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
+import { useOAuthLoading } from '@/hooks/use-oauth-loading';
 
 export function LoginForm({ 
   onToggleForm, 
@@ -23,10 +24,17 @@ export function LoginForm({
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  const [isFacebookLoading, setIsFacebookLoading] = useState(false);
   const [error, setError] = useState('');
   const { t } = useTranslation();
+  
+  const {
+    isGoogleLoading,
+    isFacebookLoading,
+    startGoogleLoading,
+    stopGoogleLoading,
+    startFacebookLoading,
+    stopFacebookLoading,
+  } = useOAuthLoading();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,7 +63,7 @@ export function LoginForm({
 
   const handleGoogleSignIn = async () => {
     setError('');
-    setIsGoogleLoading(true);
+    startGoogleLoading();
     
     try {
       const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
@@ -82,13 +90,13 @@ export function LoginForm({
     } catch (err) {
       console.error('Unexpected Google sign-in error:', err);
       setError(t('auth.googleAuthNotConfigured'));
-      setIsGoogleLoading(false);
+      stopGoogleLoading();
     }
   };
 
   const handleFacebookSignIn = async () => {
     setError('');
-    setIsFacebookLoading(true);
+    startFacebookLoading();
     
     try {
       const clientId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
@@ -113,7 +121,7 @@ export function LoginForm({
     } catch (err) {
       console.error('Unexpected Facebook sign-in error:', err);
       setError(t('auth.facebookAuthNotConfigured'));
-      setIsFacebookLoading(false);
+      stopFacebookLoading();
     }
   };
 
