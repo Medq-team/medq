@@ -1,12 +1,9 @@
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Lecture } from '@/types';
-import { LectureCard } from '@/components/lectures/LectureCard';
 import { LecturesListView } from '@/components/specialties/LecturesListView';
-import { LectureViewToggle } from '@/components/specialties/LectureViewToggle';
 import { LectureSearch } from '@/components/specialties/LectureSearch';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useTranslation } from 'react-i18next';
 
 interface LecturesListProps {
@@ -15,7 +12,6 @@ interface LecturesListProps {
 }
 
 export function LecturesList({ lectures, isLoading }: LecturesListProps) {
-  const [view, setView] = useLocalStorage<'grid' | 'list'>('lecture-view', 'grid');
   const [searchTerm, setSearchTerm] = useState('');
   const { t } = useTranslation();
   
@@ -34,9 +30,9 @@ export function LecturesList({ lectures, isLoading }: LecturesListProps) {
   const renderContent = () => {
     if (isLoading) {
       return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="space-y-2">
           {[...Array(6)].map((_, i) => (
-            <Skeleton key={i} className="h-48 w-full rounded-lg" />
+            <Skeleton key={i} className="h-12 w-full" />
           ))}
         </div>
       );
@@ -59,22 +55,13 @@ export function LecturesList({ lectures, isLoading }: LecturesListProps) {
       );
     }
     
-    return view === 'list' ? (
-      <LecturesListView lectures={filteredLectures} isLoading={false} />
-    ) : (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
-        {filteredLectures.map((lecture) => (
-          <LectureCard key={lecture.id} lecture={lecture} />
-        ))}
-      </div>
-    );
+    return <LecturesListView lectures={filteredLectures} isLoading={false} />;
   };
   
   return (
     <div className="space-y-4">
       <div className="flex flex-col md:flex-row justify-between gap-4 items-start md:items-center">
         <LectureSearch onSearch={setSearchTerm} />
-        <LectureViewToggle onViewChange={setView} />
       </div>
       
       {renderContent()}

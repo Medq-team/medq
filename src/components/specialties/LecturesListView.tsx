@@ -195,7 +195,6 @@ export function LecturesListView({ lectures, isLoading }: LecturesListViewProps)
         <TableHeader>
           <TableRow>
             <TableHead>{t('lectures.title')}</TableHead>
-            <TableHead className="hidden md:table-cell">{t('lectures.description')}</TableHead>
             <TableHead className="w-[120px]">Progress</TableHead>
             <TableHead className="w-[100px]">{t('common.actions')}</TableHead>
           </TableRow>
@@ -211,11 +210,6 @@ export function LecturesListView({ lectures, isLoading }: LecturesListViewProps)
                 <div className="flex items-center">
                   <FileText className="h-4 w-4 mr-2 text-primary" />
                   {lecture.title}
-                </div>
-              </TableCell>
-              <TableCell className="hidden md:table-cell text-muted-foreground">
-                <div className="truncate max-w-[400px]">
-                  {lecture.description}
                 </div>
               </TableCell>
               <TableCell>
