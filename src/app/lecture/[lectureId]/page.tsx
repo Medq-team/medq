@@ -12,6 +12,7 @@ import { OpenQuestion } from '@/components/questions/OpenQuestion'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 
 export default function LecturePageRoute() {
   const params = useParams()
@@ -42,34 +43,40 @@ export default function LecturePageRoute() {
 
   if (isLoading) {
     return (
-      <AppLayout>
-        <LectureLoadingState />
-      </AppLayout>
+      <ProtectedRoute>
+        <AppLayout>
+          <LectureLoadingState />
+        </AppLayout>
+      </ProtectedRoute>
     );
   }
 
   if (!lecture) {
     return (
-      <AppLayout>
-        <div className="text-center">
-          <h1 className="text-2xl font-bold">{t('lectures.lectureNotFound')}</h1>
-          <Button onClick={handleBackToSpecialty} className="mt-4">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            {t('common.back')}
-          </Button>
-        </div>
-      </AppLayout>
+      <ProtectedRoute>
+        <AppLayout>
+          <div className="text-center">
+            <h1 className="text-2xl font-bold">{t('lectures.lectureNotFound')}</h1>
+            <Button onClick={handleBackToSpecialty} className="mt-4">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              {t('common.back')}
+            </Button>
+          </div>
+        </AppLayout>
+      </ProtectedRoute>
     );
   }
 
   if (isComplete) {
     return (
-      <AppLayout>
-        <LectureComplete
-          onRestart={handleRestart}
-          onBackToSpecialty={handleBackToSpecialty}
-        />
-      </AppLayout>
+      <ProtectedRoute>
+        <AppLayout>
+          <LectureComplete
+            onRestart={handleRestart}
+            onBackToSpecialty={handleBackToSpecialty}
+          />
+        </AppLayout>
+      </ProtectedRoute>
     );
   }
 
@@ -96,35 +103,51 @@ export default function LecturePageRoute() {
   };
 
   return (
-    <AppLayout>
-      <div className="flex flex-col lg:flex-row gap-4 pb-12 lg:pb-0">
-        <div className="flex-1 space-y-6 min-w-0 w-full max-w-full">
-          <div className="flex justify-end">
-            <LectureTimer lectureId={lectureId} />
+    <ProtectedRoute>
+      <AppLayout>
+        <div className="flex flex-col lg:flex-row gap-4 pb-12 lg:pb-0">
+          <div className="flex-1 space-y-6 min-w-0 w-full max-w-full">
+            <div className="flex justify-end">
+              <LectureTimer lectureId={lectureId} />
+            </div>
+
+            {currentQuestion && (
+              <div className="space-y-6">
+                {currentQuestion.type === 'mcq' ? (
+                  <MCQQuestion
+                    question={currentQuestion}
+                    onSubmit={handleMCQSubmit}
+                    onNext={handleNext}
+                    lectureId={lectureId}
+                  />
+                ) : (
+                  <OpenQuestion
+                    question={currentQuestion}
+                    onSubmit={handleOpenSubmit}
+                    onNext={handleNext}
+                    lectureId={lectureId}
+                  />
+                )}
+              </div>
+            )}
           </div>
 
-          {currentQuestion && (
-            <div className="space-y-6">
-              {currentQuestion.type === 'mcq' ? (
-                <MCQQuestion
-                  question={currentQuestion}
-                  onSubmit={handleMCQSubmit}
-                  onNext={handleNext}
-                  lectureId={lectureId}
-                />
-              ) : (
-                <OpenQuestion
-                  question={currentQuestion}
-                  onSubmit={handleOpenSubmit}
-                  onNext={handleNext}
-                  lectureId={lectureId}
-                />
-              )}
-            </div>
-          )}
+          <div className="hidden lg:block lg:w-80 lg:flex-shrink-0">
+            <QuestionControlPanel
+              questions={questions}
+              currentQuestionIndex={currentQuestionIndex}
+              answers={answers}
+              answerResults={answerResults}
+              onQuestionSelect={handleQuestionSelect}
+              onPrevious={handlePrevious}
+              onNext={handleNext}
+              isComplete={isComplete}
+            />
+          </div>
         </div>
-
-        <div className="hidden lg:block lg:w-80 lg:flex-shrink-0">
+        
+        {/* Mobile Control Panel - rendered separately to avoid layout issues */}
+        <div className="lg:hidden">
           <QuestionControlPanel
             questions={questions}
             currentQuestionIndex={currentQuestionIndex}
@@ -136,21 +159,7 @@ export default function LecturePageRoute() {
             isComplete={isComplete}
           />
         </div>
-      </div>
-      
-      {/* Mobile Control Panel - rendered separately to avoid layout issues */}
-      <div className="lg:hidden">
-        <QuestionControlPanel
-          questions={questions}
-          currentQuestionIndex={currentQuestionIndex}
-          answers={answers}
-          answerResults={answerResults}
-          onQuestionSelect={handleQuestionSelect}
-          onPrevious={handlePrevious}
-          onNext={handleNext}
-          isComplete={isComplete}
-        />
-      </div>
-    </AppLayout>
+      </AppLayout>
+    </ProtectedRoute>
   );
 } 

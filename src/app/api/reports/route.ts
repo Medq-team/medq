@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth, requireAdmin, AuthenticatedRequest } from '@/lib/auth-middleware';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(request: NextRequest) {
+async function getHandler(request: AuthenticatedRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const lectureId = searchParams.get('lectureId');
@@ -50,9 +51,10 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
+async function postHandler(request: AuthenticatedRequest) {
   try {
-    const { questionId, lectureId, message, userId } = await request.json();
+    const { questionId, lectureId, message } = await request.json();
+    const userId = request.user!.userId;
 
     if (!questionId || !lectureId || !message) {
       return NextResponse.json(
@@ -101,4 +103,7 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}
+
+export const GET = requireAdmin(getHandler);
+export const POST = requireAuth(postHandler); 

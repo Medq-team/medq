@@ -1,24 +1,53 @@
-
+'use client';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Specialty } from '@/types';
 import { SpecialtyItem } from './SpecialtyItem';
 import { useTranslation } from 'react-i18next';
+import { toast } from '@/hooks/use-toast';
 
-interface SpecialtiesTabProps {
-  specialties: Specialty[];
-  isLoading: boolean;
-  onDeleteSpecialty: (id: string) => void;
-}
-
-export function SpecialtiesTab({ 
-  specialties, 
-  isLoading, 
-  onDeleteSpecialty 
-}: SpecialtiesTabProps) {
+export function SpecialtiesTab() {
+  const [specialties, setSpecialties] = useState<Specialty[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const { t } = useTranslation();
+
+  useEffect(() => {
+    fetchSpecialties();
+  }, []);
+
+  const fetchSpecialties = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch('/api/specialties');
+      if (response.ok) {
+        const data = await response.json();
+        setSpecialties(data);
+      } else {
+        console.error('Failed to fetch specialties');
+        toast({
+          title: t('common.error'),
+          description: t('common.tryAgain'),
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching specialties:', error);
+      toast({
+        title: t('common.error'),
+        description: t('common.tryAgain'),
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteSpecialty = (id: string) => {
+    setSpecialties(prev => prev.filter(s => s.id !== id));
+  };
   
   return (
     <div className="space-y-4 animate-fade-in">
@@ -53,7 +82,7 @@ export function SpecialtiesTab({
           <SpecialtyItem
             key={specialty.id}
             specialty={specialty}
-            onDelete={onDeleteSpecialty}
+            onDelete={handleDeleteSpecialty}
           />
         ))}
       </div>

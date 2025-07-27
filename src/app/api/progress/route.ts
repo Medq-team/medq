@@ -1,20 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { authenticateRequest, AuthenticatedRequest } from '@/lib/auth-middleware';
+import { requireAuth, AuthenticatedRequest } from '@/lib/auth-middleware';
 import { prisma } from '@/lib/prisma';
 
-export async function POST(request: NextRequest) {
+async function postHandler(request: AuthenticatedRequest) {
   try {
-    const authenticatedRequest = await authenticateRequest(request);
-    
-    if (!authenticatedRequest) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
     const { lectureId, questionId, completed, score } = await request.json();
-    const userId = authenticatedRequest.user!.userId;
+    const userId = request.user!.userId;
 
     if (!lectureId) {
       return NextResponse.json(
@@ -57,21 +48,12 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
+async function getHandler(request: AuthenticatedRequest) {
   try {
-    const authenticatedRequest = await authenticateRequest(request);
-    
-    if (!authenticatedRequest) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
     const { searchParams } = new URL(request.url);
     const lectureId = searchParams.get('lectureId');
     const specialtyId = searchParams.get('specialtyId');
-    const userId = authenticatedRequest.user!.userId;
+    const userId = request.user!.userId;
 
     let whereClause: any = { userId };
 
@@ -109,4 +91,7 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}
+
+export const POST = requireAuth(postHandler);
+export const GET = requireAuth(getHandler); 

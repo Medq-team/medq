@@ -8,6 +8,7 @@ import { toast } from '@/hooks/use-toast';
 import { AddSpecialtyDialog } from '@/components/specialties/AddSpecialtyDialog';
 import { SpecialtiesList } from '@/components/specialties/SpecialtiesList';
 import { useTranslation } from 'react-i18next';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 // Disable static generation to prevent SSR issues with useAuth
 export const dynamic = 'force-dynamic';
@@ -79,33 +80,35 @@ export default function ExercicesPage() {
   };
 
   return (
-    <AppLayout>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Exercices</h1>
-            <p className="text-muted-foreground">
-              {t('dashboard.welcome', { name: user?.name || user?.email })}
-            </p>
+    <ProtectedRoute>
+      <AppLayout>
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Exercices</h1>
+              <p className="text-muted-foreground">
+                {t('dashboard.welcome', { name: user?.name || user?.email })}
+              </p>
+            </div>
+            {isAdmin && (
+              <Button onClick={() => setIsAddDialogOpen(true)}>
+                {t('specialties.add')}
+              </Button>
+            )}
           </div>
-          {isAdmin && (
-            <Button onClick={() => setIsAddDialogOpen(true)}>
-              {t('specialties.add')}
-            </Button>
-          )}
+
+          <SpecialtiesList 
+            specialties={specialties} 
+            isLoading={isLoading} 
+          />
+
+          <AddSpecialtyDialog
+            isOpen={isAddDialogOpen}
+            onOpenChange={setIsAddDialogOpen}
+            onSpecialtyAdded={fetchSpecialties}
+          />
         </div>
-
-        <SpecialtiesList 
-          specialties={specialties} 
-          isLoading={isLoading} 
-        />
-
-        <AddSpecialtyDialog
-          isOpen={isAddDialogOpen}
-          onOpenChange={setIsAddDialogOpen}
-          onSpecialtyAdded={fetchSpecialties}
-        />
-      </div>
-    </AppLayout>
+      </AppLayout>
+    </ProtectedRoute>
   );
 } 

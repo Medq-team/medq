@@ -54,8 +54,10 @@ export async function authenticateRequest(request: NextRequest): Promise<Authent
   }
 }
 
-export function requireAuth(handler: (req: AuthenticatedRequest) => Promise<NextResponse>) {
-  return async (request: NextRequest) => {
+export function requireAuth<T extends any[]>(
+  handler: (req: AuthenticatedRequest, ...args: T) => Promise<NextResponse>
+) {
+  return async (request: NextRequest, ...args: T) => {
     const authenticatedRequest = await authenticateRequest(request);
     
     if (!authenticatedRequest) {
@@ -65,12 +67,14 @@ export function requireAuth(handler: (req: AuthenticatedRequest) => Promise<Next
       );
     }
     
-    return handler(authenticatedRequest);
+    return handler(authenticatedRequest, ...args);
   };
 }
 
-export function requireAdmin(handler: (req: AuthenticatedRequest) => Promise<NextResponse>) {
-  return async (request: NextRequest) => {
+export function requireAdmin<T extends any[]>(
+  handler: (req: AuthenticatedRequest, ...args: T) => Promise<NextResponse>
+) {
+  return async (request: NextRequest, ...args: T) => {
     const authenticatedRequest = await authenticateRequest(request);
     
     if (!authenticatedRequest) {
@@ -87,6 +91,6 @@ export function requireAdmin(handler: (req: AuthenticatedRequest) => Promise<Nex
       );
     }
     
-    return handler(authenticatedRequest);
+    return handler(authenticatedRequest, ...args);
   };
 } 

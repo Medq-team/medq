@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { authenticateRequest, requireAdmin, AuthenticatedRequest } from '@/lib/auth-middleware';
+import { requireAuth, requireAdmin, AuthenticatedRequest } from '@/lib/auth-middleware';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(request: NextRequest) {
+async function getHandler(request: AuthenticatedRequest) {
   try {
-    const authenticatedRequest = await authenticateRequest(request);
-    const userId = authenticatedRequest?.user?.userId;
+    const userId = request.user!.userId;
 
     // Get all specialties with their lectures and questions
     const specialties = await prisma.specialty.findMany({
@@ -13,12 +12,12 @@ export async function GET(request: NextRequest) {
         lectures: {
           include: {
             questions: true,
-            progress: userId ? {
+            progress: {
               where: {
                 userId: userId,
                 questionId: null // Only lecture-level progress
               }
-            } : false
+            }
           }
         }
       },
@@ -27,77 +26,37 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    // Calculate progress for each specialty if user is authenticated
-    const specialtiesWithProgress = await Promise.all(
-      specialties.map(async (specialty) => {
-        const totalLectures = specialty.lectures.length;
-        const totalQuestions = specialty.lectures.reduce((sum, lecture) => sum + lecture.questions.length, 0);
-        
-        let completedLectures = 0;
-        let completedQuestions = 0;
-        let correctQuestions = 0;
-        let incorrectQuestions = 0;
-        let partialQuestions = 0;
-
-        if (userId) {
-          // Count completed lectures
-          completedLectures = specialty.lectures.filter(lecture => 
-            lecture.progress && lecture.progress.length > 0 && lecture.progress[0].completed
-          ).length;
-
-          // Get detailed progress for this specialty
-          const progressResult = await prisma.userProgress.findMany({
-            where: {
-              userId,
-              questionId: { not: null },
-              lecture: {
-                specialtyId: specialty.id
-              }
-            },
-            select: {
-              completed: true,
-              score: true
-            }
-          });
-
-          completedQuestions = progressResult.length;
-          
-          // Categorize questions based on score
-          progressResult.forEach(progress => {
-            if (progress.completed) {
-              if (progress.score === 1) {
-                correctQuestions++;
-              } else if (progress.score === 0) {
-                incorrectQuestions++;
-              } else if (progress.score && progress.score > 0 && progress.score < 1) {
-                partialQuestions++;
-              } else {
-                // If no score but completed, count as incorrect
-                incorrectQuestions++;
-              }
-            }
-          });
+    // Calculate progress for each specialty
+    const specialtiesWithProgress = specialties.map(specialty => {
+      const totalLectures = specialty.lectures.length;
+      const completedLectures = specialty.lectures.filter(lecture => 
+        lecture.progress.length > 0 && lecture.progress[0].completed
+      ).length;
+      
+      const totalQuestions = specialty.lectures.reduce((sum, lecture) => 
+        sum + lecture.questions.length, 0
+      );
+      
+      const completedQuestions = specialty.lectures.reduce((sum, lecture) => {
+        const lectureProgress = lecture.progress[0];
+        if (lectureProgress && lectureProgress.completed) {
+          return sum + lecture.questions.length;
         }
+        return sum;
+      }, 0);
 
-        const incompleteQuestions = totalQuestions - completedQuestions;
-        const percentage = totalQuestions > 0 ? Math.round((completedQuestions / totalQuestions) * 100) : 0;
-
-        return {
-          ...specialty,
-          progress: {
-            totalLectures,
-            completedLectures,
-            totalQuestions,
-            completedQuestions,
-            correctQuestions,
-            incorrectQuestions,
-            partialQuestions,
-            incompleteQuestions,
-            percentage
-          }
-        };
-      })
-    );
+      return {
+        ...specialty,
+        progress: {
+          totalLectures,
+          completedLectures,
+          totalQuestions,
+          completedQuestions,
+          lectureProgress: totalLectures > 0 ? completedLectures / totalLectures * 100 : 0,
+          questionProgress: totalQuestions > 0 ? completedQuestions / totalQuestions * 100 : 0
+        }
+      };
+    });
 
     return NextResponse.json(specialtiesWithProgress);
   } catch (error) {
@@ -137,4 +96,5 @@ async function postHandler(request: AuthenticatedRequest) {
   }
 }
 
+export const GET = requireAuth(getHandler);
 export const POST = requireAdmin(postHandler); 

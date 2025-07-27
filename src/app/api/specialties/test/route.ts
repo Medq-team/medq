@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
+import { requireAuth, AuthenticatedRequest } from '@/lib/auth-middleware';
 import { prisma } from '@/lib/prisma';
 
-export async function GET() {
+async function getHandler(request: AuthenticatedRequest) {
   try {
     const specialties = await prisma.specialty.findMany({
       take: 5,
@@ -31,4 +32,6 @@ export async function GET() {
       { status: 500 }
     );
   }
-} 
+}
+
+export const GET = requireAuth(getHandler); 

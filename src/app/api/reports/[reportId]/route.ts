@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth, requireAdmin, AuthenticatedRequest } from '@/lib/auth-middleware';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(
-  request: NextRequest,
+async function getHandler(
+  request: AuthenticatedRequest,
   { params }: { params: Promise<{ reportId: string }> }
 ) {
   try {
@@ -51,8 +52,8 @@ export async function GET(
   }
 }
 
-export async function PUT(
-  request: NextRequest,
+async function putHandler(
+  request: AuthenticatedRequest,
   { params }: { params: Promise<{ reportId: string }> }
 ) {
   try {
@@ -99,8 +100,8 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
+async function deleteHandler(
+  request: AuthenticatedRequest,
   { params }: { params: Promise<{ reportId: string }> }
 ) {
   try {
@@ -118,4 +119,8 @@ export async function DELETE(
       { status: 500 }
     );
   }
-} 
+}
+
+export const GET = requireAuth(getHandler);
+export const PUT = requireAdmin(putHandler);
+export const DELETE = requireAdmin(deleteHandler); 

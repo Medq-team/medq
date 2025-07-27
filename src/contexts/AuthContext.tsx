@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '@/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useRouter } from 'next/navigation';
 
 type AuthContextType = {
   user: User | null;
@@ -30,6 +31,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const router = useRouter();
 
   const checkAuth = async () => {
     // Only check auth on the client side
@@ -76,6 +78,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       if (response.ok) {
         setUser(data.user);
         setIsAdmin(data.user.role === 'admin');
+        
+        // Check if there's a redirect path stored
+        const redirectPath = sessionStorage.getItem('redirectAfterLogin');
+        if (redirectPath) {
+          sessionStorage.removeItem('redirectAfterLogin');
+          router.push(redirectPath);
+        } else {
+          router.push('/dashboard');
+        }
+        
         return { success: true };
       } else {
         return { success: false, error: data.error };
@@ -109,8 +121,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-
-
   const logout = async () => {
     try {
       await fetch('/api/auth/logout', {
@@ -120,6 +130,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       
       setUser(null);
       setIsAdmin(false);
+      router.push('/auth');
     } catch (error) {
       console.error('Logout error:', error);
     }

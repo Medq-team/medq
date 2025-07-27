@@ -4,16 +4,18 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 import { AuthLoadingScreen } from './AuthLoadingScreen';
 
-interface AdminRouteProps {
+interface ProtectedRouteProps {
   children: React.ReactNode;
+  requireAdmin?: boolean;
 }
 
-export function AdminRoute({ children }: AdminRouteProps) {
+export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
   const { user, isAdmin, isLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
+    // Only redirect if we're not loading and we have a definitive answer about auth status
     if (!isLoading) {
       if (!user) {
         // Store the current path to redirect back after login
@@ -22,18 +24,20 @@ export function AdminRoute({ children }: AdminRouteProps) {
         return;
       }
       
-      if (!isAdmin) {
+      if (requireAdmin && !isAdmin) {
         router.replace('/dashboard');
         return;
       }
     }
-  }, [user, isAdmin, isLoading, router, pathname]);
+  }, [user, isAdmin, isLoading, requireAdmin, router, pathname]);
 
+  // Show loading state while checking authentication
   if (isLoading) {
     return <AuthLoadingScreen />;
   }
 
-  if (!user || !isAdmin) {
+  // Don't render anything if user is not authenticated or doesn't have required role
+  if (!user || (requireAdmin && !isAdmin)) {
     return null;
   }
 

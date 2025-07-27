@@ -1,24 +1,53 @@
-
+'use client';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Lecture } from '@/types';
 import { LectureItem } from './LectureItem';
 import { useTranslation } from 'react-i18next';
+import { toast } from '@/hooks/use-toast';
 
-interface LecturesTabProps {
-  lectures: Lecture[];
-  isLoading: boolean;
-  onDeleteLecture: (id: string) => void;
-}
-
-export function LecturesTab({ 
-  lectures, 
-  isLoading, 
-  onDeleteLecture 
-}: LecturesTabProps) {
+export function LecturesTab() {
+  const [lectures, setLectures] = useState<Lecture[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const { t } = useTranslation();
+
+  useEffect(() => {
+    fetchLectures();
+  }, []);
+
+  const fetchLectures = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch('/api/lectures');
+      if (response.ok) {
+        const data = await response.json();
+        setLectures(data);
+      } else {
+        console.error('Failed to fetch lectures');
+        toast({
+          title: t('common.error'),
+          description: t('common.tryAgain'),
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching lectures:', error);
+      toast({
+        title: t('common.error'),
+        description: t('common.tryAgain'),
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteLecture = (id: string) => {
+    setLectures(prev => prev.filter(l => l.id !== id));
+  };
   
   return (
     <div className="space-y-4 animate-fade-in">
@@ -53,7 +82,7 @@ export function LecturesTab({
           <LectureItem
             key={lecture.id}
             lecture={lecture}
-            onDelete={onDeleteLecture}
+            onDelete={handleDeleteLecture}
           />
         ))}
       </div>
