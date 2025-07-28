@@ -25,6 +25,11 @@ export type SpecialtyProgress = {
   lectureProgress: number;
   questionProgress: number;
   averageScore: number;
+  // Additional fields for detailed progress
+  correctQuestions: number;
+  incorrectQuestions: number;
+  partialQuestions: number;
+  incompleteQuestions: number;
 };
 
 export type Lecture = {
