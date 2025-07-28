@@ -6,8 +6,13 @@ import { LecturesTab } from '@/components/admin/LecturesTab';
 import { ReportsTab } from '@/components/admin/ReportsTab';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { Button } from '@/components/ui/button';
+import { Upload } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export default function AdminPage() {
+  const router = useRouter();
+  
   return (
     <ProtectedRoute requireAdmin>
       <AdminRoute>
@@ -20,6 +25,17 @@ export default function AdminPage() {
           </div>
 
           <AdminStats />
+
+          <div className="flex justify-between items-center mb-4">
+            <Button 
+              onClick={() => router.push('/admin/import')}
+              variant="outline"
+              className="btn-hover"
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              Import QROC Questions
+            </Button>
+          </div>
 
           <Tabs defaultValue="specialties" className="space-y-4">
             <TabsList>

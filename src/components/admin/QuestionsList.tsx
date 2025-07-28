@@ -9,19 +9,25 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 
-export function QuestionsList() {
+interface QuestionsListProps {
+  lectureId?: string;
+  refreshTrigger?: number;
+}
+
+export function QuestionsList({ lectureId, refreshTrigger }: QuestionsListProps) {
   const { t } = useTranslation();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     fetchQuestions();
-  }, []);
+  }, [lectureId, refreshTrigger]);
 
   const fetchQuestions = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('/api/questions');
+      const url = lectureId ? `/api/questions?lectureId=${lectureId}` : '/api/questions';
+      const response = await fetch(url);
       
       if (!response.ok) {
         throw new Error('Failed to fetch questions');

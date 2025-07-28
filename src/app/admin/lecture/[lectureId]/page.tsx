@@ -19,6 +19,7 @@ export default function AdminLecturePageRoute() {
   const [questions, setQuestions] = useState<Question[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isAddQuestionOpen, setIsAddQuestionOpen] = useState(false)
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
   
   if (!params?.lectureId) {
     return <div>Lecture ID not found</div>
@@ -76,10 +77,7 @@ export default function AdminLecturePageRoute() {
 
   const handleQuestionAdded = () => {
     // Refresh questions list
-    fetch(`/api/questions?lectureId=${lectureId}`)
-      .then(res => res.json())
-      .then(data => setQuestions(data))
-      .catch(console.error)
+    setRefreshTrigger(prev => prev + 1)
   }
 
   return (
@@ -90,9 +88,10 @@ export default function AdminLecturePageRoute() {
             lecture={lecture}
             onBack={handleBack}
             onAddQuestion={handleAddQuestion}
+            onImportSuccess={handleQuestionAdded}
           />
 
-          <QuestionsList />
+          <QuestionsList lectureId={lectureId} refreshTrigger={refreshTrigger} />
         </div>
       </AppLayout>
     </AdminRoute>

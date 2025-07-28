@@ -44,7 +44,7 @@ export type LectureProgress = {
   lastAccessed?: Date;
 };
 
-export type QuestionType = 'mcq' | 'open';
+export type QuestionType = 'mcq' | 'open' | 'qroc' | 'clinic_mcq' | 'clinic_croq';
 
 export type Option = {
   id: string;
