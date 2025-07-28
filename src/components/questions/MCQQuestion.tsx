@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Question } from '@/types';
 import { AnimatePresence, motion } from 'framer-motion';
 import { MCQHeader } from './mcq/MCQHeader';
@@ -31,6 +31,32 @@ export function MCQQuestion({ question, onSubmit, onNext, lectureId }: MCQQuesti
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const { t } = useTranslation();
   const { trackQuestionProgress } = useProgress();
+
+  // Normalize options to ensure they have the correct format
+  const normalizedOptions = useMemo(() => {
+    if (!question.options) return [];
+    
+    return question.options
+      .map((option, index) => {
+        if (typeof option === 'string') {
+          // Convert string option to object format
+          return {
+            id: index.toString(),
+            text: option,
+            explanation: undefined
+          };
+        } else if (option && typeof option === 'object') {
+          // Ensure object option has required properties
+          return {
+            id: option.id || index.toString(),
+            text: option.text || '',
+            explanation: option.explanation
+          };
+        }
+        return null;
+      })
+      .filter(Boolean) as Array<{ id: string; text: string; explanation?: string }>;
+  }, [question.options]);
 
   // Get correct answers array from question
   const correctAnswers = question.correctAnswers || question.correct_answers || [];
@@ -179,7 +205,7 @@ export function MCQQuestion({ question, onSubmit, onNext, lectureId }: MCQQuesti
       <QuestionMedia question={question} className="mb-4" />
 
       <div className="space-y-3">
-        {question.options?.map((option, index) => (
+        {normalizedOptions.map((option, index) => (
           <MCQOptionItem
             key={option.id}
             option={option}

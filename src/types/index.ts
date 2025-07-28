@@ -22,11 +22,9 @@ export type SpecialtyProgress = {
   completedLectures: number;
   totalQuestions: number;
   completedQuestions: number;
-  correctQuestions: number;
-  incorrectQuestions: number;
-  partialQuestions: number;
-  incompleteQuestions: number;
-  percentage: number;
+  lectureProgress: number;
+  questionProgress: number;
+  averageScore: number;
 };
 
 export type Lecture = {

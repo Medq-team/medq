@@ -74,6 +74,10 @@ export default function LecturePageRoute() {
           <LectureComplete
             onRestart={handleRestart}
             onBackToSpecialty={handleBackToSpecialty}
+            questions={questions}
+            answers={answers}
+            answerResults={answerResults}
+            lectureTitle={lecture.title}
           />
         </AppLayout>
       </ProtectedRoute>
@@ -95,10 +99,9 @@ export default function LecturePageRoute() {
     // Don't automatically move to next question - let user see the result first
   };
 
-  const handleOpenSubmit = (answer: string) => {
-    // For open questions, we don't have automatic correctness checking
-    // So we'll just mark it as answered without a result
-    handleAnswerSubmit(currentQuestion!.id, answer);
+  const handleOpenSubmit = (answer: string, resultValue?: boolean | 'partial') => {
+    // For open questions, we store the answer and the self-assessment result
+    handleAnswerSubmit(currentQuestion!.id, answer, resultValue);
     // Don't automatically move to next question - let user see the result first
   };
 
@@ -113,7 +116,7 @@ export default function LecturePageRoute() {
 
             {currentQuestion && (
               <div className="space-y-6">
-                {currentQuestion.type === 'mcq' ? (
+                {(currentQuestion.type === 'mcq' || currentQuestion.type === 'clinic_mcq') ? (
                   <MCQQuestion
                     question={currentQuestion}
                     onSubmit={handleMCQSubmit}

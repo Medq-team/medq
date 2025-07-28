@@ -9,6 +9,7 @@ interface OpenQuestionActionsProps {
   onNext: () => void;
   onPrevious?: () => void;
   showPrevious?: boolean;
+  showNext?: boolean;
 }
 
 export function OpenQuestionActions({
@@ -17,7 +18,8 @@ export function OpenQuestionActions({
   onSubmit,
   onNext,
   onPrevious,
-  showPrevious = false
+  showPrevious = false,
+  showNext = true
 }: OpenQuestionActionsProps) {
   return (
     <div className="flex justify-between mt-6">
@@ -41,7 +43,7 @@ export function OpenQuestionActions({
           >
             Submit
           </Button>
-        ) : (
+        ) : showNext ? (
           <Button 
             onClick={onNext}
             className="flex items-center gap-1"
@@ -49,7 +51,7 @@ export function OpenQuestionActions({
             Next
             <ChevronRight className="h-4 w-4" />
           </Button>
-        )}
+        ) : null}
       </div>
     </div>
   );

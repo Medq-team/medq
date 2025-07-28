@@ -52,6 +52,7 @@ model Lecture {
   reports     Report[]
   progress    UserProgress[]
 
+  @@index([specialtyId], map: "idx_lectures_specialty")
   @@map("lectures")
 }
 
@@ -95,6 +96,8 @@ model UserProgress {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, lectureId, questionId], map: "unique_user_lecture_question")
+  @@index([userId, questionId], map: "idx_user_progress_user_question")
+  @@index([userId, lectureId], map: "idx_user_progress_user_lecture")
   @@map("user_progress")
 }
 
