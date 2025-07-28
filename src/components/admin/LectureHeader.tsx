@@ -3,14 +3,16 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, PlusCircle } from 'lucide-react';
 import { Lecture } from '@/types';
 import { useTranslation } from 'react-i18next';
+import { CSVImportDialog } from './CSVImportDialog';
 
 interface LectureHeaderProps {
   lecture: Lecture | null;
   onBack: () => void;
   onAddQuestion: () => void;
+  onImportSuccess?: () => void;
 }
 
-export function LectureHeader({ lecture, onBack, onAddQuestion }: LectureHeaderProps) {
+export function LectureHeader({ lecture, onBack, onAddQuestion, onImportSuccess }: LectureHeaderProps) {
   const { t } = useTranslation();
   
   return (
@@ -34,10 +36,18 @@ export function LectureHeader({ lecture, onBack, onAddQuestion }: LectureHeaderP
           </p>
         </div>
         
+        <div className="flex items-center space-x-2">
+          {lecture && (
+            <CSVImportDialog
+              lectureId={lecture.id}
+              onImportSuccess={onImportSuccess}
+            />
+          )}
         <Button onClick={onAddQuestion}>
           <PlusCircle className="h-4 w-4 mr-2" />
           {t('questions.addQuestion')}
         </Button>
+        </div>
       </div>
     </>
   );

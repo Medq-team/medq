@@ -80,8 +80,8 @@ export function QuestionForm({ lectureId, editQuestionId, onComplete }: Question
               courseReminder,
               questionNumber,
               session,
-              options: questionType === 'mcq' ? options : undefined,
-              correctAnswers: questionType === 'mcq' ? correctAnswers : undefined,
+              options: (questionType === 'mcq' || questionType === 'clinic_mcq') ? options : undefined,
+              correctAnswers: (questionType === 'mcq' || questionType === 'clinic_mcq') ? correctAnswers : undefined,
               mediaUrl,
               mediaType
             };
@@ -126,7 +126,7 @@ export function QuestionForm({ lectureId, editQuestionId, onComplete }: Question
             setQuestionType={setQuestionType} 
           />
           
-          {questionType === 'mcq' && !editQuestionId && (
+          {(questionType === 'mcq' || questionType === 'clinic_mcq') && !editQuestionId && (
             <AutoParseInput onParsedContent={handleParsedContent} />
           )}
           
@@ -150,7 +150,7 @@ export function QuestionForm({ lectureId, editQuestionId, onComplete }: Question
             onMediaChange={handleMediaChange}
           />
           
-          {questionType === 'mcq' && (
+          {(questionType === 'mcq' || questionType === 'clinic_mcq') && (
             <>
               <Separator className="my-6" />
               <McqOptionsSection

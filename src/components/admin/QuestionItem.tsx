@@ -1,9 +1,19 @@
 
-import { Question } from '@/types';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Edit, Trash, HelpCircle, PenLine, ChevronDown, ChevronUp, Image, Video } from 'lucide-react';
 import { useState } from 'react';
+import { Question } from '@/types';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { 
+  Edit, 
+  Trash, 
+  HelpCircle, 
+  PenLine, 
+  Stethoscope,
+  Image, 
+  Video, 
+  ChevronDown, 
+  ChevronUp 
+} from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,7 +24,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog';
+import { useTranslation } from 'react-i18next';
 
 interface QuestionItemProps {
   question: Question;
@@ -24,6 +35,7 @@ interface QuestionItemProps {
 
 export function QuestionItem({ question, onEdit, onDelete }: QuestionItemProps) {
   const [expandedOption, setExpandedOption] = useState<string | null>(null);
+  const { t } = useTranslation();
   
   const toggleOption = (optionId: string) => {
     if (expandedOption === optionId) {
@@ -32,6 +44,23 @@ export function QuestionItem({ question, onEdit, onDelete }: QuestionItemProps) 
       setExpandedOption(optionId);
     }
   };
+
+  const getQuestionTypeLabel = (type: string) => {
+    switch (type) {
+      case 'mcq':
+        return { icon: <HelpCircle className="h-3 w-3 mr-1" />, label: t('questions.mcq') };
+      case 'qroc':
+        return { icon: <PenLine className="h-3 w-3 mr-1" />, label: t('questions.open') };
+      case 'clinic_mcq':
+        return { icon: <Stethoscope className="h-3 w-3 mr-1" />, label: t('questions.casCliniqueQcm') };
+      case 'clinic_croq':
+        return { icon: <Stethoscope className="h-3 w-3 mr-1" />, label: t('questions.casCliniqueQroc') };
+      default:
+        return { icon: <HelpCircle className="h-3 w-3 mr-1" />, label: type };
+    }
+  };
+
+  const typeInfo = getQuestionTypeLabel(question.type);
   
   return (
     <Card key={question.id}>
@@ -40,17 +69,8 @@ export function QuestionItem({ question, onEdit, onDelete }: QuestionItemProps) 
           <div>
             <div className="flex items-center space-x-2 mb-2">
               <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-muted">
-                {question.type === 'mcq' ? (
-                  <>
-                    <HelpCircle className="h-3 w-3 mr-1" />
-                    Multiple Choice
-                  </>
-                ) : (
-                  <>
-                    <PenLine className="h-3 w-3 mr-1" />
-                    Open Question
-                  </>
-                )}
+                {typeInfo.icon}
+                {typeInfo.label}
               </div>
               {question.number !== null && question.number !== undefined && (
                 <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800">
@@ -135,7 +155,7 @@ export function QuestionItem({ question, onEdit, onDelete }: QuestionItemProps) 
           </div>
         )}
       
-        {question.type === 'mcq' && question.options && (
+        {(question.type === 'mcq' || question.type === 'clinic_mcq') && question.options && (
           <div className="space-y-2">
             {question.options.map((option, index) => (
               <div key={option.id} className="border rounded-md p-2">

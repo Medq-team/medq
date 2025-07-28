@@ -37,7 +37,7 @@ export function MCQOptionItem({
   const optionLetter = String.fromCharCode(65 + index);
   
   // Background color based on state
-  let bgColorClass = 'bg-white dark:bg-card';
+  let bgColorClass = 'bg-card dark:bg-card';
   let borderColorClass = 'border-gray-200 dark:border-gray-700';
   let textColorClass = 'text-foreground';
   

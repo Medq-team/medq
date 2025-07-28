@@ -4,7 +4,7 @@ import { Question } from '@/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ChevronLeft, ChevronRight, CheckCircle, Circle, XCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CheckCircle, Circle, XCircle, MinusCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 import { useTranslation } from 'react-i18next';
@@ -13,7 +13,7 @@ interface QuestionControlPanelProps {
   questions: Question[];
   currentQuestionIndex: number;
   answers: Record<string, any>;
-  answerResults?: Record<string, boolean>;
+  answerResults?: Record<string, boolean | 'partial'>;
   onQuestionSelect: (index: number) => void;
   onPrevious: () => void;
   onNext: () => void;
@@ -69,51 +69,93 @@ export function QuestionControlPanel({
     </Card>
   );
 
-  const renderQuestionsList = () => (
-    <div className="space-y-2">
-      {questions.map((question, index) => {
-        const isAnswered = answers[question.id] !== undefined;
-        const isCurrent = index === currentQuestionIndex && !isComplete;
-        const isCorrect = answerResults[question.id];
-        
-        return (
-          <Button
-            key={question.id}
-            variant="outline"
-            className={cn(
-              "w-full justify-start",
-              isCurrent && "border-primary",
-              isAnswered && "bg-muted"
-            )}
-            onClick={() => {
-              onQuestionSelect(index);
-              setIsDrawerOpen(false);
-            }}
-          >
-            <div className="flex items-center w-full">
-              <div className="flex items-center mr-2">
-                <span>{t('questions.mcq')} {index + 1}</span>
-                {question.session && (
-                  <span className="text-xs text-muted-foreground ml-1">
-                    ({question.session})
-                  </span>
-                )}
+  const renderQuestionsList = () => {
+    // Group questions by type
+    const groupedQuestions = questions.reduce((groups, question, index) => {
+      const type = question.type;
+      if (!groups[type]) {
+        groups[type] = [];
+      }
+      groups[type].push({ ...question, originalIndex: index });
+      return groups;
+    }, {} as Record<string, Array<Question & { originalIndex: number }>>);
+
+    // Define type order and labels
+    const typeOrder = ['mcq', 'qroc', 'clinic_mcq', 'clinic_croq'];
+    const getTypeLabel = (type: string) => {
+      switch (type) {
+        case 'mcq': return t('questions.mcq');
+        case 'qroc': return t('questions.open');
+        case 'clinic_mcq': return t('questions.casCliniqueQcm');
+        case 'clinic_croq': return t('questions.casCliniqueQroc');
+        default: return type;
+      }
+    };
+
+    return (
+      <div className="space-y-4">
+        {typeOrder.map(type => {
+          const typeQuestions = groupedQuestions[type];
+          if (!typeQuestions || typeQuestions.length === 0) return null;
+
+          return (
+            <div key={type} className="space-y-2">
+              <div className="text-sm font-medium text-muted-foreground px-2 py-1 bg-muted rounded">
+                {getTypeLabel(type)} ({typeQuestions.length})
               </div>
-              {isAnswered ? (
-                isCorrect ? (
-                  <CheckCircle className="h-4 w-4 text-green-600 ml-auto" />
-                ) : (
-                  <XCircle className="h-4 w-4 text-red-600 ml-auto" />
-                )
-              ) : (
-                <Circle className="h-4 w-4 text-muted-foreground ml-auto" />
-              )}
+              <div className="space-y-1">
+                {typeQuestions.map((question) => {
+                  const isAnswered = answers[question.id] !== undefined;
+                  const isCurrent = question.originalIndex === currentQuestionIndex && !isComplete;
+                  const isCorrect = answerResults[question.id];
+                  
+                  return (
+                    <Button
+                      key={question.id}
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start",
+                        isCurrent && "border-primary",
+                        isAnswered && "bg-muted"
+                      )}
+                      onClick={() => {
+                        onQuestionSelect(question.originalIndex);
+                        setIsDrawerOpen(false);
+                      }}
+                    >
+                      <div className="flex items-center w-full">
+                        <div className="flex items-center mr-2">
+                          <span>
+                            {question.number ? `${getTypeLabel(question.type)} ${question.number}` : `${getTypeLabel(question.type)} ${question.originalIndex + 1}`}
+                          </span>
+                          {question.session && (
+                            <span className="text-xs text-muted-foreground ml-1">
+                              {question.session}
+                            </span>
+                          )}
+                        </div>
+                        {isAnswered ? (
+                          isCorrect === true ? (
+                            <CheckCircle className="h-4 w-4 text-green-600 ml-auto" />
+                          ) : isCorrect === 'partial' ? (
+                            <MinusCircle className="h-4 w-4 text-yellow-600 ml-auto" />
+                          ) : (
+                            <XCircle className="h-4 w-4 text-red-600 ml-auto" />
+                          )
+                        ) : (
+                          <Circle className="h-4 w-4 text-muted-foreground ml-auto" />
+                        )}
+                      </div>
+                    </Button>
+                  );
+                })}
+              </div>
             </div>
-          </Button>
-        );
-      })}
-    </div>
-  );
+          );
+        })}
+      </div>
+    );
+  };
 
   const renderNavigationButtons = () => (
     <div className="flex justify-between mt-4">

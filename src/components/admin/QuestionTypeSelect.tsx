@@ -1,6 +1,6 @@
 
 import { Label } from '@/components/ui/label';
-import { HelpCircle, PenLine } from 'lucide-react';
+import { HelpCircle, PenLine, Stethoscope } from 'lucide-react';
 import { QuestionType } from '@/types';
 import {
   Select,
@@ -36,10 +36,22 @@ export function QuestionTypeSelect({ questionType, setQuestionType }: QuestionTy
               <span>{t('questions.mcq')}</span>
             </div>
           </SelectItem>
-          <SelectItem value="open">
+          <SelectItem value="qroc">
             <div className="flex items-center">
               <PenLine className="mr-2 h-4 w-4" />
               <span>{t('questions.open')}</span>
+            </div>
+          </SelectItem>
+          <SelectItem value="clinic_mcq">
+            <div className="flex items-center">
+              <Stethoscope className="mr-2 h-4 w-4" />
+              <span>{t('questions.casCliniqueQcm')}</span>
+            </div>
+          </SelectItem>
+          <SelectItem value="clinic_croq">
+            <div className="flex items-center">
+              <Stethoscope className="mr-2 h-4 w-4" />
+              <span>{t('questions.casCliniqueQroc')}</span>
             </div>
           </SelectItem>
         </SelectContent>

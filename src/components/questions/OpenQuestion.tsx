@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { OpenQuestionHeader } from './open/OpenQuestionHeader';
 import { OpenQuestionInput } from './open/OpenQuestionInput';
 import { OpenQuestionExplanation } from './open/OpenQuestionExplanation';
+import { OpenQuestionSelfAssessment } from './open/OpenQuestionSelfAssessment';
 import { OpenQuestionActions } from './open/OpenQuestionActions';
 import { QuestionEditDialog } from './QuestionEditDialog';
 import { ReportQuestionDialog } from './ReportQuestionDialog';
@@ -17,7 +18,7 @@ import { QuestionMedia } from './QuestionMedia';
 
 interface OpenQuestionProps {
   question: Question;
-  onSubmit: (answer: string) => void;
+  onSubmit: (answer: string, resultValue: boolean | 'partial') => void;
   onNext: () => void;
   lectureId?: string;
 }
@@ -25,6 +26,8 @@ interface OpenQuestionProps {
 export function OpenQuestion({ question, onSubmit, onNext, lectureId }: OpenQuestionProps) {
   const [answer, setAnswer] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [showSelfAssessment, setShowSelfAssessment] = useState(false);
+  const [assessmentCompleted, setAssessmentCompleted] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const { t } = useTranslation();
@@ -34,15 +37,27 @@ export function OpenQuestion({ question, onSubmit, onNext, lectureId }: OpenQues
     if (!answer.trim() || submitted) return;
     
     setSubmitted(true);
+    setShowSelfAssessment(true);
+    
+    // Don't call onSubmit here - wait for self-assessment
+  };
+
+  const handleSelfAssessment = async (rating: 'correct' | 'wrong' | 'partial') => {
+    setAssessmentCompleted(true);
+    setShowSelfAssessment(false);
+    
+    // Store the rating as a string for proper handling in the navigator
+    const resultValue = rating === 'correct' ? true : rating === 'partial' ? 'partial' : false;
     
     // Track progress if lectureId is provided
     if (lectureId) {
-      // For open questions, we mark them as completed regardless of correctness
-      // since there's no automatic way to determine correctness
-      await trackQuestionProgress(lectureId, question.id, true);
+      // For progress tracking, only 'correct' counts as correct
+      const isCorrect = rating === 'correct';
+      await trackQuestionProgress(lectureId, question.id, isCorrect);
     }
     
-    onSubmit(answer);
+    // Call onSubmit with the rating information
+    onSubmit(answer, resultValue);
   };
 
   const handleQuestionUpdated = () => {
@@ -57,8 +72,8 @@ export function OpenQuestion({ question, onSubmit, onNext, lectureId }: OpenQues
         // Only trigger if not already submitted and there's text in the answer
         if (!submitted && answer.trim()) {
           handleSubmit();
-        } else if (submitted) {
-          // If already submitted, move to next question
+        } else if (submitted && assessmentCompleted) {
+          // If already submitted and assessment completed, move to next question
           onNext();
         }
       }
@@ -68,7 +83,7 @@ export function OpenQuestion({ question, onSubmit, onNext, lectureId }: OpenQues
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [submitted, answer, onNext]);
+  }, [submitted, answer, assessmentCompleted, onNext]);
 
   return (
     <motion.div
@@ -121,6 +136,13 @@ export function OpenQuestion({ question, onSubmit, onNext, lectureId }: OpenQues
         <OpenQuestionExplanation
           courseReminder={question.course_reminder}
           explanation={question.explanation}
+          correctAnswers={question.correctAnswers || question.correct_answers}
+        />
+      )}
+
+      {showSelfAssessment && (
+        <OpenQuestionSelfAssessment
+          onAssessment={handleSelfAssessment}
         />
       )}
 
@@ -129,6 +151,7 @@ export function OpenQuestion({ question, onSubmit, onNext, lectureId }: OpenQues
         canSubmit={answer.trim().length > 0}
         onSubmit={handleSubmit}
         onNext={onNext}
+        showNext={assessmentCompleted}
       />
       
       <QuestionEditDialog

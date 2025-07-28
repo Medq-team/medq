@@ -62,7 +62,7 @@ export function QuestionEditContent({
       <TabsList className="w-full">
         <TabsTrigger value="content" className="flex-1">{t('questions.questionContent')}</TabsTrigger>
         <TabsTrigger value="media" className="flex-1">{t('questions.media')}</TabsTrigger>
-        {question.type === 'mcq' && (
+        {(question.type === 'mcq' || question.type === 'clinic_mcq') && (
           <TabsTrigger value="answers" className="flex-1">{t('questions.answersExplanations')}</TabsTrigger>
         )}
       </TabsList>
@@ -90,7 +90,7 @@ export function QuestionEditContent({
           />
         </TabsContent>
         
-        {question.type === 'mcq' && (
+        {(question.type === 'mcq' || question.type === 'clinic_mcq') && (
           <TabsContent value="answers" className="space-y-4">
             <AnswersExplanationsTab
               options={options}

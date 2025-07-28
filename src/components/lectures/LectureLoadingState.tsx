@@ -15,7 +15,7 @@ export function LectureLoadingState() {
         <Skeleton className="h-6 w-4/5 rounded" />
       </div>
       
-      <div className="bg-white border rounded-lg p-6 shadow-sm">
+      <div className="bg-card border rounded-lg p-6 shadow-sm">
         <div className="space-y-6">
           <Skeleton className="h-8 w-2/3 rounded" />
           <div className="space-y-4">

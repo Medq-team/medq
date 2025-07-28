@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,11 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 // Disable static generation to prevent SSR issues with useAuth
 export const dynamic = 'force-dynamic';
 
+// Cache for specialties data
+let specialtiesCache: Specialty[] | null = null;
+let cacheTimestamp: number = 0;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
 export default function ExercicesPage() {
   const { user, isAdmin } = useAuth();
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
@@ -20,14 +25,22 @@ export default function ExercicesPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const { t } = useTranslation();
 
-  useEffect(() => {
-    fetchSpecialties();
-  }, [user, isAdmin]);
-
-  async function fetchSpecialties() {
+  const fetchSpecialties = useCallback(async (forceRefresh = false) => {
     try {
+      // Check cache first
+      const now = Date.now();
+      if (!forceRefresh && specialtiesCache && (now - cacheTimestamp) < CACHE_DURATION) {
+        setSpecialties(specialtiesCache);
+        setIsLoading(false);
+        return;
+      }
+
       setIsLoading(true);
-      const response = await fetch('/api/specialties');
+      const response = await fetch('/api/specialties', {
+        headers: {
+          'Cache-Control': 'no-cache',
+        }
+      });
       
       if (!response.ok) {
         throw new Error('Failed to fetch specialties');
@@ -35,6 +48,10 @@ export default function ExercicesPage() {
 
       const data = await response.json();
       setSpecialties(data || []);
+      
+      // Update cache
+      specialtiesCache = data || [];
+      cacheTimestamp = now;
     } catch (error) {
       console.error('Error fetching specialties:', error);
       toast({
@@ -45,9 +62,15 @@ export default function ExercicesPage() {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [t]);
 
-  const handleAddSpecialty = async (name: string, description: string) => {
+  useEffect(() => {
+    if (user) {
+      fetchSpecialties();
+    }
+  }, [user, fetchSpecialties]);
+
+  const handleAddSpecialty = useCallback(async (name: string, description: string) => {
     try {
       const response = await fetch('/api/specialties', {
         method: 'POST',
@@ -65,6 +88,9 @@ export default function ExercicesPage() {
       setSpecialties(prev => [...prev, newSpecialty]);
       setIsAddDialogOpen(false);
       
+      // Invalidate cache
+      specialtiesCache = null;
+      
       toast({
         title: t('specialties.created'),
         description: t('specialties.createdSuccess'),
@@ -77,7 +103,10 @@ export default function ExercicesPage() {
         variant: "destructive",
       });
     }
-  };
+  }, [t]);
+
+  // Memoize the specialties list to prevent unnecessary re-renders
+  const memoizedSpecialties = useMemo(() => specialties, [specialties]);
 
   return (
     <ProtectedRoute>
@@ -98,14 +127,14 @@ export default function ExercicesPage() {
           </div>
 
           <SpecialtiesList 
-            specialties={specialties} 
+            specialties={memoizedSpecialties} 
             isLoading={isLoading} 
           />
 
           <AddSpecialtyDialog
             isOpen={isAddDialogOpen}
             onOpenChange={setIsAddDialogOpen}
-            onSpecialtyAdded={fetchSpecialties}
+            onSpecialtyAdded={() => fetchSpecialties(true)}
           />
         </div>
       </AppLayout>

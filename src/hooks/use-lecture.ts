@@ -12,7 +12,7 @@ export function useLecture(lectureId: string | undefined) {
   const storageKey = `lecture-${lectureId}`;
   const [currentQuestionIndex, setCurrentQuestionIndex] = useLocalStorage<number>(`${storageKey}-currentIndex`, 0);
   const [answers, setAnswers] = useLocalStorage<Record<string, any>>(`${storageKey}-answers`, {});
-  const [answerResults, setAnswerResults] = useLocalStorage<Record<string, boolean>>(`${storageKey}-results`, {});
+  const [answerResults, setAnswerResults] = useLocalStorage<Record<string, boolean | 'partial'>>(`${storageKey}-results`, {});
   const [isComplete, setIsComplete] = useLocalStorage<boolean>(`${storageKey}-complete`, false);
   
   const [isLoading, setIsLoading] = useState(true);
@@ -41,10 +41,25 @@ export function useLecture(lectureId: string | undefined) {
         const questionsData = await questionsResponse.json();
 
         const sortedQuestions = [...questionsData].sort((a, b) => {
-          if (a.type !== b.type) {
-            return a.type === 'mcq' ? -1 : 1;
+          // Define type priority: mcq (QCM) first, then qroc, then clinic types
+          const getTypePriority = (type: string) => {
+            switch (type) {
+              case 'mcq': return 1;
+              case 'qroc': return 2;
+              case 'clinic_mcq': return 3;
+              case 'clinic_croq': return 3;
+              default: return 4;
+            }
+          };
+
+          const aPriority = getTypePriority(a.type);
+          const bPriority = getTypePriority(b.type);
+
+          if (aPriority !== bPriority) {
+            return aPriority - bPriority;
           }
           
+          // Within same type, sort by question number
           if (a.number !== undefined && b.number !== undefined) {
             return a.number - b.number;
           }
@@ -76,14 +91,14 @@ export function useLecture(lectureId: string | undefined) {
     fetchLectureAndQuestions();
   }, [lectureId, router, isAddQuestionOpen, currentQuestionIndex]);
 
-  const handleAnswerSubmit = (questionId: string, answer: any, isCorrect?: boolean) => {
+  const handleAnswerSubmit = (questionId: string, answer: any, isCorrect?: boolean | 'partial') => {
     setAnswers((prevAnswers: Record<string, any>) => ({
       ...prevAnswers,
       [questionId]: answer
     }));
     
     if (isCorrect !== undefined) {
-      setAnswerResults((prevResults: Record<string, boolean>) => ({
+      setAnswerResults((prevResults: Record<string, boolean | 'partial'>) => ({
         ...prevResults,
         [questionId]: isCorrect
       }));

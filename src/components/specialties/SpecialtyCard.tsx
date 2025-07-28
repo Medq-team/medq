@@ -65,67 +65,49 @@ export function SpecialtyCard({ specialty }: SpecialtyCardProps) {
   const renderDetailedProgressBar = () => {
     if (!specialty.progress) return null;
 
-    const { totalQuestions, correctQuestions, incorrectQuestions, partialQuestions, incompleteQuestions } = specialty.progress;
+    const { totalQuestions, completedQuestions, totalLectures, completedLectures, lectureProgress, questionProgress, averageScore } = specialty.progress;
     
     if (totalQuestions === 0) return null;
 
-    const correctPercent = (correctQuestions / totalQuestions) * 100;
-    const partialPercent = (partialQuestions / totalQuestions) * 100;
-    const incorrectPercent = (incorrectQuestions / totalQuestions) * 100;
-    const incompletePercent = (incompleteQuestions / totalQuestions) * 100;
+    const completedPercent = questionProgress;
 
     return (
       <div className="space-y-2">
         <div className="flex items-center justify-between text-sm">
           <span className="text-muted-foreground">{t('progress.overallProgress')}</span>
-          <span className="font-medium">{specialty.progress.percentage}%</span>
+          <span className="font-medium">{Math.round(completedPercent)}%</span>
         </div>
         <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden">
-          {/* Correct (Green) */}
-          {correctPercent > 0 && (
+          {/* Completed (Green) */}
+          {completedPercent > 0 && (
             <div 
               className="absolute h-full bg-green-500 transition-all duration-300"
               style={{ 
                 left: '0%', 
-                width: `${correctPercent}%` 
-              }}
-            />
-          )}
-          {/* Partial (Yellow) */}
-          {partialPercent > 0 && (
-            <div 
-              className="absolute h-full bg-yellow-500 transition-all duration-300"
-              style={{ 
-                left: `${correctPercent}%`, 
-                width: `${partialPercent}%` 
-              }}
-            />
-          )}
-          {/* Incorrect (Red) */}
-          {incorrectPercent > 0 && (
-            <div 
-              className="absolute h-full bg-red-500 transition-all duration-300"
-              style={{ 
-                left: `${correctPercent + partialPercent}%`, 
-                width: `${incorrectPercent}%` 
+                width: `${completedPercent}%` 
               }}
             />
           )}
           {/* Incomplete (Gray) */}
-          {incompletePercent > 0 && (
+          {(100 - completedPercent) > 0 && (
             <div 
               className="absolute h-full bg-gray-400 transition-all duration-300"
               style={{ 
-                left: `${correctPercent + partialPercent + incorrectPercent}%`, 
-                width: `${incompletePercent}%` 
+                left: `${completedPercent}%`, 
+                width: `${100 - completedPercent}%` 
               }}
             />
           )}
         </div>
         <div className="flex justify-between text-xs text-muted-foreground">
-          <span>{specialty.progress.completedQuestions} / {specialty.progress.totalQuestions} {t('progress.questions')}</span>
-          <span>{specialty.progress.completedLectures} / {specialty.progress.totalLectures} {t('progress.lectures')}</span>
+          <span>{completedQuestions} / {totalQuestions} {t('progress.questions')}</span>
+          <span>{completedLectures} / {totalLectures} {t('progress.lectures')}</span>
         </div>
+        {averageScore > 0 && (
+          <div className="text-xs text-muted-foreground">
+            {t('progress.averageScore')}: {Math.round(averageScore * 100)}%
+          </div>
+        )}
       </div>
     );
   };
