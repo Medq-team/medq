@@ -43,10 +43,10 @@ export function LectureHeader({ lecture, onBack, onAddQuestion, onImportSuccess 
               onImportSuccess={onImportSuccess}
             />
           )}
-          <Button onClick={onAddQuestion}>
-            <PlusCircle className="h-4 w-4 mr-2" />
-            {t('questions.addQuestion')}
-          </Button>
+        <Button onClick={onAddQuestion}>
+          <PlusCircle className="h-4 w-4 mr-2" />
+          {t('questions.addQuestion')}
+        </Button>
         </div>
       </div>
     </>

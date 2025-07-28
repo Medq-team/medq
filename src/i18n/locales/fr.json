@@ -179,6 +179,7 @@
     "saving": "Enregistrement..."
   },
   "admin": {
+    "failed": "Échoué",
     "adminPanel": "Panneau d'administration",
     "adminDashboard": "Tableau de bord administrateur",
     "manageContent": "Gérer les spécialités, les cours et les questions",
@@ -244,11 +245,24 @@
     "importPreview": "Aperçu de l'import",
     "willCreateLectures": "cours seront créés automatiquement avec leurs spécialités",
     "willCreate": "🆕 Sera créé",
-    "createdNewSpecialties": "Créé {{count}} nouvelles spécialités",
+    "createdNewSpecialties": "Nouvelles spécialités créées",
     "createdNewLectures": "Créé {{count}} nouveaux cours",
     "createdNewSpecialtiesAndLectures": "Créé {{specialties}} nouvelles spécialités et {{lectures}} nouveaux cours",
     "image": "Image",
-    "questionsWithImages": "Questions avec images"
+    "questionsWithImages": "Questions avec images",
+    "clinicalCasesCreated": "Cas cliniques créés",
+    "multiSheetImport": "Import multi-feuilles Excel",
+    "expectedSheets": "Feuilles attendues: qcm, qroc, cas_qcm, cas_qroc",
+    "noValidSheets": "Aucune feuille valide trouvée",
+    "sheetQCM": "Questions à choix multiples",
+    "sheetQROC": "Questions à réponse ouverte courte",
+    "sheetCasQCM": "Cas cliniques QCM",
+    "sheetCasQROC": "Cas cliniques QROC",
+    "caseNumber": "Numéro de cas",
+    "caseText": "Texte du cas",
+    "caseQuestionNumber": "Numéro de question dans le cas",
+    "options": "Options",
+    "correctAnswer": "Réponse correcte"
   },
   "profile": {
     "profile": "Profil",

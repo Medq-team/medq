@@ -56,23 +56,28 @@ model Lecture {
 }
 
 model Question {
-  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  lectureId      String   @map("lecture_id") @db.Uuid
-  type           String
-  text           String
-  options        Json?
-  correctAnswers String[] @map("correct_answers")
-  explanation    String?
-  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  courseReminder String?  @map("course_reminder")
-  number         Int?
-  session        String?
-  mediaUrl       String?  @map("media_url")
-  mediaType      String?  @map("media_type")
-  lecture        Lecture  @relation(fields: [lectureId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  reports        Report[]
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  lectureId          String   @map("lecture_id") @db.Uuid
+  type               String
+  text               String
+  options            Json?
+  correctAnswers     String[] @map("correct_answers")
+  explanation        String?
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  courseReminder     String?  @map("course_reminder")
+  number             Int?
+  session            String?
+  mediaUrl           String?  @map("media_url")
+  mediaType          String?  @map("media_type")
+  // Clinical case fields
+  caseNumber         Int?     @map("case_number")
+  caseText           String?  @map("case_text")
+  caseQuestionNumber Int?     @map("case_question_number")
+  lecture            Lecture  @relation(fields: [lectureId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  reports            Report[]
 
   @@index([number], map: "idx_questions_number")
+  @@index([caseNumber, caseQuestionNumber], map: "idx_questions_case")
   @@map("questions")
 }
 

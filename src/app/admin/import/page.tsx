@@ -83,15 +83,26 @@ interface ImportPreview {
   matchedLectures: number;
   unmatchedLectures: number;
   specialties: string[];
-  previewData: Array<{
-    matiere: string;
-    cours: string;
-    questionNumber: number;
-    questionText: string;
-    matchedLecture?: Lecture;
-    mediaUrl?: string | null;
-    mediaType?: string | null;
-  }>;
+  sheets: {
+    [sheetName: string]: {
+      totalQuestions: number;
+      questionType: string;
+      previewData: Array<{
+        matiere: string;
+        cours: string;
+        questionNumber: number;
+        questionText: string;
+        matchedLecture?: Lecture;
+        mediaUrl?: string | null;
+        mediaType?: string | null;
+        caseNumber?: number;
+        caseText?: string;
+        caseQuestionNumber?: number;
+        options?: string[];
+        correctAnswers?: string[];
+      }>;
+    };
+  };
 }
 
 interface ImportProgress {
@@ -174,105 +185,165 @@ export default function ImportPage() {
       const arrayBuffer = await file.arrayBuffer();
       const workbook = read(arrayBuffer, { type: 'array' });
       
-      // Get the first sheet
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-      
-      // Convert to JSON
-      const jsonData = utils.sheet_to_json(worksheet, { header: 1 });
-      
-      if (jsonData.length < 2) {
-        toast({
-          title: t('common.error'),
-          description: 'XLSX file must have at least a header and one data row',
-          variant: 'destructive',
-        });
-        return;
-      }
-
-      // Parse header (first row)
-      const headerRow = jsonData[0] as string[];
-      const header = headerRow.map(h => h?.toString().trim().toLowerCase() || '');
-      const expectedHeaders = ['matiere', 'cours', 'question n', 'source', 'texte de la question', 'reponse'];
-      
-      const missingHeaders = expectedHeaders.filter(h => !header.includes(h));
-      if (missingHeaders.length > 0) {
-        toast({
-          title: t('common.error'),
-          description: `Missing required headers: ${missingHeaders.join(', ')}`,
-          variant: 'destructive',
-        });
-        return;
-      }
-
-      // Parse all rows to get accurate statistics
-      const previewData = [];
+      const sheets = ['qcm', 'qroc', 'cas_qcm', 'cas_qroc'];
+      const sheetsData: any = {};
       const uniqueSpecialties = new Set<string>();
       const uniqueLectureCombinations = new Set<string>();
       const matchedLectures = new Set<string>();
       const unmatchedLectures = new Set<string>();
       
-      for (let i = 1; i < jsonData.length; i++) { // Process all rows for accurate stats
-        const row = jsonData[i] as any[];
-        if (!row || row.length === 0) continue;
-
-        try {
-          const values = row.map(cell => cell?.toString().trim() || '');
-          if (values.length >= expectedHeaders.length) {
-            const rowData: any = {};
-            header.forEach((h, index) => {
-              rowData[h] = values[index] || '';
-            });
-
-            if (rowData['matiere'] && rowData['cours']) {
-              uniqueSpecialties.add(rowData['matiere']);
-              const lectureKey = `${rowData['matiere']}:${rowData['cours']}`;
-              uniqueLectureCombinations.add(lectureKey);
+      // Process each sheet
+      for (const sheetName of sheets) {
+        if (!workbook.Sheets[sheetName]) {
+          continue; // Skip if sheet doesn't exist
+        }
+        
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = utils.sheet_to_json(worksheet, { header: 1 });
+        
+        if (jsonData.length < 2) {
+          continue; // Skip empty sheets
+        }
+        
+        // Parse header (first row)
+        const headerRow = jsonData[0] as string[];
+        const header = headerRow.map(h => h?.toString().trim().toLowerCase() || '');
+        
+        // Define expected headers for each sheet type
+        let expectedHeaders: string[];
+        let questionType: string;
+        
+        switch (sheetName) {
+          case 'qcm':
+            expectedHeaders = ['matiere', 'cours', 'question n', 'source', 'texte de la question', 'option a', 'option b', 'option c', 'option d', 'option e', 'reponse'];
+            questionType = 'MCQ';
+            break;
+          case 'qroc':
+            expectedHeaders = ['matiere', 'cours', 'question n', 'source', 'texte de la question', 'reponse'];
+            questionType = 'QROC';
+            break;
+          case 'cas_qcm':
+            expectedHeaders = ['matiere', 'cours', 'cas n', 'source', 'texte du cas', 'question n', 'texte de question', 'option a', 'option b', 'option c', 'option d', 'option e', 'reponse'];
+            questionType = 'Clinical MCQ';
+            break;
+          case 'cas_qroc':
+            expectedHeaders = ['matiere', 'cours', 'cas n', 'source', 'texte du cas', 'question n', 'texte de question', 'reponse'];
+            questionType = 'Clinical QROC';
+            break;
+          default:
+            continue;
+        }
+        
+        // Check for missing headers
+        const missingHeaders = expectedHeaders.filter(h => !header.includes(h));
+        if (missingHeaders.length > 0) {
+          console.warn(`Sheet ${sheetName} missing headers: ${missingHeaders.join(', ')}`);
+          continue;
+        }
+        
+        // Parse rows for this sheet
+        const previewData = [];
+        
+        for (let i = 1; i < jsonData.length; i++) {
+          const row = jsonData[i] as any[];
+          if (!row || row.length === 0) continue;
+          
+          try {
+            const values = row.map(cell => cell?.toString().trim() || '');
+            if (values.length >= expectedHeaders.length) {
+              const rowData: any = {};
+              header.forEach((h, index) => {
+                rowData[h] = values[index] || '';
+              });
               
-              // Try to match with existing lectures
-              const matchedLecture = findMatchingLecture(rowData['matiere'], rowData['cours']); // matiere=specialty, cours=lecture
-              
-              if (matchedLecture) {
-                matchedLectures.add(lectureKey);
-              } else {
-                unmatchedLectures.add(lectureKey);
-              }
-              
-              // Only add to preview if it's one of the first 10 rows
-              if (previewData.length < 10) {
-                // Extract image URL from question text if present
-                const { cleanedText, mediaUrl, mediaType } = extractImageUrlAndCleanText(rowData['texte de la question']);
+              if (rowData['matiere'] && rowData['cours']) {
+                uniqueSpecialties.add(rowData['matiere']);
+                const lectureKey = `${rowData['matiere']}:${rowData['cours']}`;
+                uniqueLectureCombinations.add(lectureKey);
                 
-                previewData.push({
-                  matiere: rowData['matiere'],
-                  cours: rowData['cours'],
-                  questionNumber: parseInt(rowData['question n']) || 0,
-                  questionText: cleanedText,
-                  matchedLecture,
-                  mediaUrl,
-                  mediaType
-                });
+                // Try to match with existing lectures
+                const matchedLecture = findMatchingLecture(rowData['matiere'], rowData['cours']);
+                
+                if (matchedLecture) {
+                  matchedLectures.add(lectureKey);
+                } else {
+                  unmatchedLectures.add(lectureKey);
+                }
+                
+                // Only add to preview if it's one of the first 5 rows per sheet
+                if (previewData.length < 5) {
+                  // Extract image URL from question text if present - use correct column name
+                  const questionTextColumn = sheetName === 'cas_qcm' || sheetName === 'cas_qroc' ? 'texte de question' : 'texte de la question';
+                  const { cleanedText, mediaUrl, mediaType } = extractImageUrlAndCleanText(rowData[questionTextColumn]);
+                  
+                  const previewItem: any = {
+                    matiere: rowData['matiere'],
+                    cours: rowData['cours'],
+                    questionNumber: parseInt(rowData['question n']) || 0,
+                    questionText: cleanedText,
+                    matchedLecture,
+                    mediaUrl,
+                    mediaType
+                  };
+                  
+                  // Add clinical case fields if applicable
+                  if (sheetName === 'cas_qcm' || sheetName === 'cas_qroc') {
+                    previewItem.caseNumber = parseInt(rowData['cas n']) || null;
+                    previewItem.caseText = rowData['texte du cas'] || null;
+                    previewItem.caseQuestionNumber = parseInt(rowData['question n']) || null;
+                  }
+                  
+                  // Add MCQ options if applicable
+                  if (sheetName === 'qcm' || sheetName === 'cas_qcm') {
+                    const options = [];
+                    for (let j = 0; j < 5; j++) {
+                      const optionKey = `option ${String.fromCharCode(97 + j)}`; // a, b, c, d, e
+                      if (rowData[optionKey] && rowData[optionKey].trim()) {
+                        options.push(rowData[optionKey].trim());
+                      }
+                    }
+                    previewItem.options = options;
+                    previewItem.correctAnswers = rowData['reponse'] ? [rowData['reponse']] : [];
+                  }
+                  
+                  previewData.push(previewItem);
+                }
               }
             }
+          } catch (error) {
+            console.error(`Error parsing row ${i + 1} in sheet ${sheetName}:`, error);
           }
-        } catch (error) {
-          console.error(`Error parsing row ${i + 1}:`, error);
         }
+        
+        sheetsData[sheetName] = {
+          totalQuestions: jsonData.length - 1,
+          questionType,
+          previewData
+        };
+      }
+      
+      if (Object.keys(sheetsData).length === 0) {
+        toast({
+          title: t('common.error'),
+          description: 'No valid sheets found. Expected sheets: qcm, qroc, cas_qcm, cas_qroc',
+          variant: 'destructive',
+        });
+        return;
       }
       
       setImportPreview({
-        totalQuestions: jsonData.length - 1, // Exclude header
+        totalQuestions: Object.values(sheetsData).reduce((sum: number, sheet: any) => sum + sheet.totalQuestions, 0),
         matchedLectures: matchedLectures.size,
         unmatchedLectures: unmatchedLectures.size,
         specialties: Array.from(uniqueSpecialties),
-        previewData
+        sheets: sheetsData
       });
-
+      
     } catch (error) {
-      console.error('Error parsing XLSX:', error);
+      console.error('Error parsing file:', error);
       toast({
         title: t('common.error'),
-        description: 'Failed to parse XLSX file',
+        description: 'Error parsing Excel file. Please check the file format.',
         variant: 'destructive',
       });
     }
@@ -291,11 +362,15 @@ export default function ImportPage() {
     setIsUploading(true);
     setProgress(null);
     setImportResult(null);
-
+    
     try {
-      // Generate unique import ID
-      const importId = `import_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
+      // Test if the endpoint is accessible
+      console.log('Testing endpoint accessibility...');
+      const testResponse = await fetch('/api/questions/bulk-import-progress', {
+        method: 'OPTIONS'
+      });
+      console.log('Endpoint test response:', testResponse.status);
+
       // Set initial progress state to show the progress card immediately
       setProgress({
         progress: 0,
@@ -307,51 +382,67 @@ export default function ImportPage() {
       // Send file to server first
       const formData = new FormData();
       formData.append('file', selectedFile);
-      formData.append('importId', importId);
+      // Note: Backend generates its own importId, so we don't need to send one
 
-      console.log('Sending file to server with importId:', importId);
+      console.log('Sending file to server (backend will generate importId)');
 
       const response = await fetch('/api/questions/bulk-import-progress', {
         method: 'POST',
         body: formData,
       });
 
+      console.log('POST response status:', response.status);
+      console.log('POST response headers:', Object.fromEntries(response.headers.entries()));
+
       if (!response.ok) {
-        const error = await response.json();
+        const errorText = await response.text();
+        console.error('POST response error text:', errorText);
+        let error;
+        try {
+          error = JSON.parse(errorText);
+        } catch {
+          error = { error: errorText };
+        }
         throw new Error(error.error || 'Upload failed');
       }
 
-      console.log('File uploaded successfully, waiting before starting EventSource');
+      const responseData = await response.json();
+      console.log('POST response data:', responseData);
+
+      // Use the importId returned by the backend
+      const backendImportId = responseData.importId;
+      console.log('Using backend importId:', backendImportId);
+
+      console.log('File uploaded successfully, waiting before starting progress polling');
 
       // Wait a moment for the server to initialize the import session
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      console.log('Starting EventSource connection');
+      console.log('Starting progress polling');
 
-      // Start SSE connection for progress updates after successful upload
-      const eventSource = new EventSource(`/api/questions/bulk-import-progress?importId=${importId}`);
-      
-      console.log('EventSource created for importId:', importId);
-      
-      eventSource.onopen = () => {
-        console.log('EventSource connection opened');
-      };
-      
-      eventSource.onmessage = (event) => {
-        console.log('EventSource message received:', event.data);
+      // Start polling for progress updates
+      const pollProgress = async () => {
         try {
-          const data = JSON.parse(event.data);
-          console.log('Parsed EventSource data:', data);
-          console.log('Setting progress state:', data);
-          setProgress(data);
-          console.log('Progress state set, current progress:', data.progress, '%');
+          const response = await fetch(`/api/questions/bulk-import-progress?importId=${backendImportId}`);
           
-          if (data.phase === 'complete') {
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+          
+          const data = await response.json();
+          console.log('Progress data received:', data);
+          
+          setProgress(data);
+          
+          // Continue polling if not complete
+          if (data.progress < 100) {
+            setTimeout(pollProgress, 1000);
+          } else {
+            // Import complete
             setImportResult(data.stats);
-            eventSource.close();
             setIsUploading(false);
             
-            if (data.stats?.errors?.length > 0) {
+            if (data.stats?.failed > 0) {
               toast({
                 title: t('admin.importWithErrors'),
                 description: `${t('admin.questionsImportedOf')} ${data.stats.imported}/${data.stats.total}`,
@@ -366,20 +457,18 @@ export default function ImportPage() {
             }
           }
         } catch (error) {
-          console.error('Error parsing EventSource data:', error);
+          console.error('Progress polling error:', error);
+          setIsUploading(false);
+          toast({
+            title: t('common.error'),
+            description: t('admin.failedToUploadFile'),
+            variant: 'destructive',
+          });
         }
       };
 
-      eventSource.onerror = (error) => {
-        console.error('EventSource error:', error);
-        eventSource.close();
-        setIsUploading(false);
-        toast({
-          title: t('common.error'),
-          description: t('admin.failedToUploadFile'),
-          variant: 'destructive',
-        });
-      };
+      // Start polling
+      pollProgress();
 
     } catch (error) {
       setIsUploading(false);
@@ -413,8 +502,8 @@ export default function ImportPage() {
               {t('common.back')}
             </Button>
             <div>
-              <h1 className="text-2xl font-bold">{t('admin.importQROCQuestions')}</h1>
-              <p className="text-muted-foreground">{t('admin.importDescription')}</p>
+              <h1 className="text-2xl font-bold">{t('admin.multiSheetImport')}</h1>
+              <p className="text-muted-foreground">{t('admin.expectedSheets')}</p>
             </div>
           </div>
 
@@ -490,39 +579,76 @@ export default function ImportPage() {
                     <CardDescription>{t('admin.previewFirst10')}</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
-                      {importPreview.previewData.map((item, index) => (
-                        <div key={index} className="flex items-start gap-4 p-3 border rounded-lg">
-                          <div className="flex-shrink-0">
-                            {item.matchedLecture ? (
-                              <CheckCircle className="h-5 w-5 text-green-500" />
-                            ) : (
-                              <XCircle className="h-5 w-5 text-orange-500" />
-                            )}
+                    <div className="space-y-6">
+                      {Object.entries(importPreview.sheets).map(([sheetName, sheetData]) => (
+                        <div key={sheetName} className="space-y-4">
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-lg font-semibold capitalize">{sheetName.replace('_', ' ')}</h3>
+                            <Badge variant="outline">{sheetData.questionType}</Badge>
+                            <Badge variant="secondary">{sheetData.totalQuestions} questions</Badge>
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <Badge variant={item.matchedLecture ? 'default' : 'secondary'}>
-                                {item.matiere}
-                              </Badge>
-                              <Badge variant={item.matchedLecture ? 'default' : 'secondary'}>
-                                {item.cours}
-                              </Badge>
-                              <Badge variant="outline">
-                                #{item.questionNumber}
-                              </Badge>
-                            </div>
-                            <p className="text-sm text-muted-foreground line-clamp-2">
-                              {item.questionText}
-                            </p>
-                            {item.mediaUrl && (
-                              <p className="text-xs text-muted-foreground mt-1">
-                                <span className="font-semibold">{t('admin.image')}:</span> {item.mediaUrl}
-                              </p>
-                            )}
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {item.matchedLecture ? t('admin.matched') : t('admin.unmatched')}
-                            </p>
+                          
+                          <div className="space-y-3">
+                            {sheetData.previewData.map((item, index) => (
+                              <div key={index} className="flex items-start gap-4 p-3 border rounded-lg">
+                                <div className="flex-shrink-0">
+                                  {item.matchedLecture ? (
+                                    <CheckCircle className="h-5 w-5 text-green-500" />
+                                  ) : (
+                                    <XCircle className="h-5 w-5 text-orange-500" />
+                                  )}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                    <Badge variant={item.matchedLecture ? 'default' : 'secondary'}>
+                                      {item.matiere}
+                                    </Badge>
+                                    <Badge variant={item.matchedLecture ? 'default' : 'secondary'}>
+                                      {item.cours}
+                                    </Badge>
+                                    <Badge variant="outline">
+                                      #{item.questionNumber}
+                                    </Badge>
+                                    {item.caseNumber && (
+                                      <Badge variant="outline">
+                                        Case #{item.caseNumber}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  
+                                  {item.caseText && (
+                                    <div className="mb-2 p-2 bg-muted rounded text-xs">
+                                      <strong>Case:</strong> {item.caseText.substring(0, 100)}...
+                                    </div>
+                                  )}
+                                  
+                                  <p className="text-sm text-muted-foreground line-clamp-2">
+                                    {item.questionText}
+                                  </p>
+                                  
+                                  {item.options && item.options.length > 0 && (
+                                    <div className="mt-2 space-y-1">
+                                      <p className="text-xs font-semibold">Options:</p>
+                                      {item.options.map((option, optIndex) => (
+                                        <p key={optIndex} className="text-xs text-muted-foreground ml-2">
+                                          {String.fromCharCode(65 + optIndex)}. {option}
+                                        </p>
+                                      ))}
+                                    </div>
+                                  )}
+                                  
+                                  {item.mediaUrl && (
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                      <span className="font-semibold">{t('admin.image')}:</span> {item.mediaUrl}
+                                    </p>
+                                  )}
+                                  
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    {item.matchedLecture ? t('admin.matched') : t('admin.unmatched')}
+                                  </p>
+                                </div>
+                              </div>
+                            ))}
                           </div>
                         </div>
                       ))}
@@ -558,7 +684,7 @@ export default function ImportPage() {
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span>{t('admin.importProgress')}</span>
-                        <span>{progress.progress}%</span>
+                        <span>{progress.progress.toFixed(2)}%</span>
                       </div>
                       <Progress value={progress.progress} className="w-full" />
                     </div>
@@ -614,19 +740,28 @@ export default function ImportPage() {
                       </div>
                     </div>
 
-                    {importResult.createdLectures > 0 && (
-                      <div className="mb-4">
-                        <p className="text-sm font-medium">{t('admin.createdNewLectures')}</p>
-                        <p className="text-xl font-bold text-blue-600">{importResult.createdLectures}</p>
-                      </div>
-                    )}
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+                      {importResult.createdLectures > 0 && (
+                        <div>
+                          <p className="text-sm font-medium">{t('admin.createdNewLectures')}</p>
+                          <p className="text-xl font-bold text-blue-600">{importResult.createdLectures}</p>
+                        </div>
+                      )}
 
-                    {importResult.questionsWithImages > 0 && (
-                      <div className="mb-4">
-                        <p className="text-sm font-medium">{t('admin.questionsWithImages')}</p>
-                        <p className="text-xl font-bold text-purple-600">{importResult.questionsWithImages}</p>
-                      </div>
-                    )}
+                      {importResult.createdCases > 0 && (
+                        <div>
+                          <p className="text-sm font-medium">Clinical Cases Created</p>
+                          <p className="text-xl font-bold text-indigo-600">{importResult.createdCases}</p>
+                        </div>
+                      )}
+
+                      {importResult.questionsWithImages > 0 && (
+                        <div>
+                          <p className="text-sm font-medium">{t('admin.questionsWithImages')}</p>
+                          <p className="text-xl font-bold text-purple-600">{importResult.questionsWithImages}</p>
+                        </div>
+                      )}
+                    </div>
 
                     {importResult.errors && importResult.errors.length > 0 && (
                       <Collapsible>

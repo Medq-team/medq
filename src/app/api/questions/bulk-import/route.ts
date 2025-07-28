@@ -150,7 +150,6 @@ async function postHandler(request: AuthenticatedRequest) {
             matchedLecture = await prisma.lecture.create({
               data: {
                 title: lectureTitle,
-                description: `Lecture created during import: ${lectureTitle}`,
                 specialtyId: specialty.id
               }
             });
