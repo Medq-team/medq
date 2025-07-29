@@ -15,15 +15,19 @@ import { useTranslation } from 'react-i18next';
 import { useProgress } from '@/hooks/use-progress';
 
 import { QuestionMedia } from './QuestionMedia';
+import { ClinicalCaseDisplay } from './ClinicalCaseDisplay';
 
 interface OpenQuestionProps {
   question: Question;
   onSubmit: (answer: string, resultValue: boolean | 'partial') => void;
   onNext: () => void;
   lectureId?: string;
+  isAnswered?: boolean;
+  answerResult?: boolean | 'partial';
+  userAnswer?: string;
 }
 
-export function OpenQuestion({ question, onSubmit, onNext, lectureId }: OpenQuestionProps) {
+export function OpenQuestion({ question, onSubmit, onNext, lectureId, isAnswered, answerResult, userAnswer }: OpenQuestionProps) {
   const [answer, setAnswer] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [showSelfAssessment, setShowSelfAssessment] = useState(false);
@@ -33,8 +37,23 @@ export function OpenQuestion({ question, onSubmit, onNext, lectureId }: OpenQues
   const { t } = useTranslation();
   const { trackQuestionProgress } = useProgress();
 
+  // Initialize component state based on whether question is already answered
+  useEffect(() => {
+    if (isAnswered && answerResult !== undefined) {
+      setAnswer(userAnswer || '');
+      setSubmitted(true);
+      setAssessmentCompleted(true);
+      setShowSelfAssessment(false);
+    } else {
+      setAnswer('');
+      setSubmitted(false);
+      setShowSelfAssessment(false);
+      setAssessmentCompleted(false);
+    }
+  }, [question.id, isAnswered, answerResult, userAnswer]);
+
   const handleSubmit = async () => {
-    if (!answer.trim() || submitted) return;
+    if (!answer.trim()) return;
     
     setSubmitted(true);
     setShowSelfAssessment(true);
@@ -51,9 +70,9 @@ export function OpenQuestion({ question, onSubmit, onNext, lectureId }: OpenQues
     
     // Track progress if lectureId is provided
     if (lectureId) {
-      // For progress tracking, only 'correct' counts as correct
-      const isCorrect = rating === 'correct';
-      await trackQuestionProgress(lectureId, question.id, isCorrect);
+      // Pass the actual rating to progress tracking
+      const progressValue = rating === 'correct' ? true : rating === 'partial' ? 'partial' : false;
+      trackQuestionProgress(lectureId, question.id, progressValue);
     }
     
     // Call onSubmit with the rating information
@@ -63,6 +82,14 @@ export function OpenQuestion({ question, onSubmit, onNext, lectureId }: OpenQues
   const handleQuestionUpdated = () => {
     // Reload the page to refresh the question data
     window.location.reload();
+  };
+
+  // Reset question state to allow re-answering
+  const handleReAnswer = () => {
+    setAnswer('');
+    setSubmitted(false);
+    setShowSelfAssessment(false);
+    setAssessmentCompleted(false);
   };
 
   // Add keyboard shortcut for submitting answer
@@ -93,6 +120,13 @@ export function OpenQuestion({ question, onSubmit, onNext, lectureId }: OpenQues
       transition={{ duration: 0.4 }}
       className="space-y-6 w-full max-w-full"
     >
+      {/* Clinical Case Display - Above the question */}
+      <ClinicalCaseDisplay 
+        caseNumber={question.caseNumber}
+        caseText={question.caseText}
+        caseQuestionNumber={question.caseQuestionNumber}
+      />
+      
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
         <div className="flex-1 min-w-0">
           <OpenQuestionHeader 
@@ -152,6 +186,7 @@ export function OpenQuestion({ question, onSubmit, onNext, lectureId }: OpenQues
         onSubmit={handleSubmit}
         onNext={onNext}
         showNext={assessmentCompleted}
+        onReAnswer={handleReAnswer}
       />
       
       <QuestionEditDialog

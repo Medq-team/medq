@@ -27,7 +27,7 @@ export function ReportCard({ report, onUpdateStatus }: ReportCardProps) {
         <div className="flex justify-between items-start">
           <div>
             <CardTitle className="text-base">{report.question?.text || t('reports.questionNotFound')}</CardTitle>
-            <CardDescription className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
               <span>{report.lecture?.title || t('reports.lectureNotFound')}</span>
               {report.status && (
                 <Badge variant={
@@ -37,7 +37,7 @@ export function ReportCard({ report, onUpdateStatus }: ReportCardProps) {
                   {report.status}
                 </Badge>
               )}
-            </CardDescription>
+            </div>
           </div>
           <Button 
             variant="ghost" 

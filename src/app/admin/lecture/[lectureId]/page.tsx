@@ -2,7 +2,7 @@
 
 import { useParams } from 'next/navigation'
 import { AdminRoute } from '@/components/auth/AdminRoute'
-import { AppLayout } from '@/components/layout/AppLayout'
+import { AdminLayout } from '@/components/admin/AdminLayout'
 import { LectureHeader } from '@/components/admin/LectureHeader'
 import { QuestionsList } from '@/components/admin/QuestionsList'
 import { useRouter } from 'next/navigation'
@@ -82,7 +82,7 @@ export default function AdminLecturePageRoute() {
 
   return (
     <AdminRoute>
-      <AppLayout>
+      <AdminLayout>
         <div className="space-y-6">
           <LectureHeader
             lecture={lecture}
@@ -93,7 +93,7 @@ export default function AdminLecturePageRoute() {
 
           <QuestionsList lectureId={lectureId} refreshTrigger={refreshTrigger} />
         </div>
-      </AppLayout>
+      </AdminLayout>
     </AdminRoute>
   )
 } 

@@ -71,9 +71,9 @@ export type Question = {
   media_url?: string; // URL to the media file
   media_type?: 'image' | 'video'; // Type of media
   // Clinical case fields
-  case_number?: number; // Case number for clinical cases
-  case_text?: string; // Case description text
-  case_question_number?: number; // Question number within the case
+  caseNumber?: number; // Case number for clinical cases
+  caseText?: string; // Case description text
+  caseQuestionNumber?: number; // Question number within the case
 };
 
 export type Answer = {

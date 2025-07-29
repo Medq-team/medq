@@ -14,7 +14,7 @@ async function postHandler(request: AuthenticatedRequest) {
       );
     }
 
-    // Upsert progress record
+    // Optimized upsert with minimal data selection
     const progress = await prisma.userProgress.upsert({
       where: {
         userId_lectureId_questionId: {
@@ -35,6 +35,12 @@ async function postHandler(request: AuthenticatedRequest) {
         completed: completed ?? true,
         score: score,
         lastAccessed: new Date()
+      },
+      select: {
+        id: true,
+        completed: true,
+        score: true,
+        lastAccessed: true
       }
     });
 

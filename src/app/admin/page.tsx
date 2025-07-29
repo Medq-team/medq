@@ -4,59 +4,89 @@ import { AdminStats } from '@/components/admin/AdminStats';
 import { SpecialtiesTab } from '@/components/admin/SpecialtiesTab';
 import { LecturesTab } from '@/components/admin/LecturesTab';
 import { ReportsTab } from '@/components/admin/ReportsTab';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { UsersTab } from '@/components/admin/UsersTab';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import { Button } from '@/components/ui/button';
-import { Upload } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { AppLayout } from '@/components/layout/AppLayout';
+import { AdminLayout } from '@/components/admin/AdminLayout';
+import { useSearchParams } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
 
 export default function AdminPage() {
-  const router = useRouter();
+  const searchParams = useSearchParams();
+  const tab = searchParams.get('tab') || 'dashboard';
+  const { t } = useTranslation();
+  
+  const renderContent = () => {
+    switch (tab) {
+      case 'specialties':
+        return (
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">{t('admin.specialties')}</h1>
+              <p className="text-muted-foreground">
+                Manage specialties and their content
+              </p>
+            </div>
+            <SpecialtiesTab />
+          </div>
+        );
+      case 'lectures':
+        return (
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">{t('admin.lectures')}</h1>
+              <p className="text-muted-foreground">
+                Manage lectures and their questions
+              </p>
+            </div>
+            <LecturesTab />
+          </div>
+        );
+      case 'users':
+        return (
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">{t('admin.users')}</h1>
+              <p className="text-muted-foreground">
+                Manage user accounts and roles
+              </p>
+            </div>
+            <UsersTab />
+          </div>
+        );
+      case 'reports':
+        return (
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">{t('admin.reports')}</h1>
+              <p className="text-muted-foreground">
+                View and manage user reports
+              </p>
+            </div>
+            <ReportsTab />
+          </div>
+        );
+      case 'dashboard':
+      default:
+        return (
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">{t('admin.adminDashboard')}</h1>
+              <p className="text-muted-foreground">
+                {t('admin.manageContent')}
+              </p>
+            </div>
+            <AdminStats />
+          </div>
+        );
+    }
+  };
   
   return (
     <ProtectedRoute requireAdmin>
       <AdminRoute>
-        <AppLayout>
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
-              <p className="text-muted-foreground">
-                Manage specialties, lectures, questions, and reports
-              </p>
-            </div>
-
-            <AdminStats />
-
-            <div className="flex justify-between items-center mb-4">
-              <Button 
-                onClick={() => router.push('/admin/import')}
-                variant="outline"
-                className="btn-hover"
-              >
-                <Upload className="h-4 w-4 mr-2" />
-                Import QROC Questions
-              </Button>
-            </div>
-
-            <Tabs defaultValue="specialties" className="space-y-4">
-              <TabsList>
-                <TabsTrigger value="specialties">Specialties</TabsTrigger>
-                <TabsTrigger value="lectures">Lectures</TabsTrigger>
-                <TabsTrigger value="reports">Reports</TabsTrigger>
-              </TabsList>
-              <TabsContent value="specialties" className="space-y-4">
-                <SpecialtiesTab />
-              </TabsContent>
-              <TabsContent value="lectures" className="space-y-4">
-                <LecturesTab />
-              </TabsContent>
-              <TabsContent value="reports" className="space-y-4">
-                <ReportsTab />
-              </TabsContent>
-            </Tabs>
-          </div>
-        </AppLayout>
+        <AdminLayout>
+          {renderContent()}
+        </AdminLayout>
       </AdminRoute>
     </ProtectedRoute>
   );

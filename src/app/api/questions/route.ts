@@ -19,7 +19,23 @@ async function getHandler(request: AuthenticatedRequest) {
         { number: 'asc' },
         { id: 'asc' }
       ],
-      include: {
+      select: {
+        id: true,
+        lectureId: true,
+        type: true,
+        text: true,
+        options: true,
+        correctAnswers: true,
+        explanation: true,
+        courseReminder: true,
+        number: true,
+        session: true,
+        mediaUrl: true,
+        mediaType: true,
+        caseNumber: true,
+        caseText: true,
+        caseQuestionNumber: true,
+        createdAt: true,
         lecture: {
           select: {
             id: true,
@@ -58,7 +74,10 @@ async function postHandler(request: AuthenticatedRequest) {
       number,
       session,
       mediaUrl,
-      mediaType
+      mediaType,
+      caseNumber,
+      caseText,
+      caseQuestionNumber
     } = await request.json();
 
     if (!lectureId || !type || !text) {
@@ -80,9 +99,28 @@ async function postHandler(request: AuthenticatedRequest) {
         number,
         session,
         mediaUrl,
-        mediaType
+        mediaType,
+        caseNumber,
+        caseText,
+        caseQuestionNumber
       },
-      include: {
+      select: {
+        id: true,
+        lectureId: true,
+        type: true,
+        text: true,
+        options: true,
+        correctAnswers: true,
+        explanation: true,
+        courseReminder: true,
+        number: true,
+        session: true,
+        mediaUrl: true,
+        mediaType: true,
+        caseNumber: true,
+        caseText: true,
+        caseQuestionNumber: true,
+        createdAt: true,
         lecture: {
           select: {
             id: true,
@@ -97,6 +135,9 @@ async function postHandler(request: AuthenticatedRequest) {
         }
       }
     });
+
+    // Note: Cache invalidation is handled by the client-side hook
+    // The useLecture hook will clear its cache when isAddQuestionOpen changes
 
     return NextResponse.json(question, { status: 201 });
   } catch (error) {

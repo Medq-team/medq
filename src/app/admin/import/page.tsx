@@ -13,8 +13,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Upload, FileText, AlertCircle, CheckCircle, XCircle, ChevronDown, ChevronUp, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
-import { AppLayout } from '@/components/layout/AppLayout';
+import { AdminLayout } from '@/components/admin/AdminLayout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { AdminRoute } from '@/components/auth/AdminRoute';
 import { read, utils } from 'xlsx';
 
 // Function to extract image URLs from text and clean the text
@@ -494,7 +495,8 @@ export default function ImportPage() {
 
   return (
     <ProtectedRoute requireAdmin>
-      <AppLayout>
+      <AdminRoute>
+        <AdminLayout>
         <div className="space-y-6">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="sm" onClick={handleBack}>
@@ -809,7 +811,8 @@ export default function ImportPage() {
             </div>
           )}
         </div>
-      </AppLayout>
+        </AdminLayout>
+      </AdminRoute>
     </ProtectedRoute>
   );
 } 

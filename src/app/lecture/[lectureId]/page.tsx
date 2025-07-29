@@ -95,11 +95,13 @@ export default function LecturePageRoute() {
   };
 
   const handleMCQSubmit = (answer: string[], isCorrect: boolean) => {
+    console.log('MCQ Submit:', { questionId: currentQuestion!.id, answer, isCorrect });
     handleAnswerSubmit(currentQuestion!.id, answer, isCorrect);
     // Don't automatically move to next question - let user see the result first
   };
 
   const handleOpenSubmit = (answer: string, resultValue?: boolean | 'partial') => {
+    console.log('Open Submit:', { questionId: currentQuestion!.id, answer, resultValue });
     // For open questions, we store the answer and the self-assessment result
     handleAnswerSubmit(currentQuestion!.id, answer, resultValue);
     // Don't automatically move to next question - let user see the result first
@@ -116,21 +118,43 @@ export default function LecturePageRoute() {
 
             {currentQuestion && (
               <div className="space-y-6">
-                {(currentQuestion.type === 'mcq' || currentQuestion.type === 'clinic_mcq') ? (
-                  <MCQQuestion
-                    question={currentQuestion}
-                    onSubmit={handleMCQSubmit}
-                    onNext={handleNext}
-                    lectureId={lectureId}
-                  />
-                ) : (
-                  <OpenQuestion
-                    question={currentQuestion}
-                    onSubmit={handleOpenSubmit}
-                    onNext={handleNext}
-                    lectureId={lectureId}
-                  />
-                )}
+                {(() => {
+                  const isAnswered = answers[currentQuestion.id] !== undefined;
+                  const answerResult = answerResults[currentQuestion.id];
+                  const userAnswer = answers[currentQuestion.id];
+                  
+                  console.log('Rendering question:', {
+                    questionId: currentQuestion.id,
+                    questionType: currentQuestion.type,
+                    isAnswered,
+                    answerResult,
+                    userAnswer,
+                    allAnswers: answers,
+                    allAnswerResults: answerResults
+                  });
+                  
+                  return (currentQuestion.type === 'mcq' || currentQuestion.type === 'clinic_mcq') ? (
+                    <MCQQuestion
+                      question={currentQuestion}
+                      onSubmit={handleMCQSubmit}
+                      onNext={handleNext}
+                      lectureId={lectureId}
+                      isAnswered={isAnswered}
+                      answerResult={answerResult}
+                      userAnswer={userAnswer}
+                    />
+                  ) : (
+                    <OpenQuestion
+                      question={currentQuestion}
+                      onSubmit={handleOpenSubmit}
+                      onNext={handleNext}
+                      lectureId={lectureId}
+                      isAnswered={isAnswered}
+                      answerResult={answerResult}
+                      userAnswer={userAnswer}
+                    />
+                  );
+                })()}
               </div>
             )}
           </div>
