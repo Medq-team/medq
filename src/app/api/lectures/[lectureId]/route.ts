@@ -8,32 +8,88 @@ async function getHandler(
 ) {
   try {
     const { lectureId } = await params;
+    const { searchParams } = new URL(request.url);
+    const includeQuestions = searchParams.get('includeQuestions') === 'true';
 
-    const lecture = await prisma.lecture.findUnique({
-      where: { id: lectureId },
-      include: {
-        specialty: {
-          select: {
-            id: true,
-            name: true
-          }
-        },
-        _count: {
-          select: {
-            questions: true
+    if (includeQuestions) {
+      // Optimized query: fetch lecture with questions in a single request
+      const lectureWithQuestions = await prisma.lecture.findUnique({
+        where: { id: lectureId },
+        include: {
+          specialty: {
+            select: {
+              id: true,
+              name: true
+            }
+          },
+          questions: {
+            orderBy: [
+              { type: 'asc' },
+              { number: 'asc' },
+              { id: 'asc' }
+            ],
+            select: {
+              id: true,
+              type: true,
+              text: true,
+              options: true,
+              correctAnswers: true,
+              explanation: true,
+              courseReminder: true,
+              number: true,
+              session: true,
+              mediaUrl: true,
+              mediaType: true,
+              caseNumber: true,
+              caseText: true,
+              caseQuestionNumber: true,
+              createdAt: true
+            }
+          },
+          _count: {
+            select: {
+              questions: true
+            }
           }
         }
+      });
+
+      if (!lectureWithQuestions) {
+        return NextResponse.json(
+          { error: 'Lecture not found' },
+          { status: 404 }
+        );
       }
-    });
 
-    if (!lecture) {
-      return NextResponse.json(
-        { error: 'Lecture not found' },
-        { status: 404 }
-      );
+      return NextResponse.json(lectureWithQuestions);
+    } else {
+      // Original query: fetch lecture only
+      const lecture = await prisma.lecture.findUnique({
+        where: { id: lectureId },
+        include: {
+          specialty: {
+            select: {
+              id: true,
+              name: true
+            }
+          },
+          _count: {
+            select: {
+              questions: true
+            }
+          }
+        }
+      });
+
+      if (!lecture) {
+        return NextResponse.json(
+          { error: 'Lecture not found' },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json(lecture);
     }
-
-    return NextResponse.json(lecture);
   } catch (error) {
     console.error('Error fetching lecture:', error);
     return NextResponse.json(

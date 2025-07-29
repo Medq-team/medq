@@ -15,6 +15,7 @@ interface MCQActionsProps {
   isCorrect: boolean | null;
   onSubmit: () => void;
   onNext: () => void;
+  onReAnswer?: () => void;
 }
 
 export function MCQActions({ 
@@ -22,7 +23,8 @@ export function MCQActions({
   canSubmit, 
   isCorrect, 
   onSubmit, 
-  onNext 
+  onNext,
+  onReAnswer
 }: MCQActionsProps) {
   const { t } = useTranslation();
   
@@ -79,6 +81,15 @@ export function MCQActions({
               </div>
             )}
           </div>
+          {onReAnswer && (
+            <Button 
+              variant="outline" 
+              onClick={onReAnswer}
+              className="mr-2"
+            >
+              {t('questions.reAnswer')}
+            </Button>
+          )}
           <Button onClick={onNext} className="group">
             {t('questions.nextQuestion')}
             <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />

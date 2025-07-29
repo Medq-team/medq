@@ -14,15 +14,19 @@ import { useTranslation } from 'react-i18next';
 import { useProgress } from '@/hooks/use-progress';
 
 import { QuestionMedia } from './QuestionMedia';
+import { ClinicalCaseDisplay } from './ClinicalCaseDisplay';
 
 interface MCQQuestionProps {
   question: Question;
   onSubmit: (selectedOptionIds: string[], isCorrect: boolean) => void;
   onNext: () => void;
   lectureId?: string;
+  isAnswered?: boolean;
+  answerResult?: boolean | 'partial';
+  userAnswer?: string[];
 }
 
-export function MCQQuestion({ question, onSubmit, onNext, lectureId }: MCQQuestionProps) {
+export function MCQQuestion({ question, onSubmit, onNext, lectureId, isAnswered, answerResult, userAnswer }: MCQQuestionProps) {
   const [selectedOptionIds, setSelectedOptionIds] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
@@ -31,6 +35,49 @@ export function MCQQuestion({ question, onSubmit, onNext, lectureId }: MCQQuesti
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const { t } = useTranslation();
   const { trackQuestionProgress } = useProgress();
+
+  // Initialize component state based on whether question is already answered
+  useEffect(() => {
+    console.log('MCQQuestion initialization:', {
+      questionId: question.id,
+      isAnswered,
+      answerResult,
+      userAnswer,
+      currentSelectedOptionIds: selectedOptionIds,
+      currentSubmitted: submitted
+    });
+    
+    if (isAnswered && answerResult !== undefined) {
+      // Set the previously selected options
+      setSelectedOptionIds(userAnswer || []);
+      setSubmitted(true);
+      setIsCorrect(answerResult === true);
+      // Auto-expand explanations for answered questions
+      const autoExpandIds: string[] = [];
+      const correctAnswers = question.correctAnswers || question.correct_answers || [];
+      
+      // For answered questions, show explanations for all options
+      question.options?.forEach((option: any, index: number) => {
+        const optionId = option.id || index.toString();
+        autoExpandIds.push(optionId);
+      });
+      
+      setExpandedExplanations(autoExpandIds);
+      
+      console.log('MCQQuestion initialized as answered:', {
+        setSelectedOptionIds: userAnswer || [],
+        setSubmitted: true,
+        setIsCorrect: answerResult === true
+      });
+    } else {
+      setSelectedOptionIds([]);
+      setSubmitted(false);
+      setIsCorrect(null);
+      setExpandedExplanations([]);
+      
+      console.log('MCQQuestion initialized as unanswered');
+    }
+  }, [question.id, isAnswered, answerResult, userAnswer, question.options, question.correctAnswers, question.correct_answers]);
 
   // Normalize options to ensure they have the correct format
   const normalizedOptions = useMemo(() => {
@@ -63,8 +110,7 @@ export function MCQQuestion({ question, onSubmit, onNext, lectureId }: MCQQuesti
 
   // Handle checkbox change
   const handleOptionSelect = (optionId: string) => {
-    if (submitted) return;
-    
+    // Allow re-selection even if submitted (for re-answering)
     setSelectedOptionIds(prev => 
       prev.includes(optionId)
         ? prev.filter(id => id !== optionId)
@@ -81,8 +127,16 @@ export function MCQQuestion({ question, onSubmit, onNext, lectureId }: MCQQuesti
     );
   };
 
+  // Reset question state to allow re-answering
+  const handleReAnswer = () => {
+    setSelectedOptionIds([]);
+    setSubmitted(false);
+    setIsCorrect(null);
+    setExpandedExplanations([]);
+  };
+
   const handleSubmit = useCallback(async () => {
-    if (selectedOptionIds.length === 0 || submitted) return;
+    if (selectedOptionIds.length === 0) return;
     
     setSubmitted(true);
     
@@ -113,7 +167,7 @@ export function MCQQuestion({ question, onSubmit, onNext, lectureId }: MCQQuesti
     
     // Track progress if lectureId is provided
     if (lectureId) {
-      await trackQuestionProgress(lectureId, question.id, isAnswerCorrect);
+      trackQuestionProgress(lectureId, question.id, isAnswerCorrect);
     }
     
     onSubmit(selectedOptionIds, isAnswerCorrect);
@@ -170,6 +224,13 @@ export function MCQQuestion({ question, onSubmit, onNext, lectureId }: MCQQuesti
       transition={{ duration: 0.4 }}
       className="space-y-6 w-full max-w-full"
     >
+      {/* Clinical Case Display - Above the question */}
+      <ClinicalCaseDisplay 
+        caseNumber={question.caseNumber}
+        caseText={question.caseText}
+        caseQuestionNumber={question.caseQuestionNumber}
+      />
+      
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
         <div className="flex-1 min-w-0">
           <MCQHeader 
@@ -234,6 +295,7 @@ export function MCQQuestion({ question, onSubmit, onNext, lectureId }: MCQQuesti
         isCorrect={isCorrect}
         onSubmit={handleSubmit}
         onNext={onNext}
+        onReAnswer={handleReAnswer}
       />
       
       <QuestionEditDialog

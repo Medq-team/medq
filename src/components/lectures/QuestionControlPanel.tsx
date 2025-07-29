@@ -159,27 +159,39 @@ export function QuestionControlPanel({
 
   const renderNavigationButtons = () => (
     <div className="flex justify-between mt-4">
-              <Button
+      <Button
+        variant="outline"
+        onClick={() => {
+          onPrevious();
+          setIsDrawerOpen(false);
+        }}
+        disabled={currentQuestionIndex === 0 || isComplete}
+      >
+        <ChevronLeft className="h-4 w-4 mr-2" />
+        {t('common.previous')}
+      </Button>
+      {isComplete ? (
+        <Button
           variant="outline"
           onClick={() => {
-            onPrevious();
+            // This should trigger the completion view
+            onNext();
             setIsDrawerOpen(false);
           }}
-          disabled={currentQuestionIndex === 0 || isComplete}
         >
-          <ChevronLeft className="h-4 w-4 mr-2" />
-          {t('common.previous')}
+          {t('questions.viewSummary')}
         </Button>
+      ) : (
         <Button
           onClick={() => {
             onNext();
             setIsDrawerOpen(false);
           }}
-          disabled={isComplete}
         >
           {t('common.next')}
           <ChevronRight className="h-4 w-4 ml-2" />
         </Button>
+      )}
     </div>
   );
 

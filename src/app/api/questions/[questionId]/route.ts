@@ -11,7 +11,23 @@ async function getHandler(
 
     const question = await prisma.question.findUnique({
       where: { id: questionId },
-      include: {
+      select: {
+        id: true,
+        lectureId: true,
+        type: true,
+        text: true,
+        options: true,
+        correctAnswers: true,
+        explanation: true,
+        courseReminder: true,
+        number: true,
+        session: true,
+        mediaUrl: true,
+        mediaType: true,
+        caseNumber: true,
+        caseText: true,
+        caseQuestionNumber: true,
+        createdAt: true,
         lecture: {
           select: {
             id: true,
@@ -60,7 +76,10 @@ async function putHandler(
       number,
       session,
       mediaUrl,
-      mediaType
+      mediaType,
+      caseNumber,
+      caseText,
+      caseQuestionNumber
     } = await request.json();
 
     const question = await prisma.question.update({
@@ -75,9 +94,28 @@ async function putHandler(
         number,
         session,
         mediaUrl,
-        mediaType
+        mediaType,
+        caseNumber,
+        caseText,
+        caseQuestionNumber
       },
-      include: {
+      select: {
+        id: true,
+        lectureId: true,
+        type: true,
+        text: true,
+        options: true,
+        correctAnswers: true,
+        explanation: true,
+        courseReminder: true,
+        number: true,
+        session: true,
+        mediaUrl: true,
+        mediaType: true,
+        caseNumber: true,
+        caseText: true,
+        caseQuestionNumber: true,
+        createdAt: true,
         lecture: {
           select: {
             id: true,
@@ -92,6 +130,9 @@ async function putHandler(
         }
       }
     });
+
+    // Note: Cache invalidation is handled by the client-side hook
+    // The useLecture hook will clear its cache when needed
 
     return NextResponse.json(question);
   } catch (error) {
