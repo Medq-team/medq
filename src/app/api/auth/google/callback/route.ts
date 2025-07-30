@@ -95,6 +95,7 @@ export async function POST(request: NextRequest) {
           image: picture || undefined,
           google_id: googleId,
           role: 'student',
+          profileCompleted: false, // New users need to complete their profile
         }
       });
     } else if (!user.google_id) {

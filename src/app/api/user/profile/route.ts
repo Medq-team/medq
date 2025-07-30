@@ -1,65 +1,70 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth, AuthenticatedRequest } from '../../../../lib/auth-middleware';
 import { prisma } from '../../../../lib/prisma';
+import { verifyAuth } from '../../../../lib/auth-middleware';
 
-async function getHandler(request: AuthenticatedRequest) {
+export async function PUT(request: NextRequest) {
   try {
-    const user = await prisma.user.findUnique({
-      where: { id: request.user!.userId },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        image: true,
-        createdAt: true,
-        updatedAt: true
-      }
-    });
-    
-    if (!user) {
+    // Verify authentication
+    const authResult = await verifyAuth(request);
+    if (!authResult.success) {
       return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
+        { error: 'Unauthorized' },
+        { status: 401 }
       );
     }
-    
-    return NextResponse.json({ user });
-  } catch (error) {
-    console.error('Error fetching profile:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch profile' },
-      { status: 500 }
-    );
-  }
-}
 
-async function putHandler(request: AuthenticatedRequest) {
-  try {
-    const { firstName, lastName, email } = await request.json();
+    const { name, sexe, niveauId } = await request.json();
     
+    // Validate input
+    if (!name || !sexe || !niveauId) {
+      return NextResponse.json(
+        { error: 'All fields are required' },
+        { status: 400 }
+      );
+    }
+
+    // Validate sexe
+    if (!['M', 'F'].includes(sexe)) {
+      return NextResponse.json(
+        { error: 'Invalid gender value' },
+        { status: 400 }
+      );
+    }
+
+    // Verify niveau exists
+    const niveau = await prisma.niveau.findUnique({
+      where: { id: niveauId },
+    });
+
+    if (!niveau) {
+      return NextResponse.json(
+        { error: 'Invalid niveau selected' },
+        { status: 400 }
+      );
+    }
+
     // Update user profile
     const updatedUser = await prisma.user.update({
-      where: { id: request.user!.userId },
+      where: { id: authResult.userId },
       data: {
-        name: firstName && lastName ? `${firstName} ${lastName}` : firstName || lastName,
-        email: email || undefined,
+        name,
+        sexe,
+        niveauId,
+        profileCompleted: true,
       },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        image: true,
-        createdAt: true,
-        updatedAt: true
-      }
+      include: {
+        niveau: true,
+      },
     });
-    
-    return NextResponse.json({ 
+
+    // Remove sensitive data
+    const { password, verificationToken, passwordResetToken, ...userWithoutSensitiveData } = updatedUser;
+
+    return NextResponse.json({
+      user: userWithoutSensitiveData,
       message: 'Profile updated successfully',
-      user: updatedUser
     });
+
   } catch (error) {
     console.error('Error updating profile:', error);
     return NextResponse.json(
@@ -67,7 +72,4 @@ async function putHandler(request: AuthenticatedRequest) {
       { status: 500 }
     );
   }
-}
-
-export const GET = requireAuth(getHandler);
-export const PUT = requireAuth(putHandler); 
+} 

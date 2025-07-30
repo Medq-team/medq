@@ -24,8 +24,13 @@ model User {
   status               String         @default("pending")
   verificationToken    String?        @map("verification_token")
   passwordUpdatedAt    DateTime?      @map("password_updated_at") @db.Timestamptz(6)
+  // Profile fields
+  sexe                 String? // "M" or "F"
+  niveauId             String?        @map("niveau_id") @db.Uuid
+  profileCompleted     Boolean        @default(false) @map("profile_completed")
   reports              Report[]
   progress             UserProgress[]
+  niveau               Niveau?        @relation(fields: [niveauId], references: [id])
 
   @@map("profiles")
 }
@@ -114,4 +119,14 @@ model Report {
   user       User?    @relation(fields: [userId], references: [id])
 
   @@map("reports")
+}
+
+model Niveau {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String   @unique // "1ere", "2eme", "3eme", "4eme", "5eme"
+  order     Int      @unique // 1, 2, 3, 4, 5 for sorting
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  users     User[]
+
+  @@map("niveaux")
 }

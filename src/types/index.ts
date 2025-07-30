@@ -7,6 +7,15 @@ export type User = {
   image?: string;
   password?: string;
   passwordUpdatedAt?: string;
+  // Profile fields
+  sexe?: 'M' | 'F';
+  niveauId?: string;
+  profileCompleted?: boolean;
+  niveau?: {
+    id: string;
+    name: string;
+    order: number;
+  };
 };
 
 export type Specialty = {

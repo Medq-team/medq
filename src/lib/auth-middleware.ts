@@ -93,4 +93,38 @@ export function requireAdmin<T extends any[]>(
     
     return handler(authenticatedRequest, ...args);
   };
+}
+
+export async function verifyAuth(request: NextRequest): Promise<{ success: boolean; userId?: string; error?: string }> {
+  try {
+    // Get token from cookie or Authorization header
+    const token = request.cookies.get('auth-token')?.value || 
+                  request.headers.get('authorization')?.replace('Bearer ', '');
+    
+    if (!token) {
+      return { success: false, error: 'No token provided' };
+    }
+    
+    // Verify token
+    const decoded = jwt.verify(token, JWT_SECRET) as {
+      userId: string;
+      email: string;
+      role: string;
+    };
+    
+    // Verify user still exists in database
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      select: { id: true, email: true, role: true }
+    });
+    
+    if (!user) {
+      return { success: false, error: 'User not found' };
+    }
+    
+    return { success: true, userId: user.id };
+  } catch (error) {
+    console.error('Authentication error:', error);
+    return { success: false, error: 'Invalid token' };
+  }
 } 

@@ -12,6 +12,7 @@ type AuthContextType = {
   register: (email: string, password: string, name?: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  updateUser: (userData: User) => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -140,6 +141,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     await checkAuth();
   };
 
+  const updateUser = (userData: User) => {
+    setUser(userData);
+    setIsAdmin(userData.role === 'admin');
+  };
+
   useEffect(() => {
     setIsClient(true);
   }, []);
@@ -158,6 +164,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     register,
     logout,
     refreshUser,
+    updateUser,
   };
 
   return (

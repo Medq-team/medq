@@ -53,7 +53,8 @@ export async function POST(request: NextRequest) {
         role: 'student', // Default role
         status: 'pending',
         verificationToken,
-        passwordUpdatedAt: new Date()
+        passwordUpdatedAt: new Date(),
+        profileCompleted: false // New users need to complete their profile
       }
     });
     
