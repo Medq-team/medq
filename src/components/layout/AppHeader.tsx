@@ -143,7 +143,7 @@ export function AppHeader() {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => router.push('/profile')}>
                     <User className="mr-2 h-4 w-4" />
-                    <span>{t('profile.profile')}</span>
+                    <span>{t('profile.title')}</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => router.push('/settings')}>
                     <Settings className="mr-2 h-4 w-4" />

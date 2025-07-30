@@ -8,24 +8,32 @@ datasource db {
 }
 
 model User {
-  id                   String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email                String         @unique(map: "profiles_email_idx")
-  role                 String         @default("student")
-  createdAt            DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt            DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  password             String?
-  name                 String?
-  image                String?
-  google_id            String?        @unique(map: "profiles_google_id_idx")
-  facebook_id          String?        @unique(map: "profiles_facebook_id_idx")
-  emailVerified        DateTime?      @map("email_verified")
-  passwordResetExpires DateTime?      @map("password_reset_expires")
-  passwordResetToken   String?        @map("password_reset_token")
-  status               String         @default("pending")
-  verificationToken    String?        @map("verification_token")
-  passwordUpdatedAt    DateTime?      @map("password_updated_at") @db.Timestamptz(6)
-  reports              Report[]
-  progress             UserProgress[]
+  id                    String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email                 String         @unique(map: "profiles_email_idx")
+  role                  String         @default("student")
+  createdAt             DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  password              String?
+  name                  String?
+  image                 String?
+  google_id             String?        @unique(map: "profiles_google_id_idx")
+  facebook_id           String?        @unique(map: "profiles_facebook_id_idx")
+  emailVerified         DateTime?      @map("email_verified")
+  passwordResetExpires  DateTime?      @map("password_reset_expires")
+  passwordResetToken    String?        @map("password_reset_token")
+  status                String         @default("pending")
+  verificationToken     String?        @map("verification_token")
+  passwordUpdatedAt     DateTime?      @map("password_updated_at") @db.Timestamptz(6)
+  // Profile fields
+  sexe                  String? // "M" or "F"
+  niveauId              String?        @map("niveau_id") @db.Uuid
+  profileCompleted      Boolean        @default(false) @map("profile_completed")
+  // Subscription fields
+  hasActiveSubscription Boolean        @default(false) @map("has_active_subscription")
+  subscriptionExpiresAt DateTime?      @map("subscription_expires_at") @db.Timestamptz(6)
+  reports               Report[]
+  progress              UserProgress[]
+  niveau                Niveau?        @relation(fields: [niveauId], references: [id])
 
   @@map("profiles")
 }
@@ -35,8 +43,11 @@ model Specialty {
   name        String
   description String?
   imageUrl    String?   @map("imageurl")
+  niveauId    String?   @map("niveau_id") @db.Uuid
+  isFree      Boolean   @default(false) @map("is_free")
   createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   lectures    Lecture[]
+  niveau      Niveau?   @relation(fields: [niveauId], references: [id])
 
   @@map("specialties")
 }
@@ -46,6 +57,7 @@ model Lecture {
   specialtyId String         @map("specialty_id") @db.Uuid
   title       String
   description String?
+  isFree      Boolean        @default(false) @map("is_free")
   createdAt   DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
   specialty   Specialty      @relation(fields: [specialtyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   questions   Question[]
@@ -57,13 +69,14 @@ model Lecture {
 }
 
 model Question {
-  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  lectureId          String   @map("lecture_id") @db.Uuid
-  type               String
-  text               String
-  options            Json?
-  correctAnswers     String[] @map("correct_answers")
-  explanation        String?
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  lectureId      String   @map("lecture_id") @db.Uuid
+  type           String
+  text           String
+  options        Json?
+  correctAnswers String[] @map("correct_answers")
+  explanation    String?
+
   createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   courseReminder     String?  @map("course_reminder")
   number             Int?
@@ -114,4 +127,15 @@ model Report {
   user       User?    @relation(fields: [userId], references: [id])
 
   @@map("reports")
+}
+
+model Niveau {
+  id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String      @unique // "1ere", "2eme", "3eme", "4eme", "5eme"
+  order     Int         @unique // 1, 2, 3, 4, 5 for sorting
+  createdAt DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  users     User[]
+  Specialty Specialty[]
+
+  @@map("niveaux")
 }

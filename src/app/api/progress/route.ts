@@ -61,6 +61,23 @@ async function getHandler(request: AuthenticatedRequest) {
     const specialtyId = searchParams.get('specialtyId');
     const userId = request.user!.userId;
 
+    // Get user with their niveau information
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { 
+        id: true, 
+        role: true, 
+        niveauId: true
+      }
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      );
+    }
+
     let whereClause: any = { userId };
 
     if (lectureId) {
@@ -76,6 +93,15 @@ async function getHandler(request: AuthenticatedRequest) {
       whereClause.lectureId = { in: lectures.map(l => l.id) };
     }
 
+    // If user is not admin and has a niveau, filter by specialty niveau
+    if (user.role !== 'admin' && user.niveauId) {
+      whereClause.lecture = {
+        specialty: {
+          niveauId: user.niveauId
+        }
+      };
+    }
+
     const progress = await prisma.userProgress.findMany({
       where: whereClause,
       include: {
@@ -83,7 +109,20 @@ async function getHandler(request: AuthenticatedRequest) {
           select: {
             id: true,
             title: true,
-            specialtyId: true
+            specialtyId: true,
+            specialty: {
+              select: {
+                id: true,
+                name: true,
+                niveauId: true,
+                niveau: {
+                  select: {
+                    id: true,
+                    name: true
+                  }
+                }
+              }
+            }
           }
         }
       }

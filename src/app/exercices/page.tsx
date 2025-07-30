@@ -1,12 +1,15 @@
 'use client';
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Specialty } from '@/types';
 import { toast } from '@/hooks/use-toast';
 import { AddSpecialtyDialog } from '@/components/specialties/AddSpecialtyDialog';
 import { SpecialtiesList } from '@/components/specialties/SpecialtiesList';
+import { UpsellBanner } from '@/components/subscription/UpsellBanner';
+import { UpgradeDialog } from '@/components/subscription/UpgradeDialog';
 import { useTranslation } from 'react-i18next';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
@@ -20,9 +23,12 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 export default function ExercicesPage() {
   const { user, isAdmin } = useAuth();
+  const { hasActiveSubscription } = useSubscription();
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
+  const [isUpsellDismissed, setIsUpsellDismissed] = useState(false);
   const { t } = useTranslation();
 
   const fetchSpecialties = useCallback(async (forceRefresh = false) => {
@@ -108,10 +114,30 @@ export default function ExercicesPage() {
   // Memoize the specialties list to prevent unnecessary re-renders
   const memoizedSpecialties = useMemo(() => specialties, [specialties]);
 
+  // Show upsell banner for free users who haven't dismissed it
+  const shouldShowUpsell = !hasActiveSubscription && !isAdmin && !isUpsellDismissed;
+
+  const handleUpgrade = () => {
+    setIsUpgradeDialogOpen(true);
+  };
+
+  const handleUpgradeComplete = () => {
+    setIsUpgradeDialogOpen(false);
+    // Optionally refresh the page or update subscription status
+  };
+
   return (
     <ProtectedRoute>
       <AppLayout>
         <div className="space-y-6">
+          {/* Upsell Banner for Free Users */}
+          {shouldShowUpsell && (
+            <UpsellBanner
+              onUpgrade={handleUpgrade}
+              onDismiss={() => setIsUpsellDismissed(true)}
+            />
+          )}
+
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold tracking-tight">Exercices</h1>
@@ -135,6 +161,12 @@ export default function ExercicesPage() {
             isOpen={isAddDialogOpen}
             onOpenChange={setIsAddDialogOpen}
             onSpecialtyAdded={() => fetchSpecialties(true)}
+          />
+
+          <UpgradeDialog
+            isOpen={isUpgradeDialogOpen}
+            onOpenChange={setIsUpgradeDialogOpen}
+            onUpgrade={handleUpgradeComplete}
           />
         </div>
       </AppLayout>

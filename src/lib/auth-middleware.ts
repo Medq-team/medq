@@ -9,6 +9,7 @@ export interface AuthenticatedRequest extends NextRequest {
     userId: string;
     email: string;
     role: string;
+    hasActiveSubscription?: boolean;
   };
 }
 
@@ -32,19 +33,30 @@ export async function authenticateRequest(request: NextRequest): Promise<Authent
     // Verify user still exists in database
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
-      select: { id: true, email: true, role: true }
+      select: { 
+        id: true, 
+        email: true, 
+        role: true,
+        hasActiveSubscription: true,
+        subscriptionExpiresAt: true
+      }
     });
     
     if (!user) {
       return null;
     }
     
+    // Check if subscription is still active
+    const hasActiveSubscription = user.hasActiveSubscription && 
+      (!user.subscriptionExpiresAt || new Date(user.subscriptionExpiresAt) > new Date());
+    
     // Add user to request
     const authenticatedRequest = request as AuthenticatedRequest;
     authenticatedRequest.user = {
       userId: user.id,
       email: user.email,
-      role: user.role
+      role: user.role,
+      hasActiveSubscription
     };
     
     return authenticatedRequest;
@@ -93,4 +105,38 @@ export function requireAdmin<T extends any[]>(
     
     return handler(authenticatedRequest, ...args);
   };
+}
+
+export async function verifyAuth(request: NextRequest): Promise<{ success: boolean; userId?: string; error?: string }> {
+  try {
+    // Get token from cookie or Authorization header
+    const token = request.cookies.get('auth-token')?.value || 
+                  request.headers.get('authorization')?.replace('Bearer ', '');
+    
+    if (!token) {
+      return { success: false, error: 'No token provided' };
+    }
+    
+    // Verify token
+    const decoded = jwt.verify(token, JWT_SECRET) as {
+      userId: string;
+      email: string;
+      role: string;
+    };
+    
+    // Verify user still exists in database
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      select: { id: true, email: true, role: true }
+    });
+    
+    if (!user) {
+      return { success: false, error: 'User not found' };
+    }
+    
+    return { success: true, userId: user.id };
+  } catch (error) {
+    console.error('Authentication error:', error);
+    return { success: false, error: 'Invalid token' };
+  }
 } 

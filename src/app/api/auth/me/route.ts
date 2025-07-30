@@ -15,7 +15,21 @@ async function handler(request: AuthenticatedRequest) {
         password: true,
         passwordUpdatedAt: true,
         createdAt: true,
-        updatedAt: true
+        updatedAt: true,
+        // Profile fields
+        sexe: true,
+        niveauId: true,
+        profileCompleted: true,
+        // Subscription fields
+        hasActiveSubscription: true,
+        subscriptionExpiresAt: true,
+        niveau: {
+          select: {
+            id: true,
+            name: true,
+            order: true,
+          }
+        }
       }
     });
     

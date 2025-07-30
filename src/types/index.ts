@@ -7,6 +7,18 @@ export type User = {
   image?: string;
   password?: string;
   passwordUpdatedAt?: string;
+  // Profile fields
+  sexe?: 'M' | 'F';
+  niveauId?: string;
+  profileCompleted?: boolean;
+  // Subscription fields
+  hasActiveSubscription?: boolean;
+  subscriptionExpiresAt?: string;
+  niveau?: {
+    id: string;
+    name: string;
+    order: number;
+  };
 };
 
 export type Specialty = {
@@ -14,6 +26,12 @@ export type Specialty = {
   name: string;
   imageUrl?: string;
   description?: string;
+  niveauId?: string;
+  isFree?: boolean;
+  niveau?: {
+    id: string;
+    name: string;
+  };
   progress?: SpecialtyProgress;
 };
 
@@ -37,6 +55,16 @@ export type Lecture = {
   specialtyId: string;
   title: string;
   description?: string;
+  isFree?: boolean;
+  specialty?: {
+    id: string;
+    name: string;
+    niveauId?: string;
+    niveau?: {
+      id: string;
+      name: string;
+    };
+  };
   progress?: LectureProgress;
 };
 

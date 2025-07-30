@@ -7,27 +7,62 @@ async function getHandler(
   { params }: { params: Promise<{ lectureId: string }> }
 ) {
   try {
+    const userId = request.user!.userId;
     const { lectureId } = await params;
     const { searchParams } = new URL(request.url);
     const includeQuestions = searchParams.get('includeQuestions') === 'true';
 
+    // Get user with their niveau information
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { 
+        id: true, 
+        role: true, 
+        niveauId: true
+      }
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      );
+    }
+
+    // Build the where clause for the lecture
+    let whereClause: any = { id: lectureId };
+    
+    // If user is not admin and has a niveau, filter by specialty niveau
+    if (user.role !== 'admin' && user.niveauId) {
+      whereClause.specialty = {
+        niveauId: user.niveauId
+      };
+    }
+
     if (includeQuestions) {
       // Optimized query: fetch lecture with questions in a single request
       const lectureWithQuestions = await prisma.lecture.findUnique({
-        where: { id: lectureId },
+        where: whereClause,
         include: {
           specialty: {
             select: {
               id: true,
-              name: true
+              name: true,
+              niveauId: true,
+              niveau: {
+                select: {
+                  id: true,
+                  name: true
+                }
+              }
             }
           },
-          questions: {
-            orderBy: [
-              { type: 'asc' },
-              { number: 'asc' },
-              { id: 'asc' }
-            ],
+                      questions: {
+              orderBy: [
+                { type: 'asc' },
+                { number: 'asc' },
+                { id: 'asc' }
+              ],
             select: {
               id: true,
               type: true,
@@ -56,7 +91,7 @@ async function getHandler(
 
       if (!lectureWithQuestions) {
         return NextResponse.json(
-          { error: 'Lecture not found' },
+          { error: 'Lecture not found or access denied' },
           { status: 404 }
         );
       }
@@ -65,12 +100,19 @@ async function getHandler(
     } else {
       // Original query: fetch lecture only
       const lecture = await prisma.lecture.findUnique({
-        where: { id: lectureId },
+        where: whereClause,
         include: {
           specialty: {
             select: {
               id: true,
-              name: true
+              name: true,
+              niveauId: true,
+              niveau: {
+                select: {
+                  id: true,
+                  name: true
+                }
+              }
             }
           },
           _count: {
@@ -83,7 +125,7 @@ async function getHandler(
 
       if (!lecture) {
         return NextResponse.json(
-          { error: 'Lecture not found' },
+          { error: 'Lecture not found or access denied' },
           { status: 404 }
         );
       }

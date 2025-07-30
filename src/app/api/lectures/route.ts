@@ -4,19 +4,66 @@ import { prisma } from '@/lib/prisma';
 
 async function getHandler(request: AuthenticatedRequest) {
   try {
+    const userId = request.user!.userId;
     const { searchParams } = new URL(request.url);
     const specialtyId = searchParams.get('specialtyId');
 
-    const where = specialtyId ? { specialtyId } : {};
+    // Get user with their niveau information
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { 
+        id: true, 
+        role: true, 
+        niveauId: true
+      }
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      );
+    }
+
+    // Build the where clause for lectures
+    let where: any = {};
+    
+    if (specialtyId) {
+      where.specialtyId = specialtyId;
+    }
+
+    // If user is not admin and has a niveau, filter by specialty niveau
+    if (user.role !== 'admin' && user.niveauId) {
+      where.specialty = {
+        niveauId: user.niveauId
+      };
+    }
 
     const lectures = await prisma.lecture.findMany({
       where,
-      orderBy: { title: 'asc' },
-      include: {
+      orderBy: [
+        { isFree: 'desc' }, // Free content first (true comes before false)
+        { title: 'asc' }
+      ],
+      select: {
+        id: true,
+        specialtyId: true,
+        title: true,
+        description: true,
+        isFree: true,
+        createdAt: true,
         specialty: {
           select: {
             id: true,
-            name: true
+            name: true,
+            niveauId: true,
+            isFree: true,
+            niveau: {
+              select: {
+                id: true,
+                name: true
+              }
+            }
           }
         },
         _count: {

@@ -6,14 +6,57 @@ async function getHandler(request: AuthenticatedRequest) {
   try {
     const userId = request.user!.userId;
 
+    // Get user with their niveau information
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { 
+        id: true, 
+        role: true, 
+        niveauId: true,
+        niveau: {
+          select: {
+            id: true,
+            name: true
+          }
+        }
+      }
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      );
+    }
+
+    // Build the where clause for specialties
+    let whereClause: any = {};
+    
+    // If user is not admin and has a niveau, filter by niveau
+    if (user.role !== 'admin' && user.niveauId) {
+      whereClause.niveauId = user.niveauId;
+    }
+
+    // For now, we'll implement subscription logic in the frontend
+    // Later we can add proper subscription checking here
+
     // Use aggregation queries for better performance
     const specialtiesWithStats = await prisma.specialty.findMany({
+      where: whereClause,
       select: {
         id: true,
         name: true,
         description: true,
         imageUrl: true,
         createdAt: true,
+        niveauId: true,
+        isFree: true,
+        niveau: {
+          select: {
+            id: true,
+            name: true
+          }
+        },
         _count: {
           select: {
             lectures: true
@@ -39,9 +82,10 @@ async function getHandler(request: AuthenticatedRequest) {
           }
         }
       },
-      orderBy: {
-        name: 'asc'
-      }
+      orderBy: [
+        { isFree: 'desc' }, // Free content first (true comes before false)
+        { name: 'asc' }
+      ]
     });
 
     // Get user progress for questions across all specialties in a single query
@@ -100,6 +144,9 @@ async function getHandler(request: AuthenticatedRequest) {
         description: specialty.description,
         imageUrl: specialty.imageUrl,
         createdAt: specialty.createdAt,
+        niveauId: specialty.niveauId,
+        isFree: specialty.isFree,
+        niveau: specialty.niveau,
         progress: {
           totalLectures,
           completedLectures,

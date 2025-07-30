@@ -6,6 +6,10 @@ import { Progress } from '@/components/ui/progress';
 import { Specialty } from '@/types';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { useSubscription } from '@/contexts/SubscriptionContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { LockIcon } from '@/components/ui/lock-icon';
+import { UpgradeDialog } from '@/components/subscription/UpgradeDialog';
 import { 
   Heart, 
   Brain, 
@@ -32,10 +36,27 @@ interface SpecialtyCardProps {
 export function SpecialtyCard({ specialty }: SpecialtyCardProps) {
   const router = useRouter();
   const { t } = useTranslation();
+  const { canAccessContent, isContentLocked } = useSubscription();
+  const { user } = useAuth();
   const [isHovered, setIsHovered] = useState(false);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+
+  const isLocked = isContentLocked(specialty.isFree || false);
+  const canAccess = canAccessContent(specialty.isFree || false);
 
   const handleClick = () => {
+    if (!canAccess) {
+      setShowUpgradeDialog(true);
+      return;
+    }
     router.push(`/specialty/${specialty.id}`);
+  };
+
+  const handleUpgrade = async () => {
+    // Here you would integrate with your payment provider
+    // For now, we'll just close the dialog
+    setShowUpgradeDialog(false);
+    // You could redirect to a payment page or handle the upgrade flow
   };
 
   const getSpecialtyIcon = () => {
@@ -114,14 +135,16 @@ export function SpecialtyCard({ specialty }: SpecialtyCardProps) {
 
   return (
     <motion.div
-      whileHover={{ y: -5 }}
-      whileTap={{ scale: 0.98 }}
+      whileHover={canAccess ? { y: -5 } : {}}
+      whileTap={canAccess ? { scale: 0.98 } : {}}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
       <Card 
-        className="overflow-hidden cursor-pointer h-full"
+        className={`overflow-hidden h-full ${
+          canAccess ? 'cursor-pointer hover:shadow-md' : 'cursor-not-allowed opacity-75'
+        }`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         onClick={handleClick}
@@ -131,9 +154,14 @@ export function SpecialtyCard({ specialty }: SpecialtyCardProps) {
             {getSpecialtyIcon()}
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-          <h3 className="absolute bottom-4 left-4 right-4 text-white font-semibold text-xl">
-            {specialty.name}
-          </h3>
+          <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
+            <h3 className="text-white font-semibold text-xl">
+              {specialty.name}
+            </h3>
+            {isLocked && (
+              <LockIcon className="text-white" size={20} />
+            )}
+          </div>
         </div>
         <CardContent className="p-4">
           <p className="text-muted-foreground text-sm line-clamp-2 mb-3">
@@ -144,6 +172,12 @@ export function SpecialtyCard({ specialty }: SpecialtyCardProps) {
           {renderDetailedProgressBar()}
         </CardContent>
       </Card>
+      
+      <UpgradeDialog
+        isOpen={showUpgradeDialog}
+        onOpenChange={setShowUpgradeDialog}
+        onUpgrade={handleUpgrade}
+      />
     </motion.div>
   );
 }

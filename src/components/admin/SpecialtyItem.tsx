@@ -76,7 +76,14 @@ export function SpecialtyItem({ specialty, onDelete }: SpecialtyItemProps) {
   return (
     <Card className="cursor-pointer hover:shadow-md transition-shadow">
               <CardHeader className="pb-2" onClick={() => router.push(`/admin/specialty/${specialty.id}`)}>
-        <CardTitle>{specialty.name}</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>{specialty.name}</CardTitle>
+          {specialty.niveau && (
+            <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+              {specialty.niveau.name}
+            </span>
+          )}
+        </div>
         <CardDescription className="line-clamp-2">
           {specialty.description || 'No description available'}
         </CardDescription>

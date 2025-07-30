@@ -4,13 +4,40 @@ import { prisma } from '@/lib/prisma';
 
 async function getHandler(request: AuthenticatedRequest) {
   try {
+    const userId = request.user!.userId;
     const { searchParams } = new URL(request.url);
     const lectureId = searchParams.get('lectureId');
     const type = searchParams.get('type');
 
+    // Get user with their niveau information
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { 
+        id: true, 
+        role: true, 
+        niveauId: true
+      }
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      );
+    }
+
     const where: any = {};
     if (lectureId) where.lectureId = lectureId;
     if (type) where.type = type;
+
+    // If user is not admin and has a niveau, filter by specialty niveau
+    if (user.role !== 'admin' && user.niveauId) {
+      where.lecture = {
+        specialty: {
+          niveauId: user.niveauId
+        }
+      };
+    }
 
     const questions = await prisma.question.findMany({
       where,
@@ -43,7 +70,14 @@ async function getHandler(request: AuthenticatedRequest) {
             specialty: {
               select: {
                 id: true,
-                name: true
+                name: true,
+                niveauId: true,
+                niveau: {
+                  select: {
+                    id: true,
+                    name: true
+                  }
+                }
               }
             }
           }

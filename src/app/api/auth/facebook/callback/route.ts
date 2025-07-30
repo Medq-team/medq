@@ -91,6 +91,7 @@ export async function POST(request: NextRequest) {
           image: picture?.data?.url || undefined,
           facebook_id: facebookId,
           role: 'student',
+          profileCompleted: false, // New users need to complete their profile
         }
       });
     } else if (!user.facebook_id) {

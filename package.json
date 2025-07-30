@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "db:seed": "dotenv -e .env.local -- tsx prisma/seed.ts",
+    "db:update-specialties": "dotenv -e .env.local -- tsx scripts/update-specialties-niveau.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -90,6 +92,7 @@
     "postcss": "^8.4.47",
     "prisma": "^6.12.0",
     "tailwindcss": "^3.4.11",
+    "tsx": "^4.20.3",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1"
   }

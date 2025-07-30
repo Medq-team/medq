@@ -47,7 +47,14 @@ export function SpecialtyHeader({ specialty, isLoading }: SpecialtyHeaderProps) 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">{specialty.name}</h2>
+        <div className="flex items-center gap-3 mb-2">
+          <h2 className="text-3xl font-bold tracking-tight">{specialty.name}</h2>
+          {specialty.niveau && (
+            <span className="text-sm bg-primary/10 text-primary px-3 py-1 rounded-full">
+              {specialty.niveau.name}
+            </span>
+          )}
+        </div>
         <p className="text-muted-foreground mt-2">
           {specialty.description || `Select a lecture to view questions and start learning`}
         </p>
