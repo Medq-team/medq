@@ -7,10 +7,40 @@ async function getHandler(
   { params }: { params: Promise<{ questionId: string }> }
 ) {
   try {
+    const userId = request.user!.userId;
     const { questionId } = await params;
 
+    // Get user with their niveau information
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { 
+        id: true, 
+        role: true, 
+        niveauId: true
+      }
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      );
+    }
+
+    // Build the where clause for the question
+    let whereClause: any = { id: questionId };
+    
+    // If user is not admin and has a niveau, filter by specialty niveau
+    if (user.role !== 'admin' && user.niveauId) {
+      whereClause.lecture = {
+        specialty: {
+          niveauId: user.niveauId
+        }
+      };
+    }
+
     const question = await prisma.question.findUnique({
-      where: { id: questionId },
+      where: whereClause,
       select: {
         id: true,
         lectureId: true,
@@ -35,7 +65,14 @@ async function getHandler(
             specialty: {
               select: {
                 id: true,
-                name: true
+                name: true,
+                niveauId: true,
+                niveau: {
+                  select: {
+                    id: true,
+                    name: true
+                  }
+                }
               }
             }
           }
@@ -45,7 +82,7 @@ async function getHandler(
 
     if (!question) {
       return NextResponse.json(
-        { error: 'Question not found' },
+        { error: 'Question not found or access denied' },
         { status: 404 }
       );
     }

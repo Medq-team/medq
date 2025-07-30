@@ -9,6 +9,7 @@ export interface AuthenticatedRequest extends NextRequest {
     userId: string;
     email: string;
     role: string;
+    hasActiveSubscription?: boolean;
   };
 }
 
@@ -32,19 +33,30 @@ export async function authenticateRequest(request: NextRequest): Promise<Authent
     // Verify user still exists in database
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
-      select: { id: true, email: true, role: true }
+      select: { 
+        id: true, 
+        email: true, 
+        role: true,
+        hasActiveSubscription: true,
+        subscriptionExpiresAt: true
+      }
     });
     
     if (!user) {
       return null;
     }
     
+    // Check if subscription is still active
+    const hasActiveSubscription = user.hasActiveSubscription && 
+      (!user.subscriptionExpiresAt || new Date(user.subscriptionExpiresAt) > new Date());
+    
     // Add user to request
     const authenticatedRequest = request as AuthenticatedRequest;
     authenticatedRequest.user = {
       userId: user.id,
       email: user.email,
-      role: user.role
+      role: user.role,
+      hasActiveSubscription
     };
     
     return authenticatedRequest;

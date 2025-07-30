@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate",
-    "db:seed": "dotenv -e .env.local -- tsx prisma/seed.ts"
+    "db:seed": "dotenv -e .env.local -- tsx prisma/seed.ts",
+    "db:update-specialties": "dotenv -e .env.local -- tsx scripts/update-specialties-niveau.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

@@ -20,6 +20,9 @@ async function handler(request: AuthenticatedRequest) {
         sexe: true,
         niveauId: true,
         profileCompleted: true,
+        // Subscription fields
+        hasActiveSubscription: true,
+        subscriptionExpiresAt: true,
         niveau: {
           select: {
             id: true,

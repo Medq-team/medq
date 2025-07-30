@@ -15,6 +15,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSubscription } from '@/contexts/SubscriptionContext';
+import { LockIcon } from '@/components/ui/lock-icon';
+import { UpgradeDialog } from '@/components/subscription/UpgradeDialog';
 
 interface LecturesListViewProps {
   lectures: Lecture[];
@@ -33,8 +36,10 @@ export function LecturesListView({ lectures, isLoading }: LecturesListViewProps)
   const router = useRouter();
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { canAccessContent, isContentLocked } = useSubscription();
   const [lectureProgress, setLectureProgress] = useState<Record<string, LectureProgressData>>({});
   const [isLoadingProgress, setIsLoadingProgress] = useState(false);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
 
   // Fetch progress for all lectures
   useEffect(() => {
@@ -200,43 +205,73 @@ export function LecturesListView({ lectures, isLoading }: LecturesListViewProps)
           </TableRow>
         </TableHeader>
         <TableBody>
-          {lectures.map((lecture) => (
-            <TableRow 
-              key={lecture.id}
-              className="cursor-pointer hover:bg-muted/80"
-              onClick={() => router.push(`/lecture/${lecture.id}`)}
-            >
-              <TableCell className="font-medium">
-                <div className="flex items-center">
-                  <FileText className="h-4 w-4 mr-2 text-primary" />
-                  {lecture.title}
-                </div>
-              </TableCell>
-              <TableCell>
-                {isLoadingProgress ? (
-                  <Skeleton className="h-2 w-16" />
-                ) : (
-                  renderProgressBar(lecture.id)
-                )}
-              </TableCell>
-              <TableCell>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-8 w-8 p-0"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    router.push(`/lecture/${lecture.id}`);
-                  }}
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  <span className="sr-only">{t('lectures.openLecture')}</span>
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
+          {lectures.map((lecture) => {
+            const isLocked = isContentLocked(lecture.isFree || false);
+            const canAccess = canAccessContent(lecture.isFree || false);
+            
+            const handleRowClick = () => {
+              if (!canAccess) {
+                setShowUpgradeDialog(true);
+                return;
+              }
+              router.push(`/lecture/${lecture.id}`);
+            };
+
+            return (
+              <TableRow 
+                key={lecture.id}
+                className={`${canAccess ? 'cursor-pointer hover:bg-muted/80' : 'cursor-not-allowed opacity-75'}`}
+                onClick={handleRowClick}
+              >
+                <TableCell className="font-medium">
+                  <div className="flex items-center">
+                    <FileText className="h-4 w-4 mr-2 text-primary" />
+                    <span className="flex items-center gap-2">
+                      {lecture.title}
+                      {isLocked && <LockIcon size={16} />}
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  {isLoadingProgress ? (
+                    <Skeleton className="h-2 w-16" />
+                  ) : (
+                    renderProgressBar(lecture.id)
+                  )}
+                </TableCell>
+                <TableCell>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-8 w-8 p-0"
+                    disabled={!canAccess}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (!canAccess) {
+                        setShowUpgradeDialog(true);
+                        return;
+                      }
+                      router.push(`/lecture/${lecture.id}`);
+                    }}
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    <span className="sr-only">{t('lectures.openLecture')}</span>
+                  </Button>
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
+      
+      <UpgradeDialog
+        isOpen={showUpgradeDialog}
+        onOpenChange={setShowUpgradeDialog}
+        onUpgrade={() => {
+          setShowUpgradeDialog(false);
+          // Handle upgrade logic here
+        }}
+      />
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider } from '@/contexts/AuthContext'
+import { SubscriptionProvider } from '@/contexts/SubscriptionContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { I18nProvider } from '@/i18n/I18nProvider'
 import { Toaster } from '@/components/ui/toaster'
@@ -28,15 +29,17 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <Suspense fallback={<LoadingFallback />}>
         <AuthProvider>
-          <ThemeProvider>
-            <I18nProvider>
-              <TooltipProvider>
-                {children}
-                <Toaster />
-                <Sonner />
-              </TooltipProvider>
-            </I18nProvider>
-          </ThemeProvider>
+          <SubscriptionProvider>
+            <ThemeProvider>
+              <I18nProvider>
+                <TooltipProvider>
+                  {children}
+                  <Toaster />
+                  <Sonner />
+                </TooltipProvider>
+              </I18nProvider>
+            </ThemeProvider>
+          </SubscriptionProvider>
         </AuthProvider>
       </Suspense>
     </QueryClientProvider>

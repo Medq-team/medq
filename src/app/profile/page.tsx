@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { useTranslation } from 'react-i18next'
-import { User, Mail, GraduationCap, Calendar, Shield } from 'lucide-react'
+import { User, Mail, GraduationCap, Calendar, Shield, Crown, Clock } from 'lucide-react'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { ProfileCompletionGuard } from '@/components/ProfileCompletionGuard'
 
@@ -133,6 +133,81 @@ export default function ProfilePageRoute() {
                 </CardContent>
               </Card>
             </div>
+
+                         {/* Subscription Information Card */}
+             <Card>
+               <CardHeader>
+                 <CardTitle className="flex items-center gap-2">
+                   <Crown className="h-5 w-5" />
+                   {t('profile.subscriptionDetails')}
+                 </CardTitle>
+               </CardHeader>
+               <CardContent className="space-y-6">
+                 <div className="grid gap-4 md:grid-cols-2">
+                   <div className="space-y-2">
+                     <div className="text-sm font-medium">{t('profile.subscriptionStatus')}</div>
+                     <div className="flex items-center gap-2">
+                       <Badge variant={user?.hasActiveSubscription ? 'default' : 'secondary'}>
+                         {user?.hasActiveSubscription ? t('profile.active') : t('profile.freePlan')}
+                       </Badge>
+                     </div>
+                   </div>
+
+                   <div className="space-y-2">
+                     <div className="text-sm font-medium">{t('profile.accessLevel')}</div>
+                     <div className="flex items-center gap-2 text-sm">
+                       <Crown className="h-4 w-4 text-muted-foreground" />
+                       <span>
+                         {user?.role === 'admin' ? t('profile.fullAccessAdmin') :
+                          user?.hasActiveSubscription ? t('profile.premiumAccess') : t('profile.freeAccess')}
+                       </span>
+                     </div>
+                   </div>
+
+                   {user?.hasActiveSubscription && user?.subscriptionExpiresAt && (
+                     <div className="space-y-2">
+                       <div className="text-sm font-medium">{t('profile.expiresOn')}</div>
+                       <div className="flex items-center gap-2 text-sm">
+                         <Clock className="h-4 w-4 text-muted-foreground" />
+                         <span>
+                           {new Date(user.subscriptionExpiresAt).toLocaleDateString('fr-FR', {
+                             year: 'numeric',
+                             month: 'long',
+                             day: 'numeric'
+                           })}
+                         </span>
+                       </div>
+                     </div>
+                   )}
+
+                   <div className="space-y-2">
+                     <div className="text-sm font-medium">{t('profile.contentAccess')}</div>
+                     <div className="flex items-center gap-2 text-sm">
+                       <Shield className="h-4 w-4 text-muted-foreground" />
+                       <span>
+                         {user?.role === 'admin' ? t('profile.allSpecialtiesAndLectures') :
+                          user?.hasActiveSubscription ? t('profile.allSpecialtiesAndLectures') : t('profile.freeSpecialtiesAndLecturesOnly')}
+                       </span>
+                     </div>
+                   </div>
+                 </div>
+
+                 {!user?.hasActiveSubscription && user?.role !== 'admin' && (
+                   <div className="mt-4 p-4 bg-muted rounded-lg">
+                     <div className="flex items-center gap-2 mb-2">
+                       <Crown className="h-4 w-4 text-yellow-600" />
+                       <span className="font-medium">{t('profile.upgradeToPremium')}</span>
+                     </div>
+                     <p className="text-sm text-muted-foreground mb-3">
+                       {t('profile.upgradeDescription')}
+                     </p>
+                     <button className="text-sm text-primary hover:underline">
+                       {t('profile.learnMoreAboutPremium')}
+                     </button>
+                   </div>
+                 )}
+               </CardContent>
+             </Card>
           </div>
         </AppLayout>
       </ProfileCompletionGuard>
