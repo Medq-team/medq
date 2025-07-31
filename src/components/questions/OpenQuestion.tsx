@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Question } from '@/types';
 import { motion } from 'framer-motion';
 import { OpenQuestionHeader } from './open/OpenQuestionHeader';
@@ -15,7 +15,6 @@ import { useTranslation } from 'react-i18next';
 import { useProgress } from '@/hooks/use-progress';
 
 import { QuestionMedia } from './QuestionMedia';
-import { ClinicalCaseDisplay } from './ClinicalCaseDisplay';
 
 interface OpenQuestionProps {
   question: Question;
@@ -25,40 +24,98 @@ interface OpenQuestionProps {
   isAnswered?: boolean;
   answerResult?: boolean | 'partial';
   userAnswer?: string;
+  hideImmediateResults?: boolean;
+  showDeferredSelfAssessment?: boolean; // Show self-assessment after results are revealed
+  onSelfAssessmentUpdate?: (questionId: string, result: boolean | 'partial') => void; // Update result after self-assessment
 }
 
-export function OpenQuestion({ question, onSubmit, onNext, lectureId, isAnswered, answerResult, userAnswer }: OpenQuestionProps) {
+export function OpenQuestion({ 
+  question, 
+  onSubmit, 
+  onNext, 
+  lectureId, 
+  isAnswered, 
+  answerResult, 
+  userAnswer,
+  hideImmediateResults = false,
+  showDeferredSelfAssessment = false,
+  onSelfAssessmentUpdate
+}: OpenQuestionProps) {
   const [answer, setAnswer] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [showSelfAssessment, setShowSelfAssessment] = useState(false);
   const [assessmentCompleted, setAssessmentCompleted] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
+  const [hasSubmitted, setHasSubmitted] = useState(false); // Track if question has been submitted
+  const [deferredAssessmentResult, setDeferredAssessmentResult] = useState<boolean | 'partial' | null>(null); // Track deferred self-assessment
+  const hasSubmittedRef = useRef(false); // Immediate synchronous access to submission state
   const { t } = useTranslation();
   const { trackQuestionProgress } = useProgress();
+
+  // Force reset when question changes (safety net)
+  useEffect(() => {
+    hasSubmittedRef.current = false;
+    setHasSubmitted(false);
+  }, [question.id]);
+
+  // Handle userAnswer changes separately to avoid reinitialization loops
+  useEffect(() => {
+    if (userAnswer) {
+      setAnswer(userAnswer);
+    }
+  }, [userAnswer]);
+
+
 
   // Initialize component state based on whether question is already answered
   useEffect(() => {
     if (isAnswered && answerResult !== undefined) {
       setAnswer(userAnswer || '');
       setSubmitted(true);
-      setAssessmentCompleted(true);
-      setShowSelfAssessment(false);
+      setHasSubmitted(true); // Question has been submitted
+      hasSubmittedRef.current = true; // Also set ref for answered questions
+      
+      // For deferred self-assessment, don't mark as completed and show self-assessment
+      if (showDeferredSelfAssessment) {
+        setAssessmentCompleted(false);
+        setShowSelfAssessment(true);
+      } else {
+        setAssessmentCompleted(true);
+        setShowSelfAssessment(false);
+      }
     } else {
-      setAnswer('');
+      if (!userAnswer) {
+        setAnswer('');
+      }
       setSubmitted(false);
       setShowSelfAssessment(false);
       setAssessmentCompleted(false);
+      setHasSubmitted(false); // Question has not been submitted
+      hasSubmittedRef.current = false; // Reset ref as well
     }
-  }, [question.id, isAnswered, answerResult, userAnswer]);
+  }, [question.id, isAnswered, answerResult, showDeferredSelfAssessment, userAnswer]);
 
   const handleSubmit = async () => {
     if (!answer.trim()) return;
+    if (hasSubmittedRef.current) return; // Prevent double submission with immediate synchronous check
     
+    // Mark that this question is being submitted IMMEDIATELY
+    hasSubmittedRef.current = true;
     setSubmitted(true);
-    setShowSelfAssessment(true);
+    setHasSubmitted(true);
     
-    // Don't call onSubmit here - wait for self-assessment
+    // For clinical case questions (hideImmediateResults = true), 
+    // call onSubmit immediately with a default result since self-assessment is hidden
+    if (hideImmediateResults) {
+      setAssessmentCompleted(true);
+      // Call onSubmit immediately with answer and a placeholder result
+      // The actual result will be determined when "Show Results" is clicked
+      onSubmit(answer, 'partial'); // Use 'partial' as default for clinic questions
+    } else {
+      // For regular questions, show self-assessment
+      setShowSelfAssessment(true);
+    }
   };
 
   const handleSelfAssessment = async (rating: 'correct' | 'wrong' | 'partial') => {
@@ -68,15 +125,22 @@ export function OpenQuestion({ question, onSubmit, onNext, lectureId, isAnswered
     // Store the rating as a string for proper handling in the navigator
     const resultValue = rating === 'correct' ? true : rating === 'partial' ? 'partial' : false;
     
-    // Track progress if lectureId is provided
-    if (lectureId) {
-      // Pass the actual rating to progress tracking
-      const progressValue = rating === 'correct' ? true : rating === 'partial' ? 'partial' : false;
-      trackQuestionProgress(lectureId, question.id, progressValue);
+    // For deferred self-assessment (clinical cases), store the result and update the parent
+    if (showDeferredSelfAssessment && onSelfAssessmentUpdate) {
+      setDeferredAssessmentResult(resultValue);
+      onSelfAssessmentUpdate(question.id, resultValue);
+      
+      // Track progress for deferred assessment
+      if (lectureId) {
+        trackQuestionProgress(lectureId, question.id, resultValue);
+      }
+    } else {
+      // For regular questions, track progress and call onSubmit
+      if (lectureId) {
+        trackQuestionProgress(lectureId, question.id, resultValue);
+      }
+      onSubmit(answer, resultValue);
     }
-    
-    // Call onSubmit with the rating information
-    onSubmit(answer, resultValue);
   };
 
   const handleQuestionUpdated = () => {
@@ -90,6 +154,8 @@ export function OpenQuestion({ question, onSubmit, onNext, lectureId, isAnswered
     setSubmitted(false);
     setShowSelfAssessment(false);
     setAssessmentCompleted(false);
+    setHasSubmitted(false);
+    hasSubmittedRef.current = false; // Reset the ref too!
   };
 
   // Add keyboard shortcut for submitting answer
@@ -120,12 +186,6 @@ export function OpenQuestion({ question, onSubmit, onNext, lectureId, isAnswered
       transition={{ duration: 0.4 }}
       className="space-y-6 w-full max-w-full"
     >
-      {/* Clinical Case Display - Above the question */}
-      <ClinicalCaseDisplay 
-        caseNumber={question.caseNumber}
-        caseText={question.caseText}
-        caseQuestionNumber={question.caseQuestionNumber}
-      />
       
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
         <div className="flex-1 min-w-0">
@@ -166,7 +226,7 @@ export function OpenQuestion({ question, onSubmit, onNext, lectureId, isAnswered
         isSubmitted={submitted}
       />
 
-      {submitted && (
+      {submitted && !hideImmediateResults && (
         <OpenQuestionExplanation
           courseReminder={question.course_reminder}
           explanation={question.explanation}
@@ -174,7 +234,7 @@ export function OpenQuestion({ question, onSubmit, onNext, lectureId, isAnswered
         />
       )}
 
-      {showSelfAssessment && (
+      {showSelfAssessment && (!hideImmediateResults || showDeferredSelfAssessment) && (
         <OpenQuestionSelfAssessment
           onAssessment={handleSelfAssessment}
         />
@@ -182,11 +242,12 @@ export function OpenQuestion({ question, onSubmit, onNext, lectureId, isAnswered
 
       <OpenQuestionActions
         isSubmitted={submitted}
-        canSubmit={answer.trim().length > 0}
+        canSubmit={!hasSubmitted && answer.trim().length > 0}
         onSubmit={handleSubmit}
         onNext={onNext}
         showNext={assessmentCompleted}
         onReAnswer={handleReAnswer}
+        hasSubmitted={hasSubmitted}
       />
       
       <QuestionEditDialog

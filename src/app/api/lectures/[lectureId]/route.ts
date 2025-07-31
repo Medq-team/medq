@@ -59,8 +59,10 @@ async function getHandler(
           },
                       questions: {
               orderBy: [
-                { type: 'asc' },
+                { caseNumber: 'asc' },
+                { caseQuestionNumber: 'asc' },
                 { number: 'asc' },
+                { type: 'asc' },
                 { id: 'asc' }
               ],
             select: {

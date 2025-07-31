@@ -119,6 +119,7 @@
   "lectures": {
     "title": "Cours",
     "addLecture": "Ajouter un cours",
+    "searchPlaceholder": "Rechercher un cours...",
     "startLecture": "Commencer le cours",
     "noDescription": "Aucune description disponible",
     "creating": "Création en cours...",
@@ -146,6 +147,7 @@
   },
   "questions": {
     "questions": "Questions",
+    "report": "Signaler",
     "navigator": "Navigateur",
     "multipleChoice": "Choix multiple",
     "openQuestion": "QROC",

@@ -1,6 +1,7 @@
 'use client'
 
 import { useParams } from 'next/navigation'
+import { useEffect } from 'react'
 import { useLecture } from '@/hooks/use-lecture'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { LectureTimer } from '@/components/lectures/LectureTimer'
@@ -9,10 +10,12 @@ import { LectureLoadingState } from '@/components/lectures/LectureLoadingState'
 import { QuestionControlPanel } from '@/components/lectures/QuestionControlPanel'
 import { MCQQuestion } from '@/components/questions/MCQQuestion'
 import { OpenQuestion } from '@/components/questions/OpenQuestion'
+import { ClinicalCaseQuestion } from '@/components/questions/ClinicalCaseQuestion'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
+import { ClinicalCase, Question } from '@/types'
 
 export default function LecturePageRoute() {
   const params = useParams()
@@ -36,10 +39,13 @@ export default function LecturePageRoute() {
     currentQuestion,
     progress,
     handleAnswerSubmit,
+    handleClinicalCaseSubmit,
     handleNext,
     handleRestart,
     handleBackToSpecialty,
   } = useLecture(lectureId);
+
+
 
   if (isLoading) {
     return (
@@ -95,16 +101,110 @@ export default function LecturePageRoute() {
   };
 
   const handleMCQSubmit = (answer: string[], isCorrect: boolean) => {
-    console.log('MCQ Submit:', { questionId: currentQuestion!.id, answer, isCorrect });
-    handleAnswerSubmit(currentQuestion!.id, answer, isCorrect);
+    // Only handle regular questions here, clinical cases are handled separately
+    // Check if this is actually a clinical case (has questions array) vs a regular question
+    if (!('questions' in currentQuestion!)) {
+      const question = currentQuestion as Question;
+
+      handleAnswerSubmit(question.id, answer, isCorrect);
+    }
     // Don't automatically move to next question - let user see the result first
   };
 
   const handleOpenSubmit = (answer: string, resultValue?: boolean | 'partial') => {
-    console.log('Open Submit:', { questionId: currentQuestion!.id, answer, resultValue });
-    // For open questions, we store the answer and the self-assessment result
-    handleAnswerSubmit(currentQuestion!.id, answer, resultValue);
+    // Only handle regular questions here, clinical cases are handled separately
+    // Check if this is actually a clinical case (has questions array) vs a regular question
+    if (!('questions' in currentQuestion!)) {
+      const question = currentQuestion as Question;
+
+      // For open questions, we store the answer and the self-assessment result
+      handleAnswerSubmit(question.id, answer, resultValue);
+    }
     // Don't automatically move to next question - let user see the result first
+  };
+
+  const handleClinicalCaseComplete = (caseNumber: number, caseAnswers: Record<string, any>, caseResults: Record<string, boolean | 'partial'>) => {
+
+    handleClinicalCaseSubmit(caseNumber, caseAnswers, caseResults);
+  };
+
+  const renderCurrentQuestion = () => {
+    if (!currentQuestion) return null;
+
+    // Check if current question is a clinical case
+    if ('caseNumber' in currentQuestion && 'questions' in currentQuestion) {
+      const clinicalCase = currentQuestion as ClinicalCase;
+      
+      // Add null checks for questions array
+      if (!clinicalCase.questions || !Array.isArray(clinicalCase.questions)) {
+        console.error('Invalid clinical case structure:', clinicalCase);
+        return null;
+      }
+      
+      const isAnswered = clinicalCase.questions.every(q => answers[q.id] !== undefined);
+      const caseAnswerResult = isAnswered ? 
+        (clinicalCase.questions.every(q => answerResults[q.id] === true) ? true : 
+         clinicalCase.questions.some(q => answerResults[q.id] === true || answerResults[q.id] === 'partial') ? 'partial' : false) : 
+        undefined;
+      
+      const caseUserAnswers: Record<string, any> = {};
+      const caseAnswerResults: Record<string, boolean | 'partial'> = {};
+      clinicalCase.questions.forEach(q => {
+        if (answers[q.id] !== undefined) {
+          caseUserAnswers[q.id] = answers[q.id];
+        }
+        if (answerResults[q.id] !== undefined) {
+          caseAnswerResults[q.id] = answerResults[q.id];
+        }
+      });
+
+      return (
+        <ClinicalCaseQuestion
+          clinicalCase={clinicalCase}
+          onSubmit={handleClinicalCaseComplete}
+          onNext={handleNext}
+          lectureId={lectureId}
+          isAnswered={isAnswered}
+          answerResult={caseAnswerResult}
+          userAnswers={caseUserAnswers}
+          answerResults={caseAnswerResults}
+          onAnswerUpdate={handleAnswerSubmit}
+        />
+      );
+    }
+
+    // Regular question handling
+    const isAnswered = answers[currentQuestion.id] !== undefined;
+    const answerResult = answerResults[currentQuestion.id];
+    const userAnswer = answers[currentQuestion.id];
+    
+
+    
+    if (currentQuestion.type === 'mcq') {
+      return (
+        <MCQQuestion
+          question={currentQuestion}
+          onSubmit={handleMCQSubmit}
+          onNext={handleNext}
+          lectureId={lectureId}
+          isAnswered={isAnswered}
+          answerResult={answerResult}
+          userAnswer={userAnswer}
+        />
+      );
+    } else {
+      return (
+        <OpenQuestion
+          question={currentQuestion}
+          onSubmit={handleOpenSubmit}
+          onNext={handleNext}
+          lectureId={lectureId}
+          isAnswered={isAnswered}
+          answerResult={answerResult}
+          userAnswer={userAnswer}
+        />
+      );
+    }
   };
 
   return (
@@ -118,43 +218,7 @@ export default function LecturePageRoute() {
 
             {currentQuestion && (
               <div className="space-y-6">
-                {(() => {
-                  const isAnswered = answers[currentQuestion.id] !== undefined;
-                  const answerResult = answerResults[currentQuestion.id];
-                  const userAnswer = answers[currentQuestion.id];
-                  
-                  console.log('Rendering question:', {
-                    questionId: currentQuestion.id,
-                    questionType: currentQuestion.type,
-                    isAnswered,
-                    answerResult,
-                    userAnswer,
-                    allAnswers: answers,
-                    allAnswerResults: answerResults
-                  });
-                  
-                  return (currentQuestion.type === 'mcq' || currentQuestion.type === 'clinic_mcq') ? (
-                    <MCQQuestion
-                      question={currentQuestion}
-                      onSubmit={handleMCQSubmit}
-                      onNext={handleNext}
-                      lectureId={lectureId}
-                      isAnswered={isAnswered}
-                      answerResult={answerResult}
-                      userAnswer={userAnswer}
-                    />
-                  ) : (
-                    <OpenQuestion
-                      question={currentQuestion}
-                      onSubmit={handleOpenSubmit}
-                      onNext={handleNext}
-                      lectureId={lectureId}
-                      isAnswered={isAnswered}
-                      answerResult={answerResult}
-                      userAnswer={userAnswer}
-                    />
-                  );
-                })()}
+                {renderCurrentQuestion()}
               </div>
             )}
           </div>

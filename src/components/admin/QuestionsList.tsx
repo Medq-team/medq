@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from 'react';
-import { Question } from '@/types';
+import { Question, ClinicalCase } from '@/types';
 import { QuestionItem } from './QuestionItem';
 import { EmptyQuestionsState } from './EmptyQuestionsState';
 import { Button } from '@/components/ui/button';
@@ -17,11 +17,56 @@ interface QuestionsListProps {
 export function QuestionsList({ lectureId, refreshTrigger }: QuestionsListProps) {
   const { t } = useTranslation();
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [groupedQuestions, setGroupedQuestions] = useState<(Question | ClinicalCase)[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     fetchQuestions();
   }, [lectureId, refreshTrigger]);
+
+  // Group clinical case questions
+  useEffect(() => {
+    const regularQuestions: (Question | ClinicalCase)[] = [];
+    const clinicalCaseMap = new Map<number, Question[]>();
+
+    // Group clinical case questions
+    questions.forEach(question => {
+      if (question.caseNumber && (question.type === 'clinic_mcq' || question.type === 'clinic_croq')) {
+        if (!clinicalCaseMap.has(question.caseNumber)) {
+          clinicalCaseMap.set(question.caseNumber, []);
+        }
+        clinicalCaseMap.get(question.caseNumber)!.push(question);
+      } else {
+        regularQuestions.push(question);
+      }
+    });
+
+    // Convert clinical case groups to ClinicalCase objects
+    clinicalCaseMap.forEach((caseQuestions, caseNumber) => {
+      // Sort questions by caseQuestionNumber
+      const sortedQuestions = caseQuestions.sort((a, b) => 
+        (a.caseQuestionNumber || 0) - (b.caseQuestionNumber || 0)
+      );
+      
+      const clinicalCase: ClinicalCase = {
+        caseNumber,
+        caseText: sortedQuestions[0]?.caseText || '',
+        questions: sortedQuestions,
+        totalQuestions: sortedQuestions.length
+      };
+      
+      regularQuestions.push(clinicalCase);
+    });
+
+    // Sort all questions by number
+    const sortedQuestions = regularQuestions.sort((a, b) => {
+      const aNumber = 'caseNumber' in a ? a.caseNumber : (a.number || 0);
+      const bNumber = 'caseNumber' in b ? b.caseNumber : (b.number || 0);
+      return (aNumber || 0) - (bNumber || 0);
+    });
+
+    setGroupedQuestions(sortedQuestions);
+  }, [questions]);
 
   const fetchQuestions = async () => {
     try {
@@ -96,7 +141,7 @@ export function QuestionsList({ lectureId, refreshTrigger }: QuestionsListProps)
   }
 
   // Show empty state if no questions available
-  if (questions.length === 0) {
+  if (groupedQuestions.length === 0) {
     return <EmptyQuestionsState onAddQuestion={handleAddQuestion} />;
   }
 
@@ -104,14 +149,51 @@ export function QuestionsList({ lectureId, refreshTrigger }: QuestionsListProps)
   return (
     <div className="space-y-6 animate-fade-in">
         <div className="grid grid-cols-1 gap-4 pr-4">
-          {questions.map((question) => (
-            <QuestionItem 
-              key={question.id}
-              question={question}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          ))}
+          {groupedQuestions.map((item) => {
+            if ('caseNumber' in item && 'questions' in item) {
+              // This is a clinical case
+              const clinicalCase = item as ClinicalCase;
+              
+              // Add null checks for questions array
+              if (!clinicalCase.questions || !Array.isArray(clinicalCase.questions)) {
+                console.error('Invalid clinical case structure:', clinicalCase);
+                return null;
+              }
+              
+              return (
+                <QuestionItem 
+                  key={`case-${clinicalCase.caseNumber}`}
+                  question={{
+                    id: `case-${clinicalCase.caseNumber}`,
+                    lectureId: clinicalCase.questions[0]?.lectureId || '',
+                    lecture_id: clinicalCase.questions[0]?.lectureId || '',
+                    type: 'clinical_case',
+                    text: `Cas Clinique #${clinicalCase.caseNumber} - ${clinicalCase.totalQuestions} questions`,
+                    caseNumber: clinicalCase.caseNumber,
+                    caseText: clinicalCase.caseText,
+                    number: clinicalCase.caseNumber
+                  } as Question}
+                  onEdit={() => console.log('Edit clinical case:', clinicalCase.caseNumber)}
+                  onDelete={() => {
+                    // Delete all questions in the clinical case
+                    clinicalCase.questions.forEach(q => handleDelete(q.id));
+                  }}
+                  isClinicalCase={true}
+                  clinicalCase={clinicalCase}
+                />
+              );
+            } else {
+              // This is a regular question
+              return (
+                <QuestionItem 
+                  key={item.id}
+                  question={item}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              );
+            }
+          })}
         </div>
     </div>
   );

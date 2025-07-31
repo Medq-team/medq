@@ -17,6 +17,7 @@ interface MCQOptionItemProps {
   onSelect: (id: string) => void;
   expandedExplanations: string[];
   toggleExplanation: (id: string) => void;
+  hideImmediateResults?: boolean;
 }
 
 export function MCQOptionItem({
@@ -28,7 +29,8 @@ export function MCQOptionItem({
   explanation,
   onSelect,
   expandedExplanations,
-  toggleExplanation
+  toggleExplanation,
+  hideImmediateResults = false
 }: MCQOptionItemProps) {
   // Get expanded state from parent component
   const isExpanded = expandedExplanations.includes(option.id);
@@ -41,7 +43,7 @@ export function MCQOptionItem({
   let borderColorClass = 'border-gray-200 dark:border-gray-700';
   let textColorClass = 'text-foreground';
   
-  if (isSubmitted) {
+  if (isSubmitted && !hideImmediateResults) {
     if (isSelected && isCorrect) {
       bgColorClass = 'bg-green-50 dark:bg-green-900/20';
       borderColorClass = 'border-green-300 dark:border-green-700';
@@ -61,7 +63,7 @@ export function MCQOptionItem({
   return (
     <div 
       className={`rounded-lg border ${borderColorClass} p-4 ${bgColorClass} transition-colors duration-200 w-full max-w-full`}
-      onClick={() => !isSubmitted && onSelect(option.id)}
+      onClick={() => onSelect(option.id)}
     >
       <div className="flex items-start gap-3 w-full">
         <div className={`flex-shrink-0 h-6 w-6 rounded-full flex items-center justify-center 
@@ -73,7 +75,7 @@ export function MCQOptionItem({
         <div className="flex-grow min-w-0">
           <p className={`${textColorClass} break-words`}>{option.text}</p>
           
-          {isSubmitted && option.explanation && (
+          {isSubmitted && !hideImmediateResults && option.explanation && (
             <div className="mt-3">
               <div className="flex items-center justify-between">
                 <button 
@@ -106,7 +108,7 @@ export function MCQOptionItem({
           )}
         </div>
         
-        {!isSubmitted && (
+        {isSelected && (
           <div className={`flex-shrink-0 h-5 w-5 rounded border ${isSelected ? 'border-primary bg-primary' : 'border-muted bg-background'} flex items-center justify-center`}>
             {isSelected && (
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3 text-white dark:text-black">

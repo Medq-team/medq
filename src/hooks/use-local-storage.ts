@@ -21,12 +21,17 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T 
   // State to store our value
   const [storedValue, setStoredValue] = useState<T>(readValue);
 
+  // Sync with localStorage when the component mounts and key changes
+  useEffect(() => {
+    setStoredValue(readValue());
+  }, [key]);
+
   // Return a wrapped version of useState's setter function that
   // persists the new value to localStorage
   const setValue = (value: T | ((prev: T) => T)) => {
     try {
-      const valueToStore =
-        value instanceof Function ? value(storedValue) : value;
+      // Always read the latest value from localStorage when using a function updater
+      const valueToStore = value instanceof Function ? value(readValue()) : value;
       setStoredValue(valueToStore);
       if (typeof window !== 'undefined') {
         window.localStorage.setItem(key, JSON.stringify(valueToStore));
