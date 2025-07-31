@@ -16,6 +16,8 @@ interface MCQActionsProps {
   onSubmit: () => void;
   onNext: () => void;
   onReAnswer?: () => void;
+  hasSubmitted?: boolean; // Track if question has been submitted (for clinical cases)
+  buttonRef?: React.RefObject<HTMLButtonElement>; // Ref for direct button control
 }
 
 export function MCQActions({ 
@@ -24,7 +26,9 @@ export function MCQActions({
   isCorrect, 
   onSubmit, 
   onNext,
-  onReAnswer
+  onReAnswer,
+  hasSubmitted = false,
+  buttonRef
 }: MCQActionsProps) {
   const { t } = useTranslation();
   
@@ -60,11 +64,12 @@ export function MCQActions({
 
       {!isSubmitted ? (
         <Button 
+          ref={buttonRef}
           onClick={onSubmit} 
-          disabled={!canSubmit}
+          disabled={hasSubmitted || !canSubmit}
           className="ml-auto"
         >
-          {t('questions.submitAnswer')}
+          {hasSubmitted ? "Répondu" : t('questions.submitAnswer')}
         </Button>
       ) : (
         <div className="flex items-center ml-auto gap-2">

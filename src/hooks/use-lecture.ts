@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from '@/hooks/use-toast';
-import { Lecture, Question } from '@/types';
+import { Lecture, Question, ClinicalCase } from '@/types';
 import { useLocalStorage } from './use-local-storage';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -21,20 +21,66 @@ export function useLecture(lectureId: string | undefined) {
   const [answerResults, setAnswerResults] = useLocalStorage<Record<string, boolean | 'partial'>>(`${storageKey}-results`, {});
   const [isComplete, setIsComplete] = useLocalStorage<boolean>(`${storageKey}-complete`, false);
   
-  // Debug storage state
-  useEffect(() => {
-    console.log('Storage state loaded:', {
-      storageKey,
-      currentQuestionIndex,
-      answers,
-      answerResults,
-      isComplete
-    });
-  }, [storageKey, currentQuestionIndex, answers, answerResults, isComplete]);
+
   
   const [isLoading, setIsLoading] = useState(true);
   const [isAddQuestionOpen, setIsAddQuestionOpen] = useState(false);
   const hasSyncedProgress = useRef(false);
+
+  // Group clinical case questions and organize all questions properly
+  const groupedQuestions = useMemo(() => {
+    const mcqQuestions: Question[] = [];
+    const qrocQuestions: Question[] = [];
+    const clinicalCaseMap = new Map<number, Question[]>();
+
+    // Separate questions by type
+    questions.forEach(question => {
+      if (question.caseNumber && (question.type === 'clinic_mcq' || question.type === 'clinic_croq')) {
+        // Clinical case questions
+        if (!clinicalCaseMap.has(question.caseNumber)) {
+          clinicalCaseMap.set(question.caseNumber, []);
+        }
+        clinicalCaseMap.get(question.caseNumber)!.push(question);
+      } else if (question.type === 'mcq') {
+        mcqQuestions.push(question);
+      } else if (question.type === 'qroc' || question.type === 'open') {
+        qrocQuestions.push(question);
+      }
+    });
+
+    // Sort each group by their number
+    mcqQuestions.sort((a, b) => (a.number || 0) - (b.number || 0));
+    qrocQuestions.sort((a, b) => (a.number || 0) - (b.number || 0));
+
+    // Convert clinical case groups to ClinicalCase objects and sort by case number
+    const clinicalCases: ClinicalCase[] = [];
+    Array.from(clinicalCaseMap.entries())
+      .sort(([a], [b]) => a - b) // Sort by case number
+      .forEach(([caseNumber, caseQuestions]) => {
+        // Sort questions within each case by caseQuestionNumber
+        const sortedQuestions = caseQuestions.sort((a, b) => 
+          (a.caseQuestionNumber || 0) - (b.caseQuestionNumber || 0)
+        );
+        
+        const clinicalCase: ClinicalCase = {
+          caseNumber,
+          caseText: sortedQuestions[0]?.caseText || '',
+          questions: sortedQuestions,
+          totalQuestions: sortedQuestions.length
+        };
+
+        clinicalCases.push(clinicalCase);
+      });
+
+    // Combine all questions in the correct order: MCQ -> QROC -> Clinical Cases
+    const result: (Question | ClinicalCase)[] = [
+      ...mcqQuestions,
+      ...qrocQuestions,
+      ...clinicalCases
+    ];
+
+    return result;
+  }, [questions]);
 
   const fetchLectureData = useCallback(async () => {
     if (!lectureId) return;
@@ -69,6 +115,7 @@ export function useLecture(lectureId: string | undefined) {
       setLecture(data);
       setQuestions(data.questions || []);
       
+      // Reset to first question if current index is out of bounds
       if (data.questions && data.questions.length > 0 && currentQuestionIndex >= data.questions.length) {
         setCurrentQuestionIndex(0);
       }
@@ -83,7 +130,7 @@ export function useLecture(lectureId: string | undefined) {
     } finally {
       setIsLoading(false);
     }
-  }, [lectureId, router, currentQuestionIndex]);
+  }, [lectureId, router]);
 
   useEffect(() => {
     fetchLectureData();
@@ -98,112 +145,42 @@ export function useLecture(lectureId: string | undefined) {
     }
   }, [isAddQuestionOpen, lectureId]);
 
-  // Temporarily disabled progress sync to fix state overwriting issue
-  // TODO: Re-enable with proper logic to prevent overwriting user actions
-  /*
-  useEffect(() => {
-    if (!lectureId || !user || hasSyncedProgress.current) return;
-
-    const syncProgressFromDatabase = async () => {
-      try {
-        const response = await fetch(`/api/progress?lectureId=${lectureId}`);
-        if (response.ok) {
-          const progressData = await response.json();
-          
-          // Convert database scores to answerResults format
-          const syncedResults: Record<string, boolean | 'partial'> = {};
-          const syncedAnswers: Record<string, any> = {};
-          
-          progressData.forEach((item: any) => {
-            if (item.questionId && item.completed) {
-              // Convert numeric score to result format
-              let result: boolean | 'partial';
-              if (item.score === 1) {
-                result = true;
-              } else if (item.score === 0.5) {
-                result = 'partial';
-              } else {
-                result = false;
-              }
-              
-              syncedResults[item.questionId] = result;
-              syncedAnswers[item.questionId] = 'answered'; // Mark as answered
-            }
-          });
-          
-          // Only sync if we don't have any local data yet
-          setAnswerResults((prevResults) => {
-            console.log('Syncing answerResults:', { prevResults, syncedResults });
-            if (Object.keys(prevResults).length === 0) {
-              return syncedResults;
-            }
-            return prevResults;
-          });
-          
-          setAnswers((prevAnswers) => {
-            console.log('Syncing answers:', { prevAnswers, syncedAnswers });
-            if (Object.keys(prevAnswers).length === 0) {
-              return syncedAnswers;
-            }
-            return prevAnswers;
-          });
-          
-          // Mark as synced to prevent future calls
-          hasSyncedProgress.current = true;
-        }
-      } catch (error) {
-        console.error('Error syncing progress from database:', error);
-      }
-    };
-
-    syncProgressFromDatabase();
-  }, [lectureId, user]);
-  */
-
-
-
   const handleAnswerSubmit = useCallback((questionId: string, answer: any, isCorrect?: boolean | 'partial') => {
-    console.log('handleAnswerSubmit called:', { questionId, answer, isCorrect });
-    console.log('Current storage key:', storageKey);
-    console.log('Current answers before update:', answers);
-    console.log('Current answerResults before update:', answerResults);
-    
-    setAnswers((prevAnswers: Record<string, any>) => {
-      const newAnswers = {
-        ...prevAnswers,
-        [questionId]: answer
-      };
-      console.log('Updated answers:', newAnswers);
-      return newAnswers;
-    });
+    setAnswers((prevAnswers: Record<string, any>) => ({
+      ...prevAnswers,
+      [questionId]: answer
+    }));
     
     if (isCorrect !== undefined) {
-      setAnswerResults((prevResults: Record<string, boolean | 'partial'>) => {
-        const newResults = {
-          ...prevResults,
-          [questionId]: isCorrect
-        };
-        console.log('Updated answerResults:', newResults);
-        return newResults;
-      });
+      setAnswerResults((prevResults: Record<string, boolean | 'partial'>) => ({
+        ...prevResults,
+        [questionId]: isCorrect
+      }));
     }
-  }, [answers, answerResults, storageKey]);
+  }, []);
+
+  // Handle clinical case submission
+  const handleClinicalCaseSubmit = useCallback((caseNumber: number, caseAnswers: Record<string, any>, caseResults: Record<string, boolean | 'partial'>) => {
+    // Store all answers for the clinical case
+    setAnswers((prevAnswers: Record<string, any>) => ({
+      ...prevAnswers,
+      ...caseAnswers
+    }));
+    
+    // Store all results for the clinical case
+    setAnswerResults((prevResults: Record<string, boolean | 'partial'>) => ({
+      ...prevResults,
+      ...caseResults
+    }));
+  }, []);
 
   const handleNext = useCallback(() => {
-    console.log('handleNext called:', { 
-      currentQuestionIndex, 
-      questionsLength: questions.length, 
-      isComplete: false 
-    });
-    
-    if (currentQuestionIndex < questions.length - 1) {
-      console.log('Moving to next question:', currentQuestionIndex + 1);
+    if (currentQuestionIndex < groupedQuestions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
-      console.log('Setting lecture as complete');
       setIsComplete(true);
     }
-  }, [currentQuestionIndex, questions.length, setCurrentQuestionIndex]);
+  }, [currentQuestionIndex, groupedQuestions.length, setCurrentQuestionIndex]);
 
   const handleRestart = useCallback(() => {
     setCurrentQuestionIndex(0);
@@ -228,17 +205,29 @@ export function useLecture(lectureId: string | undefined) {
     setIsComplete(false);
   }, [setCurrentQuestionIndex]);
 
-  const currentQuestion = useMemo(() => questions[currentQuestionIndex], [questions, currentQuestionIndex]);
+  const currentQuestion = useMemo(() => groupedQuestions[currentQuestionIndex], [groupedQuestions, currentQuestionIndex]);
   
   const progress = useMemo(() => {
-    if (questions.length === 0) return 0;
+    // Calculate total number of individual questions (including those in clinical cases)
+    let totalQuestions = 0;
+    groupedQuestions.forEach(item => {
+      if ('questions' in item && Array.isArray(item.questions)) {
+        // Clinical case - count all questions within it
+        totalQuestions += item.questions.length;
+      } else {
+        // Regular question
+        totalQuestions += 1;
+      }
+    });
+
+    if (totalQuestions === 0) return 0;
     const answeredCount = Object.keys(answers).length;
-    return (answeredCount / questions.length) * 100;
-  }, [questions.length, answers]);
+    return (answeredCount / totalQuestions) * 100;
+  }, [groupedQuestions, answers]);
 
   return {
     lecture,
-    questions,
+    questions: groupedQuestions, // Return grouped questions instead of raw questions
     currentQuestionIndex,
     setCurrentQuestionIndex,
     answers,
@@ -250,6 +239,7 @@ export function useLecture(lectureId: string | undefined) {
     currentQuestion,
     progress,
     handleAnswerSubmit,
+    handleClinicalCaseSubmit, // New handler for clinical cases
     handleNext,
     handleRestart,
     handleBackToSpecialty,

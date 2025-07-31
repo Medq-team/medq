@@ -75,7 +75,7 @@ export type LectureProgress = {
   lastAccessed?: Date;
 };
 
-export type QuestionType = 'mcq' | 'open' | 'qroc' | 'clinic_mcq' | 'clinic_croq';
+export type QuestionType = 'mcq' | 'open' | 'qroc' | 'clinic_mcq' | 'clinic_croq' | 'clinical_case';
 
 export type Option = {
   id: string;
@@ -102,6 +102,14 @@ export type Question = {
   caseNumber?: number; // Case number for clinical cases
   caseText?: string; // Case description text
   caseQuestionNumber?: number; // Question number within the case
+};
+
+// New type for grouped clinical cases
+export type ClinicalCase = {
+  caseNumber: number;
+  caseText: string;
+  questions: Question[];
+  totalQuestions: number;
 };
 
 export type Answer = {

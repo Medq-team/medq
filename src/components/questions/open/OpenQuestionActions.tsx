@@ -11,6 +11,7 @@ interface OpenQuestionActionsProps {
   showPrevious?: boolean;
   showNext?: boolean;
   onReAnswer?: () => void;
+  hasSubmitted?: boolean; // Track if question has been submitted (for clinical cases)
 }
 
 export function OpenQuestionActions({
@@ -21,7 +22,8 @@ export function OpenQuestionActions({
   onPrevious,
   showPrevious = false,
   showNext = true,
-  onReAnswer
+  onReAnswer,
+  hasSubmitted = false
 }: OpenQuestionActionsProps) {
   return (
     <div className="flex justify-between mt-6">
@@ -40,10 +42,10 @@ export function OpenQuestionActions({
         {!isSubmitted ? (
           <Button 
             onClick={onSubmit} 
-            disabled={!canSubmit}
+            disabled={hasSubmitted || !canSubmit}
             className="flex items-center gap-1"
           >
-            Submit
+            {hasSubmitted ? "Répondu" : "Submit"}
           </Button>
         ) : (
           <div className="flex gap-2">

@@ -19,7 +19,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       <SidebarInset>
         <AppHeader />
         <ScrollArea className="flex-1">
-          <div className="px-3 py-4 sm:px-4 md:px-6 max-w-7xl mx-auto transition-all duration-300 animate-fade-in overflow-x-hidden">
+          <div className="px-1 py-4 sm:px-1 md:px-1 max-w-7xl mx-auto transition-all duration-300 animate-fade-in overflow-x-hidden">
             {children}
           </div>
         </ScrollArea>

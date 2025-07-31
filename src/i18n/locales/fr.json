@@ -98,7 +98,41 @@
     "welcome": "Bienvenue {{name}}",
     "selectSpecialty": "Sélectionnez une spécialité pour commencer",
     "adminView": "Vue administrateur",
-    "studentView": "Vue étudiant"
+    "studentView": "Vue étudiant",
+    "error": "Erreur lors du chargement des données: {{error}}",
+    "stats": {
+      "averageScore": "Score moyen",
+      "totalQuestions": "Questions totales",
+      "learningStreak": "Série d'apprentissage",
+      "totalLectures": "Cours suivis"
+    },
+    "continueLearning": {
+      "title": "Continuer l'apprentissage",
+      "noProgress": "Vous n'avez pas encore commencé à apprendre. Commencez votre parcours d'apprentissage !",
+      "startLearning": "Commencer à apprendre",
+      "progress": "Progression",
+      "lastAccessed": "Dernière visite",
+      "continue": "Continuer",
+      "yesterday": "Hier",
+      "daysAgo": "Il y a {{days}} jours"
+    },
+    "chart": {
+      "dailyActivity": "Activité quotidienne",
+      "questionsAnswered": "Questions répondues",
+      "noData": "Aucune donnée disponible pour cette période"
+    },
+    "recentResults": {
+      "title": "Résultats récents",
+      "noResults": "Aucun résultat récent. Commencez à répondre aux questions pour voir vos performances !",
+      "questions": "questions"
+    },
+    "popularCourses": {
+      "title": "Cours populaires",
+      "noCourses": "Aucun cours populaire disponible pour le moment.",
+      "free": "Gratuit",
+      "questions": "questions",
+      "start": "Commencer"
+    }
   },
   "specialties": {
     "title": "Spécialités",
@@ -119,6 +153,7 @@
   "lectures": {
     "title": "Cours",
     "addLecture": "Ajouter un cours",
+    "searchPlaceholder": "Rechercher un cours...",
     "startLecture": "Commencer le cours",
     "noDescription": "Aucune description disponible",
     "creating": "Création en cours...",
@@ -146,6 +181,7 @@
   },
   "questions": {
     "questions": "Questions",
+    "report": "Signaler",
     "navigator": "Navigateur",
     "multipleChoice": "Choix multiple",
     "openQuestion": "QROC",
