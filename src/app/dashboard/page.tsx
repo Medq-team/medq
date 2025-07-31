@@ -8,6 +8,14 @@ import { UpgradeDialog } from '@/components/subscription/UpgradeDialog';
 import { useTranslation } from 'react-i18next';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { ProfileCompletionGuard } from '@/components/ProfileCompletionGuard';
+import { UserStats } from '@/components/dashboard/UserStats';
+import { ContinueLearning } from '@/components/dashboard/ContinueLearning';
+import { DailyLearningChart } from '@/components/dashboard/DailyLearningChart';
+import { RecentResults } from '@/components/dashboard/RecentResults';
+import { PopularCourses } from '@/components/dashboard/PopularCourses';
+import { useDashboardData } from '@/hooks/useDashboardData';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
 // Disable static generation to prevent SSR issues with useAuth
 export const dynamic = 'force-dynamic';
@@ -18,6 +26,8 @@ export default function DashboardPage() {
   const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
   const [isUpsellDismissed, setIsUpsellDismissed] = useState(false);
   const { t } = useTranslation();
+  
+  const { stats, dailyActivity, recentResults, popularCourses, isLoading, error } = useDashboardData();
 
   // Show upsell banner for free users who haven't dismissed it
   const shouldShowUpsell = !hasActiveSubscription && !isAdmin && !isUpsellDismissed;
@@ -49,6 +59,60 @@ export default function DashboardPage() {
               <p className="text-muted-foreground">
                 {t('dashboard.welcome', { name: user?.name || user?.email })}
               </p>
+            </div>
+
+            {/* Error Alert */}
+            {error && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  {t('dashboard.error', { error })}
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {/* User Statistics */}
+            <UserStats
+              averageScore={stats?.averageScore || 0}
+              totalQuestions={stats?.totalQuestions || 0}
+              learningStreak={stats?.learningStreak || 0}
+              totalLectures={stats?.totalLectures || 0}
+              isLoading={isLoading}
+            />
+
+            {/* Main Dashboard Grid */}
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {/* Continue Learning */}
+              <div className="lg:col-span-1">
+                <ContinueLearning
+                  lastLecture={stats?.lastLecture}
+                  isLoading={isLoading}
+                />
+              </div>
+
+              {/* Daily Learning Chart */}
+              <div className="lg:col-span-2">
+                <DailyLearningChart
+                  data={dailyActivity}
+                  isLoading={isLoading}
+                />
+              </div>
+
+              {/* Recent Results */}
+              <div className="lg:col-span-1">
+                <RecentResults
+                  results={recentResults}
+                  isLoading={isLoading}
+                />
+              </div>
+
+              {/* Popular Courses */}
+              <div className="lg:col-span-2">
+                <PopularCourses
+                  courses={popularCourses}
+                  isLoading={isLoading}
+                />
+              </div>
             </div>
 
             <UpgradeDialog
